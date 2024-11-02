@@ -26,9 +26,7 @@ const Login = () => {
 
     // Cleanup subscription
     return () => {
-      if (authListener?.subscription) {
-        authListener.subscription.unsubscribe();
-      }
+      authListener?.subscription?.unsubscribe();
     };
   }, [navigate]);
 
@@ -43,9 +41,16 @@ const Login = () => {
         <div className="mt-8">
           <Auth
             supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
+            appearance={{ 
+              theme: ThemeSupa,
+              style: {
+                button: { background: 'rgb(59, 130, 246)', color: 'white' },
+                anchor: { color: 'rgb(59, 130, 246)' }
+              }
+            }}
             theme="light"
             providers={[]}
+            redirectTo={window.location.origin}
           />
         </div>
       </div>
