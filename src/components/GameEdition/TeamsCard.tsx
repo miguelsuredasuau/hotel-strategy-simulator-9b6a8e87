@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -21,16 +22,28 @@ interface Team {
 }
 
 interface TeamsCardProps {
-  teams: Team[];
+  gameId: number;
 }
 
-const TeamsCard = ({ teams }: TeamsCardProps) => {
+const TeamsCard = ({ gameId }: TeamsCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  const { data: teams } = useQuery({
+    queryKey: ['teams'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*');
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,7 +157,7 @@ const TeamsCard = ({ teams }: TeamsCardProps) => {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {teams.map((team) => (
+          {teams?.map((team) => (
             <div key={team.id} className="flex items-center space-x-2">
               <Checkbox id={`team-${team.id}`} />
               <Label htmlFor={`team-${team.id}`}>{team.teamname}</Label>

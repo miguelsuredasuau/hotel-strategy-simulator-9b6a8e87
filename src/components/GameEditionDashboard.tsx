@@ -116,7 +116,7 @@ const GameEditionDashboard = () => {
             setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
             setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
           />
-          <TeamsCard teams={[]} />
+          <TeamsCard gameId={parseInt(gameId!)} />
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Game Turns</h2>
             <Button onClick={() => setIsNewTurnOpen(true)}>
@@ -127,7 +127,7 @@ const GameEditionDashboard = () => {
           <TurnsCard turns={turnsData || []} />
           {isNewTurnOpen && (
             <TurnEditDialog
-              turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1 }}
+              turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1, game: parseInt(gameId!) }}
               open={isNewTurnOpen}
               onOpenChange={setIsNewTurnOpen}
               onSave={handleCreateTurn}
