@@ -19,7 +19,6 @@ const Index = () => {
   const { data: options, isLoading: optionsLoading, error: optionsError } = useQuery({
     queryKey: ['options', currentTurn],
     queryFn: async () => {
-      console.log('Fetching options for turn:', currentTurn);
       const { data, error } = await supabase
         .from('Options')
         .select('*')
@@ -36,7 +35,6 @@ const Index = () => {
         throw error;
       }
 
-      console.log('Fetched options:', data);
       return data;
     },
   });
@@ -44,12 +42,11 @@ const Index = () => {
   const { data: turnData, isLoading: turnLoading, error: turnError } = useQuery({
     queryKey: ['turn', currentTurn],
     queryFn: async () => {
-      console.log('Fetching turn data for turn:', currentTurn);
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .maybeSingle();
+        .single();
 
       if (error && (error as PostgrestError).code !== 'PGRST116') {
         console.error('Error fetching turn data:', error);
@@ -61,7 +58,6 @@ const Index = () => {
         throw error;
       }
 
-      console.log('Fetched turn data:', data);
       return data;
     },
   });
@@ -104,7 +100,7 @@ const Index = () => {
         <div className="p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-hotel-text mb-2">
-              Turn {currentTurn}{turnData ? `: ${turnData.Challenge}` : ''}
+              Turn {currentTurn}{turnData?.Challenge ? `: ${turnData.Challenge}` : ''}
             </h2>
             {turnData?.Description && (
               <p className="text-gray-600">{turnData.Description}</p>
@@ -113,7 +109,7 @@ const Index = () => {
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
+              {[...Array(3)].map((_, index) => (
                 <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
               ))}
             </div>
