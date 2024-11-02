@@ -61,7 +61,7 @@ export type Database = {
             columns: ["Turn"]
             isOneToOne: false
             referencedRelation: "Turns"
-            referencedColumns: ["id"]
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -121,24 +121,24 @@ export type Database = {
           created_at: string
           Description: string | null
           game: number | null
-          id: number
           turnnumber: number | null
+          uuid: number
         }
         Insert: {
           Challenge?: string | null
           created_at?: string
           Description?: string | null
           game?: number | null
-          id?: number
           turnnumber?: number | null
+          uuid?: number
         }
         Update: {
           Challenge?: string | null
           created_at?: string
           Description?: string | null
           game?: number | null
-          id?: number
           turnnumber?: number | null
+          uuid?: number
         }
         Relationships: []
       }
