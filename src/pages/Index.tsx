@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GameHeader from "../components/GameHeader";
+import Header from "../components/Header/Header";
 import Dashboard from "../components/Dashboard";
 import HotelCard from "../components/HotelCard";
 
@@ -45,7 +45,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GameHeader currentTurn={currentTurn} totalTurns={TOTAL_TURNS} />
+      <Header>
+        <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
+      </Header>
       
       {!showDashboard ? (
         <div className="p-6">
