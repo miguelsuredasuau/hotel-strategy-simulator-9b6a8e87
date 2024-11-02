@@ -37,6 +37,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          game: number | null
           id: number
           image: string | null
           impactkpi1: string | null
@@ -52,6 +53,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          game?: number | null
           id?: never
           image?: string | null
           impactkpi1?: string | null
@@ -67,6 +69,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          game?: number | null
           id?: never
           image?: string | null
           impactkpi1?: string | null
@@ -80,6 +83,13 @@ export type Database = {
           turn?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "Options_game_fkey"
+            columns: ["game"]
+            isOneToOne: false
+            referencedRelation: "Games"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "Options_turn_fkey"
             columns: ["turn"]

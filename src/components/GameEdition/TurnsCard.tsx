@@ -13,6 +13,7 @@ interface Turn {
   turnnumber: number;
   challenge?: string;
   description?: string;
+  game: number;
 }
 
 interface TurnsCardProps {
@@ -147,6 +148,7 @@ const TurnsCard = ({ turns: initialTurns }: TurnsCardProps) => {
             />
             <OptionsEditDialog
               turnId={selectedTurn.id}
+              gameId={selectedTurn.game}
               open={isOptionsOpen}
               onOpenChange={setIsOptionsOpen}
             />

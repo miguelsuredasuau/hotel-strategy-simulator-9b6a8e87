@@ -10,18 +10,20 @@ import { Loader2 } from "lucide-react";
 
 interface OptionsEditDialogProps {
   turnId: number;
+  gameId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const OptionsEditDialog = ({ turnId, open, onOpenChange }: OptionsEditDialogProps) => {
+const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDialogProps) => {
   const { data: options, isLoading } = useQuery({
-    queryKey: ['options', turnId],
+    queryKey: ['options', turnId, gameId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('turn', turnId);
+        .eq('turn', turnId)
+        .eq('game', gameId);
 
       if (error) throw error;
       return data;
