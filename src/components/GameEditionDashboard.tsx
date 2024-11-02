@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import GameDetailsCard from './GameEdition/GameDetailsCard';
 import TeamsCard from './GameEdition/TeamsCard';
 import TurnsCard from './GameEdition/TurnsCard';
+import TurnEditDialog from './GameEdition/TurnEditDialog';
 
 const GameEditionDashboard = () => {
   const [gameName, setGameName] = useState('');
@@ -15,6 +16,7 @@ const GameEditionDashboard = () => {
   const [teams, setTeams] = useState([]);
   const [turns, setTurns] = useState([]);
   const [isGamemaster, setIsGamemaster] = useState(false);
+  const [isNewTurnOpen, setIsNewTurnOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -66,7 +68,8 @@ const GameEditionDashboard = () => {
 
     const { data: turnsData, error: turnsError } = await supabase
       .from('Turns')
-      .select('*');
+      .select('*')
+      .order('turnnumber');
 
     if (turnsError) {
       toast({
@@ -78,7 +81,7 @@ const GameEditionDashboard = () => {
     }
 
     setTeams(teamsData);
-    setTurns(turnsData);
+    setTurns(turnsData || []);
   };
 
   const handleSaveGame = async () => {
@@ -100,6 +103,37 @@ const GameEditionDashboard = () => {
     } catch (error) {
       toast({
         title: "Error saving game",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCreateTurn = async (turn) => {
+    try {
+      const newTurnNumber = turns.length + 1;
+      const { data, error } = await supabase
+        .from('Turns')
+        .insert([
+          { 
+            ...turn,
+            turnnumber: newTurnNumber
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTurns([...turns, data]);
+      setIsNewTurnOpen(false);
+      toast({
+        title: "Success",
+        description: "Turn created successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error creating turn",
         description: error.message,
         variant: "destructive",
       });
@@ -149,7 +183,22 @@ const GameEditionDashboard = () => {
             setInspirationalImage={setInspirationalImage}
           />
           <TeamsCard teams={teams} />
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Game Turns</h2>
+            <Button onClick={() => setIsNewTurnOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Turn
+            </Button>
+          </div>
           <TurnsCard turns={turns} />
+          {isNewTurnOpen && (
+            <TurnEditDialog
+              turn={{ id: 0, turnnumber: turns.length + 1 }}
+              open={isNewTurnOpen}
+              onOpenChange={setIsNewTurnOpen}
+              onSave={handleCreateTurn}
+            />
+          )}
           <div className="flex justify-end">
             <Button onClick={handleSaveGame}>Save Game</Button>
           </div>
