@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const TeamLogo = () => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
@@ -14,24 +15,6 @@ const TeamLogo = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // First check if profile exists, if not create it
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id);
-
-        if (!existingProfile || existingProfile.length === 0) {
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({ id: user.id });
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError);
-            return;
-          }
-        }
-
-        // Now fetch the profile with team info
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('team_id')
@@ -75,11 +58,12 @@ const TeamLogo = () => {
 
   return (
     <div className="absolute top-4 right-4 flex items-center gap-2">
-      {teamLogo ? (
-        <img src={teamLogo} alt={teamName || 'Team logo'} className="w-8 h-8 rounded-full" />
-      ) : (
-        <Image className="w-8 h-8 text-gray-400" />
-      )}
+      <Avatar>
+        <AvatarImage src={teamLogo || ''} alt={teamName || 'Team logo'} />
+        <AvatarFallback>
+          <Image className="w-4 h-4 text-gray-400" />
+        </AvatarFallback>
+      </Avatar>
       {teamName && <span className="text-sm font-medium">{teamName}</span>}
     </div>
   );

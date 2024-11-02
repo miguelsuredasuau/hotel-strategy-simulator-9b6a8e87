@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const TeamMenu = () => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
@@ -24,22 +25,6 @@ const TeamMenu = () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-
-        const { data: existingProfile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', user.id);
-
-        if (!existingProfile || existingProfile.length === 0) {
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({ id: user.id });
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError);
-            return;
-          }
-        }
 
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -102,12 +87,13 @@ const TeamMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 rounded-full">
-          {teamLogo ? (
-            <img src={teamLogo} alt={teamName || 'Team logo'} className="h-8 w-8 rounded-full" />
-          ) : (
-            <Image className="h-6 w-6 text-gray-400" />
-          )}
+        <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+          <Avatar>
+            <AvatarImage src={teamLogo || ''} alt={teamName || 'Team logo'} />
+            <AvatarFallback>
+              <Image className="h-4 w-4 text-gray-400" />
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

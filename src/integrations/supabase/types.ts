@@ -115,30 +115,6 @@ export type Database = {
         }
         Relationships: []
       }
-      Teams: {
-        Row: {
-          created_at: string
-          email: string | null
-          id: number
-          teamlogo: string | null
-          teamname: string | null
-        }
-        Insert: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          teamlogo?: string | null
-          teamname?: string | null
-        }
-        Update: {
-          created_at?: string
-          email?: string | null
-          id?: number
-          teamlogo?: string | null
-          teamname?: string | null
-        }
-        Relationships: []
-      }
       Turns: {
         Row: {
           Challenge: string | null
