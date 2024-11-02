@@ -21,3 +21,11 @@ export interface Option {
   turn?: number;
   game?: number;
 }
+
+export interface Team {
+  id: number;
+  teamname?: string;
+  teamlogo?: string;
+  email?: string;
+  created_at?: string;
+}
