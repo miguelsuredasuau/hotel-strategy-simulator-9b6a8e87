@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import GameDetailsCard from './GameEdition/GameDetailsCard';
 import TeamsCard from './GameEdition/TeamsCard';
@@ -39,7 +39,7 @@ const GameEditionDashboard = () => {
           description: "Only gamemasters can access this page",
           variant: "destructive",
         });
-        navigate('/');
+        navigate('/login');
         return;
       }
 
@@ -97,8 +97,6 @@ const GameEditionDashboard = () => {
         title: "Success",
         description: "Game saved successfully",
       });
-
-      navigate('/');
     } catch (error) {
       toast({
         title: "Error saving game",
@@ -132,17 +130,7 @@ const GameEditionDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              className="mr-4"
-              onClick={() => navigate('/')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <h1 className="text-3xl font-bold text-gray-900">Game Edition Dashboard</h1>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900">Game Edition Dashboard</h1>
           <Button 
             variant="ghost"
             onClick={handleLogout}
