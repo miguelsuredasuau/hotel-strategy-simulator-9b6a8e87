@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
 import Header from "@/components/Header/Header";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const TOTAL_TURNS = 20;
 
@@ -50,7 +51,7 @@ const Index = () => {
         .eq('id', currentTurn)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error && (error as PostgrestError).code !== 'PGRST116') {
         console.error('Error fetching turn data:', error);
         toast({
           title: "Error loading turn data",
@@ -80,7 +81,7 @@ const Index = () => {
 
   const isLoading = optionsLoading || turnLoading;
 
-  if (optionsError || (turnError && turnError.code !== 'PGRST116')) {
+  if (optionsError || (turnError && (turnError as PostgrestError).code !== 'PGRST116')) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
