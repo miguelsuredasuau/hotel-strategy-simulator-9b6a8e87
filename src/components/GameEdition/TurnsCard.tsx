@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import { Turn } from "@/types/game";
@@ -14,13 +14,14 @@ interface TurnsCardProps {
 const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="flex justify-end mb-4">
-          <Button onClick={onAddTurn}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Turn
-          </Button>
-        </div>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Game Turns</CardTitle>
+        <Button onClick={onAddTurn}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Turn
+        </Button>
+      </CardHeader>
+      <CardContent>
         <div className="space-y-4">
           {turns.map((turn) => (
             <Card key={turn.id}>
