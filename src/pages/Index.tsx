@@ -15,16 +15,17 @@ const Index = () => {
   const [showDashboard, setShowDashboard] = useState(false);
   const { toast } = useToast();
 
-  const { data: options, isLoading: optionsLoading } = useQuery({
+  const { data: options, isLoading: optionsLoading, error: optionsError } = useQuery({
     queryKey: ['options', currentTurn],
     queryFn: async () => {
+      console.log('Fetching options for turn:', currentTurn);
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('Turn', currentTurn)
-        .order('OptionNumber');
+        .eq('Turn', currentTurn);
 
       if (error) {
+        console.error('Error fetching options:', error);
         toast({
           title: "Error loading options",
           description: error.message,
@@ -33,20 +34,23 @@ const Index = () => {
         throw error;
       }
 
+      console.log('Fetched options:', data);
       return data;
     },
   });
 
-  const { data: turnData, isLoading: turnLoading } = useQuery({
+  const { data: turnData, isLoading: turnLoading, error: turnError } = useQuery({
     queryKey: ['turn', currentTurn],
     queryFn: async () => {
+      console.log('Fetching turn data for turn:', currentTurn);
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .maybeSingle();
+        .single();
 
       if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching turn data:', error);
         toast({
           title: "Error loading turn data",
           description: error.message,
@@ -55,6 +59,7 @@ const Index = () => {
         throw error;
       }
 
+      console.log('Fetched turn data:', data);
       return data;
     },
   });
@@ -73,6 +78,19 @@ const Index = () => {
   };
 
   const isLoading = optionsLoading || turnLoading;
+
+  if (optionsError || turnError) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
+          <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
+        </Header>
+        <div className="text-center py-8 text-red-600">
+          <p>Error loading game data. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,7 +130,7 @@ const Index = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No options available for this turn.</p>
+              <p className="text-gray-600">No options available for this turn. Please make sure to add options in the database.</p>
             </div>
           )}
         </div>
