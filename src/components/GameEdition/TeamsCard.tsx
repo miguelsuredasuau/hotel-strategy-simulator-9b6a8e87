@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, UserCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
@@ -15,10 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface Team {
   id: number;
   teamname: string;
+  teamlogo?: string;
 }
 
 interface TeamsCardProps {
@@ -50,7 +52,6 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
     setIsLoading(true);
 
     try {
-      // First create the team
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .insert([
@@ -61,7 +62,6 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
 
       if (teamError) throw teamError;
 
-      // Then create the user account
       const { data: userData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -69,7 +69,6 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
 
       if (authError) throw authError;
 
-      // Update the user's profile with the team_id
       if (userData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -89,10 +88,9 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
       setEmail("");
       setPassword("");
     } catch (error: any) {
-      console.error('Error creating team:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create team",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -160,6 +158,12 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
           {teams?.map((team) => (
             <div key={team.id} className="flex items-center space-x-2">
               <Checkbox id={`team-${team.id}`} />
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={team.teamlogo} alt={team.teamname} />
+                <AvatarFallback>
+                  <UserCircle className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
               <Label htmlFor={`team-${team.id}`}>{team.teamname}</Label>
             </div>
           ))}
