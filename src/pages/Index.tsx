@@ -22,7 +22,8 @@ const Index = () => {
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('Turn', currentTurn);
+        .eq('Turn', currentTurn)
+        .order('OptionNumber');
 
       if (error) {
         console.error('Error fetching options:', error);
@@ -47,7 +48,7 @@ const Index = () => {
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching turn data:', error);
@@ -79,7 +80,7 @@ const Index = () => {
 
   const isLoading = optionsLoading || turnLoading;
 
-  if (optionsError || turnError) {
+  if (optionsError || (turnError && turnError.code !== 'PGRST116')) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
