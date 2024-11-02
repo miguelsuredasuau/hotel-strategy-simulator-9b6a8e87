@@ -54,16 +54,7 @@ const Index = () => {
         throw error;
       }
 
-      if (!data) {
-        toast({
-          title: "Turn not found",
-          description: `Turn ${currentTurn} data is not available`,
-          variant: "destructive",
-        });
-        return null;
-      }
-
-      return data;
+      return data; // Return data even if null
     },
   });
 
@@ -90,14 +81,14 @@ const Index = () => {
       
       {!showDashboard ? (
         <div className="p-6">
-          {turnData && (
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-hotel-text mb-2">
-                Turn {currentTurn}: {turnData.Challenge}
-              </h2>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-hotel-text mb-2">
+              Turn {currentTurn}{turnData ? `: ${turnData.Challenge}` : ''}
+            </h2>
+            {turnData?.Description && (
               <p className="text-gray-600">{turnData.Description}</p>
-            </div>
-          )}
+            )}
+          </div>
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
