@@ -18,11 +18,11 @@ const mockCompetitiveData = Array.from({ length: 100 }, () => ({
 }));
 
 const mockHotels = [
-  { name: "El manitas", adr: 110, rating: 4.3, occupancy: 80 },
-  { name: "Time2Fit", adr: 150, rating: 4.1, occupancy: 75 },
-  { name: "Boaties", adr: 120, rating: 3.8, occupancy: 70 },
-  { name: "Scandal", adr: 200, rating: 2.8, occupancy: 55 },
-  { name: "Near Trust", adr: 75, rating: 1.7, occupancy: 45 },
+  { name: "El manitas", adr: 110, rating: 4.3, occupancy: 80, x: 2.1, y: 65 },
+  { name: "Time2Fit", adr: 150, rating: 4.1, occupancy: 75, x: 2.8, y: 72 },
+  { name: "Boaties", adr: 120, rating: 3.8, occupancy: 70, x: 1.9, y: 58 },
+  { name: "Scandal", adr: 200, rating: 2.8, occupancy: 55, x: 3.2, y: 45 },
+  { name: "Near Trust", adr: 75, rating: 1.7, occupancy: 45, x: 1.2, y: 32 },
 ];
 
 const Dashboard = () => {
@@ -151,10 +151,25 @@ const Dashboard = () => {
             <div className="text-2xl font-bold mb-2">€1,565,367</div>
             <div className="text-sm text-green-500">+30% vs last month</div>
             <div className="mt-4">
-              <BarChart width={300} height={200} data={mockRevenueData}>
+              <BarChart width={200} height={150} data={mockRevenueData}>
                 <Bar dataKey="revenue" fill="#1E40AF" />
               </BarChart>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-1">
+          <CardHeader>
+            <CardTitle>Competitive Environment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScatterChart width={300} height={300}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" dataKey="x" />
+              <YAxis type="number" dataKey="y" />
+              <Scatter data={mockCompetitiveData} fill="#60A5FA" />
+              <Scatter data={mockHotels} fill="#EF4444" />
+            </ScatterChart>
           </CardContent>
         </Card>
 
@@ -175,20 +190,6 @@ const Dashboard = () => {
             <div className="mt-4 text-sm text-hotel-muted">
               Share this quote with your team to boost morale and remind them of our service-first approach.
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle>Competitive Environment</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScatterChart width={300} height={300}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" dataKey="x" />
-              <YAxis type="number" dataKey="y" />
-              <Scatter data={mockCompetitiveData} fill="#60A5FA" />
-            </ScatterChart>
           </CardContent>
         </Card>
       </div>
