@@ -71,14 +71,9 @@ const TeamMenu = () => {
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      
-      // Clear all React Query caches
+      await supabase.auth.signOut();
       queryClient.clear();
-      
-      // Force navigation to login page after successful logout
-      navigate("/login", { replace: true });
+      navigate("/login");
     } catch (error: any) {
       toast({
         title: "Error",
