@@ -1,7 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, LineChart, Line } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, TrendingUp, TrendingDown } from "lucide-react";
+import { Check, TrendingUp, TrendingDown, Quote } from "lucide-react";
 
 const mockRevenueData = [
   { month: 1, revenue: 2400 },
@@ -158,12 +158,32 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-1">
+          <CardHeader className="flex flex-row items-center space-x-2">
+            <Quote className="w-4 h-4 text-hotel-primary" />
+            <CardTitle>Quote of the Day</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <blockquote className="border-l-4 border-hotel-primary pl-4 my-4">
+              <p className="text-lg italic text-hotel-text mb-2">
+                "The best way to find yourself is to lose yourself in the service of others."
+              </p>
+              <footer className="text-sm text-hotel-muted">
+                — Mahatma Gandhi
+              </footer>
+            </blockquote>
+            <div className="mt-4 text-sm text-hotel-muted">
+              Share this quote with your team to boost morale and remind them of our service-first approach.
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Competitive Environment</CardTitle>
           </CardHeader>
           <CardContent>
-            <ScatterChart width={500} height={300}>
+            <ScatterChart width={300} height={300}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" dataKey="x" />
               <YAxis type="number" dataKey="y" />
