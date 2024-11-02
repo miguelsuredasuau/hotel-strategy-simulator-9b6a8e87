@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import GameEditionDashboard from "./components/GameEditionDashboard";
+import GameSelectionPage from "./components/GameEdition/GameSelectionPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,14 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route
               path="/game-edition"
+              element={
+                <ProtectedRoute requiredRole="gamemaster">
+                  <GameSelectionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/game-edition/:gameId"
               element={
                 <ProtectedRoute requiredRole="gamemaster">
                   <GameEditionDashboard />

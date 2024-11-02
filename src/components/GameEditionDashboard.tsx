@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import TurnsCard from './GameEdition/TurnsCard';
 import TurnEditDialog from './GameEdition/TurnEditDialog';
 
 const GameEditionDashboard = () => {
+  const { gameId } = useParams();
   const [gameName, setGameName] = useState('');
   const [inspirationalImage, setInspirationalImage] = useState('');
   const [teams, setTeams] = useState([]);
@@ -46,29 +47,35 @@ const GameEditionDashboard = () => {
       }
 
       setIsGamemaster(true);
-      fetchTeamsAndTurns();
+      fetchGameData();
     };
 
     checkRole();
-  }, [navigate, toast]);
+  }, [navigate, toast, gameId]);
 
-  const fetchTeamsAndTurns = async () => {
-    const { data: teamsData, error: teamsError } = await supabase
-      .from('teams')
-      .select('*');
+  const fetchGameData = async () => {
+    const { data: gameData, error: gameError } = await supabase
+      .from('Games')
+      .select('*')
+      .eq('id', gameId)
+      .single();
 
-    if (teamsError) {
+    if (gameError) {
       toast({
-        title: "Error fetching teams",
-        description: teamsError.message,
+        title: "Error fetching game",
+        description: gameError.message,
         variant: "destructive",
       });
+      navigate('/game-edition');
       return;
     }
+
+    setGameName(gameData.name || '');
 
     const { data: turnsData, error: turnsError } = await supabase
       .from('Turns')
       .select('*')
+      .eq('game', gameId)
       .order('turnnumber');
 
     if (turnsError) {
@@ -80,33 +87,7 @@ const GameEditionDashboard = () => {
       return;
     }
 
-    setTeams(teamsData);
     setTurns(turnsData || []);
-  };
-
-  const handleSaveGame = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('Games')
-        .insert([
-          { name: gameName, status: 'active' }
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Game saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error saving game",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
   };
 
   const handleCreateTurn = async (turn) => {
@@ -118,7 +99,8 @@ const GameEditionDashboard = () => {
           { 
             challenge: turn.challenge,
             description: turn.description,
-            turnnumber: newTurnNumber
+            turnnumber: newTurnNumber,
+            game: gameId
           }
         ])
         .select()
@@ -166,14 +148,22 @@ const GameEditionDashboard = () => {
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Game Edition Dashboard</h1>
-          <Button 
-            variant="ghost"
-            onClick={handleLogout}
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex gap-4">
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/game-edition')}
+            >
+              Back to Games
+            </Button>
+            <Button 
+              variant="ghost"
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -200,9 +190,6 @@ const GameEditionDashboard = () => {
               onSave={handleCreateTurn}
             />
           )}
-          <div className="flex justify-end">
-            <Button onClick={handleSaveGame}>Save Game</Button>
-          </div>
         </div>
       </div>
     </div>
