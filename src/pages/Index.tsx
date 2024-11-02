@@ -1,13 +1,14 @@
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
 import Header from "@/components/Header/Header";
 import { PostgrestError } from "@supabase/supabase-js";
 import { Database } from "@/integrations/supabase/types";
+import { useNavigate } from "react-router-dom";
 
 const TOTAL_TURNS = 20;
 
@@ -19,6 +20,26 @@ const Index = () => {
   const [selectedHotel, setSelectedHotel] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role === 'gamemaster') {
+        navigate('/game-edition');
+      }
+    };
+
+    checkRole();
+  }, [navigate]);
 
   const { data: options, isLoading: optionsLoading, error: optionsError } = useQuery({
     queryKey: ['options', currentTurn],

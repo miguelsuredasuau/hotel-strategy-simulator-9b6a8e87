@@ -202,12 +202,9 @@ const Dashboard = ({ onNextTurn }: DashboardProps) => {
         </div>
 
         <div className="flex justify-end mt-8">
-          <Link to="/game-edition" className="bg-hotel-primary text-white hover:bg-hotel-primary/90 p-2 rounded">
-            Game Edition Dashboard
-          </Link>
           <Button 
             onClick={onNextTurn}
-            className="bg-hotel-primary text-white hover:bg-hotel-primary/90 ml-4"
+            className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
           >
             Next Turn
           </Button>
