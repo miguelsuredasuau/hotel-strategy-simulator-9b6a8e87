@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/Header/Header";
+import { ArrowLeft } from "lucide-react";
 
 const Profile = () => {
   const [teamName, setTeamName] = useState("");
@@ -57,7 +58,9 @@ const Profile = () => {
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        throw new Error("No user found");
+      }
 
       const { data: profileData } = await supabase
         .from('profiles')
@@ -65,19 +68,26 @@ const Profile = () => {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profileData?.team_id) {
-        const { error } = await supabase
-          .from('teams')
-          .update({ teamname: teamName, teamlogo: teamLogo })
-          .eq('id', profileData.team_id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Team profile updated successfully",
-        });
+      if (!profileData?.team_id) {
+        throw new Error("No team found");
       }
+
+      const { error: updateError } = await supabase
+        .from('teams')
+        .update({ 
+          teamname: teamName, 
+          teamlogo: teamLogo 
+        })
+        .eq('id', profileData.team_id);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Team profile updated successfully",
+      });
+      
+      navigate('/');
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -93,6 +103,14 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header>
+        <Button 
+          variant="ghost" 
+          className="mr-2" 
+          onClick={() => navigate('/')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Game
+        </Button>
         <h1 className="text-2xl font-bold text-hotel-text">Team Profile</h1>
       </Header>
       <div className="max-w-2xl mx-auto p-6">
@@ -128,7 +146,7 @@ const Profile = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate(-1)}
+                  onClick={() => navigate('/')}
                 >
                   Cancel
                 </Button>
