@@ -58,25 +58,27 @@ const TeamMenu = () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load team information",
-          variant: "destructive",
-        });
       }
     };
 
     fetchTeamInfo();
-  }, [toast]);
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      // First clear all cached data
       queryClient.clear();
-      navigate("/login");
+      
+      // Then sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Force a hard navigation to login page
+      window.location.href = '/login';
     } catch (error: any) {
+      console.error('Logout error:', error);
       toast({
-        title: "Error",
+        title: "Error signing out",
         description: error.message || "Failed to sign out",
         variant: "destructive",
       });
