@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -7,6 +8,7 @@ import TurnCard from "./TurnCard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import OptionsPage from "./Options/OptionsPage";
 
 interface TurnsCardProps {
   turns: Turn[];
@@ -19,9 +21,11 @@ interface TurnsCardProps {
 const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
+  const [showOptionsPage, setShowOptionsPage] = useState(false);
 
   const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    if (!result.destination || !turns) return;
 
     const items = Array.from(turns);
     const [reorderedItem] = items.splice(result.source.index, 1);
@@ -58,6 +62,19 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
     }
   };
 
+  if (showOptionsPage && selectedTurn) {
+    return (
+      <OptionsPage
+        turnId={selectedTurn.id}
+        gameId={selectedTurn.game}
+        onBack={() => {
+          setShowOptionsPage(false);
+          setSelectedTurn(null);
+        }}
+      />
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -81,7 +98,10 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
                     key={turn.id}
                     turn={turn}
                     index={index}
-                    onEditOptions={onEditOptions}
+                    onEditOptions={() => {
+                      setSelectedTurn(turn);
+                      setShowOptionsPage(true);
+                    }}
                     onEditTurn={onEditTurn}
                     onDeleteTurn={onDeleteTurn}
                   />
