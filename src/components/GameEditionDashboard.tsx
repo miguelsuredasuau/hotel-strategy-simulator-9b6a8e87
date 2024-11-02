@@ -3,13 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import GameDetailsCard from './GameEdition/GameDetailsCard';
-import TeamsCard from './GameEdition/TeamsCard';
-import TurnsCard from './GameEdition/TurnsCard';
 import TurnEditDialog from './GameEdition/TurnEditDialog';
 import OptionsEditDialog from './GameEdition/OptionsEditDialog';
 import DeleteConfirmDialog from './GameEdition/DeleteConfirmDialog';
 import GameEditionHeader from './GameEdition/GameEditionHeader';
+import DashboardContent from './GameEdition/DashboardContent';
 import { useGameData } from '@/hooks/useGameData';
 import { Turn } from '@/types/game';
 
@@ -113,99 +111,90 @@ const GameEditionDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-6">
         <GameEditionHeader onLogout={handleLogout} />
+        
+        <DashboardContent
+          gameId={gameId!}
+          gameData={gameData}
+          turnsData={turnsData}
+          showingOptions={showingOptions}
+          onEditOptions={(turn) => {
+            setSelectedTurn(turn);
+            setShowingOptions(true);
+            setIsOptionsOpen(true);
+          }}
+          onEditTurn={(turn) => {
+            setSelectedTurn(turn);
+            setIsEditOpen(true);
+          }}
+          onDeleteTurn={(turn) => {
+            setSelectedTurn(turn);
+            setIsDeleteOpen(true);
+          }}
+          onAddTurn={() => setIsNewTurnOpen(true)}
+        />
 
-        <div className="space-y-6">
-          {!showingOptions && (
-            <>
-              <GameDetailsCard
-                gameId={parseInt(gameId!)}
-                gameName={gameData?.name || ''}
-                inspirationalImage={gameData?.inspirational_image || ''}
-                setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-                setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-              />
-              <TeamsCard gameId={parseInt(gameId!)} />
-            </>
-          )}
-          <TurnsCard 
-            turns={turnsData || []} 
-            onEditOptions={(turn) => {
-              setSelectedTurn(turn);
-              setShowingOptions(true);
-              setIsOptionsOpen(true);
-            }}
-            onEditTurn={(turn) => {
-              setSelectedTurn(turn);
-              setIsEditOpen(true);
-            }}
-            onDeleteTurn={(turn) => {
-              setSelectedTurn(turn);
-              setIsDeleteOpen(true);
-            }}
-            onAddTurn={() => setIsNewTurnOpen(true)}
+        {isNewTurnOpen && (
+          <TurnEditDialog
+            turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1, game: parseInt(gameId!) }}
+            open={isNewTurnOpen}
+            onOpenChange={setIsNewTurnOpen}
+            onSave={handleCreateTurn}
           />
-          {isNewTurnOpen && (
+        )}
+
+        {selectedTurn && (
+          <>
             <TurnEditDialog
-              turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1, game: parseInt(gameId!) }}
-              open={isNewTurnOpen}
-              onOpenChange={setIsNewTurnOpen}
-              onSave={handleCreateTurn}
+              turn={selectedTurn}
+              open={isEditOpen}
+              onOpenChange={setIsEditOpen}
+              onSave={(updatedTurn) => {
+                queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
+                setIsEditOpen(false);
+                toast({
+                  title: "Turn updated",
+                  description: "The turn has been successfully updated.",
+                });
+              }}
             />
-          )}
-          {selectedTurn && (
-            <>
-              <TurnEditDialog
-                turn={selectedTurn}
-                open={isEditOpen}
-                onOpenChange={setIsEditOpen}
-                onSave={(updatedTurn) => {
+            <OptionsEditDialog
+              turnId={selectedTurn.id}
+              gameId={selectedTurn.game}
+              open={isOptionsOpen}
+              onOpenChange={(open) => {
+                setIsOptionsOpen(open);
+                if (!open) setShowingOptions(false);
+              }}
+            />
+            <DeleteConfirmDialog
+              open={isDeleteOpen}
+              onOpenChange={setIsDeleteOpen}
+              onConfirm={async () => {
+                try {
+                  const { error } = await supabase
+                    .from('Turns')
+                    .delete()
+                    .eq('id', selectedTurn.id);
+                  
+                  if (error) throw error;
+                  
                   queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-                  setIsEditOpen(false);
+                  setIsDeleteOpen(false);
                   toast({
-                    title: "Turn updated",
-                    description: "The turn has been successfully updated.",
+                    title: "Turn deleted",
+                    description: "The turn has been successfully deleted.",
                   });
-                }}
-              />
-              <OptionsEditDialog
-                turnId={selectedTurn.id}
-                gameId={selectedTurn.game}
-                open={isOptionsOpen}
-                onOpenChange={(open) => {
-                  setIsOptionsOpen(open);
-                  if (!open) setShowingOptions(false);
-                }}
-              />
-              <DeleteConfirmDialog
-                open={isDeleteOpen}
-                onOpenChange={setIsDeleteOpen}
-                onConfirm={async () => {
-                  try {
-                    const { error } = await supabase
-                      .from('Turns')
-                      .delete()
-                      .eq('id', selectedTurn.id);
-                    
-                    if (error) throw error;
-                    
-                    queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-                    setIsDeleteOpen(false);
-                    toast({
-                      title: "Turn deleted",
-                      description: "The turn has been successfully deleted.",
-                    });
-                  } catch (error: any) {
-                    toast({
-                      title: "Error deleting turn",
-                      description: error.message,
-                      variant: "destructive",
-                    });
-                  }
-                }}
-              />
-            </>
-          )}
-        </div>
+                } catch (error: any) {
+                  toast({
+                    title: "Error deleting turn",
+                    description: error.message,
+                    variant: "destructive",
+                  });
+                }
+              }}
+            />
+          </>
+        )}
       </div>
     </div>
   );
