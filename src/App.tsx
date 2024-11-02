@@ -24,6 +24,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       
       if (!session) {
         setIsAuthenticated(false);
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -38,7 +39,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setUserRole(role);
 
-      // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
+      // If user is a gamemaster, always redirect to game-edition unless they're already there
       if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
         return;
@@ -51,6 +52,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       if (!session) {
         setIsAuthenticated(false);
         setUserRole(null);
+        navigate('/login', { replace: true });
         return;
       }
 
@@ -65,7 +67,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setUserRole(role);
 
-      // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
+      // If user is a gamemaster, always redirect to game-edition unless they're already there
       if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
         return;
@@ -89,7 +91,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
     return <Navigate to="/" replace />;
   }
 
-  // If user is a gamemaster and trying to access non-gamemaster routes, don't render
+  // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
   if (userRole === 'gamemaster' && !requiredRole) {
     return null;
   }
