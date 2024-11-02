@@ -68,19 +68,42 @@ const Profile = () => {
         .eq('id', user.id)
         .maybeSingle();
 
-      if (!profileData?.team_id) {
-        throw new Error("No team found");
+      let teamId = profileData?.team_id;
+
+      if (!teamId) {
+        // Create a new team
+        const { data: newTeam, error: createError } = await supabase
+          .from('teams')
+          .insert({ 
+            teamname: teamName, 
+            teamlogo: teamLogo 
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        
+        teamId = newTeam.id;
+
+        // Update the user's profile with the new team_id
+        const { error: profileUpdateError } = await supabase
+          .from('profiles')
+          .update({ team_id: teamId })
+          .eq('id', user.id);
+
+        if (profileUpdateError) throw profileUpdateError;
+      } else {
+        // Update existing team
+        const { error: updateError } = await supabase
+          .from('teams')
+          .update({ 
+            teamname: teamName, 
+            teamlogo: teamLogo 
+          })
+          .eq('id', teamId);
+
+        if (updateError) throw updateError;
       }
-
-      const { error: updateError } = await supabase
-        .from('teams')
-        .update({ 
-          teamname: teamName, 
-          teamlogo: teamLogo 
-        })
-        .eq('id', profileData.team_id);
-
-      if (updateError) throw updateError;
 
       toast({
         title: "Success",
