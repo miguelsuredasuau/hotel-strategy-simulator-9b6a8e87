@@ -131,13 +131,15 @@ const Index = () => {
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-gray-600">No options available for this turn. Please make sure to add options in the database.</p>
+              <p className="text-gray-600">No options available for this turn.</p>
             </div>
           )}
         </div>
       ) : (
         <Dashboard onNextTurn={handleNextTurn} />
       )}
+
+      <Toaster />
     </div>
   );
 };
