@@ -21,46 +21,58 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
+      
+      if (!session) {
+        setIsAuthenticated(false);
+        return;
+      }
 
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        setUserRole(profile?.role || null);
+      setIsAuthenticated(true);
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      
+      const role = profile?.role || null;
+      setUserRole(role);
 
-        // Redirect gamemaster to game-edition dashboard
-        if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
-          navigate('/game-edition');
-        }
+      // Only redirect if we're on the index page and user is a gamemaster
+      if (role === 'gamemaster' && window.location.pathname === '/') {
+        navigate('/game-edition', { replace: true });
       }
     };
 
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setIsAuthenticated(!!session);
-      
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
-        
-        setUserRole(profile?.role || null);
+      if (!session) {
+        setIsAuthenticated(false);
+        setUserRole(null);
+        return;
+      }
 
-        // Redirect gamemaster to game-edition dashboard
-        if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
-          navigate('/game-edition');
-        }
+      setIsAuthenticated(true);
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      
+      const role = profile?.role || null;
+      setUserRole(role);
+
+      // Only redirect if we're on the index page and user is a gamemaster
+      if (role === 'gamemaster' && window.location.pathname === '/') {
+        navigate('/game-edition', { replace: true });
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   if (isAuthenticated === null) {
@@ -68,11 +80,11 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
