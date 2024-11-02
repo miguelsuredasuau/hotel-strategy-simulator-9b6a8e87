@@ -43,7 +43,7 @@ const Index = () => {
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .maybeSingle();
+        .single();
 
       if (error) {
         toast({
@@ -54,7 +54,7 @@ const Index = () => {
         throw error;
       }
 
-      return data; // Return data even if null
+      return data;
     },
   });
 
@@ -83,7 +83,7 @@ const Index = () => {
         <div className="p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-hotel-text mb-2">
-              Turn {currentTurn}{turnData ? `: ${turnData.Challenge}` : ''}
+              Turn {currentTurn}: {turnData?.Challenge}
             </h2>
             {turnData?.Description && (
               <p className="text-gray-600">{turnData.Description}</p>
