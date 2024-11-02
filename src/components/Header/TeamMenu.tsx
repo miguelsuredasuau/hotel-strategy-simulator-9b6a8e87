@@ -13,12 +13,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TeamMenu = () => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
@@ -71,6 +73,9 @@ const TeamMenu = () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Clear all React Query caches
+      queryClient.clear();
       
       // Force navigation to login page after successful logout
       navigate("/login", { replace: true });
