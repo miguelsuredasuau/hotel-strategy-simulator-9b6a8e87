@@ -26,14 +26,28 @@ const generateOptions = (turn: number) => {
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
   const [selectedHotel, setSelectedHotel] = useState<string | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const currentOptions = generateOptions(currentTurn);
+
+  const handleHotelSelect = (hotelId: string) => {
+    setSelectedHotel(hotelId);
+    setShowDashboard(true);
+  };
+
+  const handleNextTurn = () => {
+    if (currentTurn < TOTAL_TURNS) {
+      setCurrentTurn(prev => prev + 1);
+    }
+    setShowDashboard(false);
+    setSelectedHotel(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <GameHeader currentTurn={currentTurn} totalTurns={TOTAL_TURNS} />
       
-      {!selectedHotel ? (
+      {!showDashboard ? (
         <div className="p-6">
           <h2 className="text-2xl font-bold text-hotel-text mb-6">Turn {currentTurn}: Select Your Next Investment</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -41,18 +55,13 @@ const Index = () => {
               <HotelCard
                 key={hotel.id}
                 {...hotel}
-                onSelect={() => {
-                  setSelectedHotel(hotel.id);
-                  if (currentTurn < TOTAL_TURNS) {
-                    setCurrentTurn(currentTurn + 1);
-                  }
-                }}
+                onSelect={() => handleHotelSelect(hotel.id)}
               />
             ))}
           </div>
         </div>
       ) : (
-        <Dashboard />
+        <Dashboard onNextTurn={handleNextTurn} />
       )}
     </div>
   );

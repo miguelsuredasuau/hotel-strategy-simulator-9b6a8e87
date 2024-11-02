@@ -1,9 +1,12 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, ScatterChart, Scatter, LineChart, Line } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, TrendingUp, TrendingDown, Quote } from "lucide-react";
+import { Check, TrendingUp, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+
+interface DashboardProps {
+  onNextTurn: () => void;
+}
 
 const mockRevenueData = [
   { month: 1, revenue: 2400 },
@@ -27,13 +30,7 @@ const mockHotels = [
   { name: "Near Trust", adr: 75, rating: 1.7, occupancy: 45, x: 1.2, y: 32 },
 ];
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-
-  const handleNextTurn = () => {
-    navigate('/');  // This will take us back to the hotel selection view
-  };
-
+const Dashboard = ({ onNextTurn }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 space-y-6">
@@ -205,7 +202,7 @@ const Dashboard = () => {
 
         <div className="flex justify-end mt-8">
           <Button 
-            onClick={handleNextTurn}
+            onClick={onNextTurn}
             className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
           >
             Next Turn
