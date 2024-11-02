@@ -1,7 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Turn } from "@/types/game";
+import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import TurnCard from "./TurnCard";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TurnsCardProps {
   turns: Turn[];
@@ -12,6 +17,47 @@ interface TurnsCardProps {
 }
 
 const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const handleDragEnd = async (result: any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(turns);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update turn numbers for all affected turns
+    const updatedTurns = items.map((turn, index) => ({
+      ...turn,
+      turnnumber: index + 1
+    }));
+
+    // Update all turns in the database
+    try {
+      for (const turn of updatedTurns) {
+        const { error } = await supabase
+          .from('Turns')
+          .update({ turnnumber: turn.turnnumber })
+          .eq('id', turn.id);
+        
+        if (error) throw error;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['turns'] });
+      toast({
+        title: "Success",
+        description: "Turn order updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error updating turn order",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -22,49 +68,29 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {turns.map((turn) => (
-            <Card key={turn.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Turn {turn.turnnumber}
-                    </h3>
-                    <p className="text-gray-600 font-medium mb-1">{turn.challenge}</p>
-                    <p className="text-sm text-gray-500">
-                      {turn.description}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEditTurn(turn)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEditOptions(turn)}
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => onDeleteTurn(turn)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="turns">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-4"
+              >
+                {turns.map((turn, index) => (
+                  <TurnCard
+                    key={turn.id}
+                    turn={turn}
+                    index={index}
+                    onEditOptions={onEditOptions}
+                    onEditTurn={onEditTurn}
+                    onDeleteTurn={onDeleteTurn}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </CardContent>
     </Card>
   );
