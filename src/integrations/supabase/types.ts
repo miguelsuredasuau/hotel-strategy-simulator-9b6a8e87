@@ -120,19 +120,25 @@ export type Database = {
           Challenge: string | null
           created_at: string
           Description: string | null
+          game: number | null
           id: number
+          turnnumber: number | null
         }
         Insert: {
           Challenge?: string | null
           created_at?: string
           Description?: string | null
+          game?: number | null
           id?: number
+          turnnumber?: number | null
         }
         Update: {
           Challenge?: string | null
           created_at?: string
           Description?: string | null
+          game?: number | null
           id?: number
+          turnnumber?: number | null
         }
         Relationships: []
       }
