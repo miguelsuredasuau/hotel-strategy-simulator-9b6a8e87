@@ -79,12 +79,24 @@ const Index = () => {
     setSelectedHotel(null);
   };
 
+  const handleTurnSelect = (turn: number) => {
+    if (turn <= currentTurn) {
+      setCurrentTurn(turn);
+      setShowDashboard(false);
+      setSelectedHotel(null);
+    }
+  };
+
   const isLoading = optionsLoading || turnLoading;
 
   if (optionsError || (turnError && (turnError as PostgrestError).code !== 'PGRST116')) {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
+        <Header 
+          currentTurn={currentTurn} 
+          totalTurns={TOTAL_TURNS} 
+          onTurnSelect={handleTurnSelect}
+        >
           <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
         </Header>
         <div className="text-center py-8 text-red-600">
@@ -96,7 +108,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
+      <Header 
+        currentTurn={currentTurn} 
+        totalTurns={TOTAL_TURNS}
+        onTurnSelect={handleTurnSelect}
+      >
         <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
       </Header>
       
