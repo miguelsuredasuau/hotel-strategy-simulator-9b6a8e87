@@ -74,6 +74,7 @@ const GameEditionDashboard = () => {
     }
 
     setGameName(gameData.name || '');
+    setInspirationalImage(gameData.inspirational_image || '');
 
     const { data: turnsData, error: turnsError } = await supabase
       .from('Turns')
