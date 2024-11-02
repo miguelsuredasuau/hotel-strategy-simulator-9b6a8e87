@@ -19,7 +19,9 @@ export default {
           text: "#1E293B",
           muted: "#64748B",
         },
-        border: "hsl(var(--border))", // Add this line
+        border: "hsl(var(--border))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
       },
       animation: {
         "number-transition": "number 0.5s ease-out",
