@@ -14,8 +14,11 @@ const Login = () => {
       }
     });
 
+    // Cleanup subscription
     return () => {
-      authListener.subscription.unsubscribe();
+      if (authListener?.subscription) {
+        authListener.subscription.unsubscribe();
+      }
     };
   }, [navigate]);
 
@@ -33,6 +36,12 @@ const Login = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
+            onKeyDown={(e) => {
+              if (e && e.key) {
+                // Handle keyboard events safely
+                e.stopPropagation();
+              }
+            }}
           />
         </div>
       </div>
