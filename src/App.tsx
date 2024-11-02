@@ -38,9 +38,10 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setUserRole(role);
 
-      // Only redirect if we're on the index page and user is a gamemaster
-      if (role === 'gamemaster' && window.location.pathname === '/') {
+      // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
+      if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
+        return;
       }
     };
 
@@ -64,16 +65,17 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setUserRole(role);
 
-      // Only redirect if we're on the index page and user is a gamemaster
-      if (role === 'gamemaster' && window.location.pathname === '/') {
+      // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
+      if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
+        return;
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, requiredRole]);
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>;
@@ -85,6 +87,11 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
 
   if (requiredRole && userRole !== requiredRole) {
     return <Navigate to="/" replace />;
+  }
+
+  // If user is a gamemaster and trying to access non-gamemaster routes, don't render
+  if (userRole === 'gamemaster' && !requiredRole) {
+    return null;
   }
 
   return <>{children}</>;
