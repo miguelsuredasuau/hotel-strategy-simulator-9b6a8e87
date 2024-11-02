@@ -116,7 +116,8 @@ const GameEditionDashboard = () => {
         .from('Turns')
         .insert([
           { 
-            ...turn,
+            challenge: turn.challenge,
+            description: turn.description,
             turnnumber: newTurnNumber
           }
         ])
@@ -193,7 +194,7 @@ const GameEditionDashboard = () => {
           <TurnsCard turns={turns} />
           {isNewTurnOpen && (
             <TurnEditDialog
-              turn={{ id: 0, turnnumber: turns.length + 1 }}
+              turn={{ turnnumber: turns.length + 1 }}
               open={isNewTurnOpen}
               onOpenChange={setIsNewTurnOpen}
               onSave={handleCreateTurn}
