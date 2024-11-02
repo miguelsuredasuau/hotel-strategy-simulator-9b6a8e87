@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
@@ -16,6 +16,7 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,7 +34,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
 
         // Redirect gamemaster to game-edition dashboard
         if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
-          window.location.href = '/game-edition';
+          navigate('/game-edition');
         }
       }
     };
@@ -54,13 +55,13 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
 
         // Redirect gamemaster to game-edition dashboard
         if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
-          window.location.href = '/game-edition';
+          navigate('/game-edition');
         }
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   if (isAuthenticated === null) {
     return <div>Loading...</div>;
