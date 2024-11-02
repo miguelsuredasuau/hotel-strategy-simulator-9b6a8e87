@@ -8,9 +8,19 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
-        navigate("/");
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile?.role === 'gamemaster') {
+          navigate('/game-edition');
+        } else {
+          navigate('/');
+        }
       }
     });
 
@@ -36,12 +46,6 @@ const Login = () => {
             appearance={{ theme: ThemeSupa }}
             theme="light"
             providers={[]}
-            onKeyDown={(e) => {
-              if (e && e.key) {
-                // Handle keyboard events safely
-                e.stopPropagation();
-              }
-            }}
           />
         </div>
       </div>

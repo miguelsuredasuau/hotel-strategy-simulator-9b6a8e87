@@ -13,7 +13,7 @@ import GameEditionDashboard from "./components/GameEditionDashboard";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode, requiredRole?: string }) => {
+const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: string }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -30,6 +30,11 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode,
           .single();
         
         setUserRole(profile?.role || null);
+
+        // Redirect gamemaster to game-edition dashboard
+        if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
+          window.location.href = '/game-edition';
+        }
       }
     };
 
@@ -46,6 +51,11 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode,
           .single();
         
         setUserRole(profile?.role || null);
+
+        // Redirect gamemaster to game-edition dashboard
+        if (profile?.role === 'gamemaster' && window.location.pathname === '/') {
+          window.location.href = '/game-edition';
+        }
       }
     });
 
