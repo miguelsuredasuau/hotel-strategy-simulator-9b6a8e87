@@ -186,6 +186,7 @@ const GameEditionDashboard = () => {
 
         <div className="space-y-6">
           <GameDetailsCard
+            gameId={parseInt(gameId!)}
             gameName={gameName}
             inspirationalImage={inspirationalImage}
             setGameName={setGameName}
