@@ -25,9 +25,9 @@ const TurnCard = ({ turn, index, onEditOptions, onEditTurn, onDeleteTurn }: Turn
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="relative inline-flex items-center justify-center">
-                    <Circle className="h-8 w-8 text-hotel-primary" />
-                    <span className="absolute text-sm font-semibold text-white">
+                  <div className="relative inline-flex items-center justify-center w-8 h-8">
+                    <div className="absolute inset-0 bg-hotel-primary rounded-full" />
+                    <span className="relative text-sm font-semibold text-white">
                       {turn.turnnumber}
                     </span>
                   </div>
