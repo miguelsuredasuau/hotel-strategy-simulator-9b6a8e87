@@ -25,7 +25,10 @@ const Index = () => {
   useEffect(() => {
     const checkRole = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        navigate('/login');
+        return;
+      }
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -35,6 +38,7 @@ const Index = () => {
 
       if (profile?.role === 'gamemaster') {
         navigate('/game-edition');
+        return;
       }
     };
 
