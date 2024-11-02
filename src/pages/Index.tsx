@@ -2,33 +2,61 @@ import { useState } from "react";
 import Header from "../components/Header/Header";
 import Dashboard from "../components/Dashboard";
 import HotelCard from "../components/HotelCard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 const TOTAL_TURNS = 20;
-const OPTIONS_PER_TURN = 6;
-
-const generateOptions = (turn: number) => {
-  const options = [];
-  for (let i = 0; i < OPTIONS_PER_TURN; i++) {
-    const basePrice = 1000000 + (turn * 250000);
-    const randomVariation = Math.floor(Math.random() * 500000);
-    
-    options.push({
-      id: `option-${turn}-${i}`,
-      name: `Hotel Option ${i + 1}`,
-      description: `Strategic hotel opportunity for Turn ${turn}`,
-      price: basePrice + randomVariation,
-      image: `https://source.unsplash.com/800x600/?hotel,luxury&sig=${turn}-${i}`,
-    });
-  }
-  return options;
-};
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
   const [selectedHotel, setSelectedHotel] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const { toast } = useToast();
 
-  const currentOptions = generateOptions(currentTurn);
+  const { data: options, isLoading } = useQuery({
+    queryKey: ['options', currentTurn],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Options')
+        .select('*')
+        .eq('Turn', currentTurn)
+        .order('OptionNumber');
+
+      if (error) {
+        toast({
+          title: "Error loading options",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      return data;
+    },
+  });
+
+  const { data: turnData } = useQuery({
+    queryKey: ['turn', currentTurn],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Turns')
+        .select('*')
+        .eq('id', currentTurn)
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error loading turn data",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+
+      return data;
+    },
+  });
 
   const handleHotelSelect = (hotelId: string) => {
     setSelectedHotel(hotelId);
@@ -51,16 +79,35 @@ const Index = () => {
       
       {!showDashboard ? (
         <div className="p-6">
-          <h2 className="text-2xl font-bold text-hotel-text mb-6">Turn {currentTurn}: Select Your Next Investment</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentOptions.map((hotel) => (
-              <HotelCard
-                key={hotel.id}
-                {...hotel}
-                onSelect={() => handleHotelSelect(hotel.id)}
-              />
-            ))}
-          </div>
+          {turnData && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-hotel-text mb-2">
+                Turn {currentTurn}: {turnData.Challenge}
+              </h2>
+              <p className="text-gray-600">{turnData.Description}</p>
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {options?.map((option) => (
+                <HotelCard
+                  key={option.id}
+                  id={String(option.id)}
+                  name={option.Title || ''}
+                  description={option.Description || ''}
+                  image={option.Image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.id}`}
+                  onSelect={() => handleHotelSelect(String(option.id))}
+                />
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <Dashboard onNextTurn={handleNextTurn} />

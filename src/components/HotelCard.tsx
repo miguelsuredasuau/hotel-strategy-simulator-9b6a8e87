@@ -1,32 +1,37 @@
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
 interface HotelCardProps {
+  id: string;
   name: string;
   description: string;
-  price: number;
   image: string;
   onSelect: () => void;
 }
 
-const HotelCard = ({ name, description, price, image, onSelect }: HotelCardProps) => {
+const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) => {
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <div
-        className="h-48 bg-cover bg-center"
-        style={{ backgroundImage: `url(${image})` }}
-      />
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="text-xl font-bold text-hotel-text">{name}</h3>
-          <div className="text-hotel-primary font-bold">€{price.toLocaleString()}</div>
-        </div>
-        <p className="text-hotel-muted mb-6">{description}</p>
-        <button
-          onClick={onSelect}
-          className="w-full bg-hotel-primary text-white py-2 rounded-lg hover:bg-opacity-90 transition-colors"
-        >
-          Select
-        </button>
+    <Card className="overflow-hidden">
+      <div className="aspect-video relative overflow-hidden">
+        <img
+          src={image}
+          alt={name}
+          className="object-cover w-full h-full transition-transform hover:scale-105"
+        />
       </div>
-    </div>
+      <CardContent className="p-4">
+        <h3 className="text-lg font-semibold mb-2">{name}</h3>
+        <p className="text-gray-600 text-sm">{description}</p>
+      </CardContent>
+      <CardFooter className="p-4 pt-0">
+        <Button 
+          onClick={onSelect}
+          className="w-full bg-hotel-primary text-white hover:bg-hotel-primary/90"
+        >
+          Select Option
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
