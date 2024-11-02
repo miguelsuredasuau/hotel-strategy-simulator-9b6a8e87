@@ -10,13 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
-
-interface Turn {
-  id: number;
-  turnnumber: number;
-  challenge?: string;
-  description?: string;
-}
+import { Turn } from "@/types/game";
 
 interface TurnEditDialogProps {
   turn: Turn;
@@ -32,7 +26,7 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Turn {turn.turnnumber}</DialogTitle>
+          <DialogTitle>Turn {turn.turnnumber}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">

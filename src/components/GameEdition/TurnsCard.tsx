@@ -7,21 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import TurnEditDialog from "./TurnEditDialog";
 import OptionsEditDialog from "./OptionsEditDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
-
-interface Turn {
-  id: number;
-  turnnumber: number;
-  challenge?: string;
-  description?: string;
-  game: number;
-}
+import { Turn } from "@/types/game";
 
 interface TurnsCardProps {
   turns: Turn[];
 }
 
 const TurnsCard = ({ turns: initialTurns }: TurnsCardProps) => {
-  const [turns, setTurns] = useState(initialTurns);
+  const [turns, setTurns] = useState<Turn[]>(initialTurns);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
@@ -35,7 +28,6 @@ const TurnsCard = ({ turns: initialTurns }: TurnsCardProps) => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update turn numbers
     const updatedItems = items.map((item, index) => ({
       ...item,
       turnnumber: index + 1,
@@ -81,7 +73,7 @@ const TurnsCard = ({ turns: initialTurns }: TurnsCardProps) => {
                               <h3 className="text-lg font-semibold mb-2">
                                 Turn {turn.turnnumber}
                               </h3>
-                              <p className="text-gray-600">{turn.challenge}</p>
+                              <p className="text-gray-600 font-medium mb-1">{turn.challenge}</p>
                               <p className="text-sm text-gray-500">
                                 {turn.description}
                               </p>
