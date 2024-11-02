@@ -1,10 +1,11 @@
-import { useState } from "react";
-import Header from "../components/Header/Header";
-import Dashboard from "../components/Dashboard";
-import HotelCard from "../components/HotelCard";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import Dashboard from "@/components/Dashboard";
+import HotelCard from "@/components/HotelCard";
+import Header from "@/components/Header/Header";
 
 const TOTAL_TURNS = 20;
 
@@ -43,9 +44,9 @@ const Index = () => {
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .single();
+        .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         toast({
           title: "Error loading turn data",
           description: error.message,
@@ -83,7 +84,7 @@ const Index = () => {
         <div className="p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-hotel-text mb-2">
-              Turn {currentTurn}: {turnData?.Challenge}
+              Turn {currentTurn}{turnData ? `: ${turnData.Challenge}` : ''}
             </h2>
             {turnData?.Description && (
               <p className="text-gray-600">{turnData.Description}</p>
