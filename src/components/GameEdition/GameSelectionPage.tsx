@@ -1,3 +1,4 @@
+```tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +9,7 @@ import { Plus, Calendar, ArrowRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import CreateGameDialog from './CreateGameDialog';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import TeamsSection from './TeamsManagement/TeamsSection';
 
 const GameSelectionPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -93,6 +95,8 @@ const GameSelectionPage = () => {
           </div>
         )}
 
+        <TeamsSection />
+
         <CreateGameDialog 
           open={isCreateDialogOpen} 
           onOpenChange={setIsCreateDialogOpen}
@@ -106,3 +110,4 @@ const GameSelectionPage = () => {
 };
 
 export default GameSelectionPage;
+```
