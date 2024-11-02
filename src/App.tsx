@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { SessionContextProvider } from "@supabase/auth-helpers-react";
+import { SessionContextProvider, useSession } from "@supabase/auth-helpers-react";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
@@ -17,53 +17,33 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const navigate = useNavigate();
+  const session = useSession();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
         setIsAuthenticated(false);
-        navigate('/login', { replace: true });
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-      
-      const role = profile?.role || null;
-      setIsAuthenticated(true);
-      setUserRole(role);
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        const role = profile?.role || null;
+        setIsAuthenticated(true);
+        setUserRole(role);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setIsAuthenticated(false);
+      }
     };
 
     checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!session) {
-        setIsAuthenticated(false);
-        setUserRole(null);
-        navigate('/login', { replace: true });
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-      
-      const role = profile?.role || null;
-      setIsAuthenticated(true);
-      setUserRole(role);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+  }, [session]);
 
   // Show loading state only during initial authentication check
   if (isAuthenticated === null) {
