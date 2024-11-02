@@ -37,11 +37,6 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setIsAuthenticated(true);
       setUserRole(role);
-
-      // Redirect gamemaster to game-edition dashboard if they're not already there
-      if (role === 'gamemaster' && !requiredRole) {
-        navigate('/game-edition', { replace: true });
-      }
     };
 
     checkAuth();
@@ -63,31 +58,33 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
       const role = profile?.role || null;
       setIsAuthenticated(true);
       setUserRole(role);
-
-      // Redirect gamemaster to game-edition dashboard if they're not already there
-      if (role === 'gamemaster' && !requiredRole) {
-        navigate('/game-edition', { replace: true });
-      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, requiredRole]);
+  }, [navigate]);
 
+  // Show loading state only during initial authentication check
   if (isAuthenticated === null) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
+  // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
+  // Check for required role
   if (requiredRole && userRole !== requiredRole) {
     return <Navigate to="/" replace />;
   }
 
-  // Always redirect gamemasters to game-edition when accessing other routes
+  // Redirect gamemaster to game-edition dashboard when accessing other routes
   if (userRole === 'gamemaster' && !requiredRole) {
     return <Navigate to="/game-edition" replace />;
   }
