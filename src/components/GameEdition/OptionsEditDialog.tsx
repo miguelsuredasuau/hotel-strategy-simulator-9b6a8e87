@@ -61,12 +61,12 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
       const optionNumber = options ? options.length + 1 : 1;
       const { error } = await supabase
         .from('Options')
-        .insert([{
+        .insert({
           ...newOption,
           turn: turnId,
           game: gameId,
           optionnumber: optionNumber,
-        }]);
+        } as any);
 
       if (error) throw error;
 
@@ -89,7 +89,17 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
     try {
       const { error } = await supabase
         .from('Options')
-        .update(option)
+        .update({
+          title: option.title,
+          description: option.description,
+          image: option.image,
+          impactkpi1: option.impactkpi1,
+          impactkpi1amount: option.impactkpi1amount,
+          impactkpi2: option.impactkpi2,
+          impactkpi2amount: option.impactkpi2amount,
+          impactkpi3: option.impactkpi3,
+          impactkpi3amount: option.impactkpi3amount,
+        } as any)
         .eq('id', option.id);
 
       if (error) throw error;

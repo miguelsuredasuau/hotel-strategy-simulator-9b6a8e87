@@ -9,11 +9,13 @@ import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import CreateTeamDialog from './CreateTeamDialog';
 import TeamCard from './TeamCard';
+import TeamEditDialog from './TeamEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
 import { Team } from '@/types/game';
 
 const TeamsSection = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [isOpen, setIsOpen] = useState(true);
@@ -66,8 +68,6 @@ const TeamsSection = () => {
 
     // Update the UI immediately
     queryClient.setQueryData(['teams'], items);
-
-    // You could implement a backend update here if needed
   };
 
   return (
@@ -109,11 +109,8 @@ const TeamsSection = () => {
                           team={team}
                           index={index}
                           onEditTeam={(team) => {
-                            // Implement edit functionality
-                            toast({
-                              title: "Edit team",
-                              description: "Edit functionality coming soon",
-                            });
+                            setSelectedTeam(team);
+                            setIsEditDialogOpen(true);
                           }}
                           onDeleteTeam={(team) => {
                             setSelectedTeam(team);
@@ -138,6 +135,12 @@ const TeamsSection = () => {
       <CreateTeamDialog 
         open={isCreateDialogOpen} 
         onOpenChange={setIsCreateDialogOpen}
+      />
+
+      <TeamEditDialog
+        team={selectedTeam}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
       />
 
       <DeleteConfirmDialog
