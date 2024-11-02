@@ -68,15 +68,15 @@ const TeamMenu = () => {
   }, [toast]);
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      await supabase.auth.signOut();
+      navigate("/login", { replace: true });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to sign out",
         variant: "destructive",
       });
-    } else {
-      navigate("/login");
     }
   };
 
