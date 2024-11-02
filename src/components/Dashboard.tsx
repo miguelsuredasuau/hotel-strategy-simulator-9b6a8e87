@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Check, TrendingUp, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import TeamLogo from "./TeamLogo";
 
 interface DashboardProps {
   onNextTurn: () => void;
@@ -33,6 +34,7 @@ const mockHotels = [
 const Dashboard = ({ onNextTurn }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
+      <TeamLogo />
       <div className="p-6 space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>

@@ -65,6 +65,56 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          team_id: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          team_id?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          team_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: number
+          teamlogo: string | null
+          teamname: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: never
+          teamlogo?: string | null
+          teamname?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: never
+          teamlogo?: string | null
+          teamname?: string | null
+        }
+        Relationships: []
+      }
       Teams: {
         Row: {
           created_at: string
