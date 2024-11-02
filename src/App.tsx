@@ -28,8 +28,6 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
         return;
       }
 
-      setIsAuthenticated(true);
-      
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -37,12 +35,12 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
         .single();
       
       const role = profile?.role || null;
+      setIsAuthenticated(true);
       setUserRole(role);
 
-      // If user is a gamemaster, always redirect to game-edition unless they're already there
+      // Redirect gamemaster to game-edition dashboard if they're not already there
       if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
-        return;
       }
     };
 
@@ -56,8 +54,6 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
         return;
       }
 
-      setIsAuthenticated(true);
-      
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
@@ -65,12 +61,12 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
         .single();
       
       const role = profile?.role || null;
+      setIsAuthenticated(true);
       setUserRole(role);
 
-      // If user is a gamemaster, always redirect to game-edition unless they're already there
+      // Redirect gamemaster to game-edition dashboard if they're not already there
       if (role === 'gamemaster' && !requiredRole) {
         navigate('/game-edition', { replace: true });
-        return;
       }
     });
 
@@ -91,9 +87,9 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
     return <Navigate to="/" replace />;
   }
 
-  // If user is a gamemaster and trying to access non-gamemaster routes, redirect them
+  // Always redirect gamemasters to game-edition when accessing other routes
   if (userRole === 'gamemaster' && !requiredRole) {
-    return null;
+    return <Navigate to="/game-edition" replace />;
   }
 
   return <>{children}</>;
