@@ -45,7 +45,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header>
+      <Header currentTurn={currentTurn} totalTurns={TOTAL_TURNS}>
         <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
       </Header>
       
