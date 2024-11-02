@@ -54,6 +54,8 @@ const GameEditionDashboard = () => {
   }, [navigate, toast, gameId]);
 
   const fetchGameData = async () => {
+    if (!gameId) return;
+    
     const { data: gameData, error: gameError } = await supabase
       .from('Games')
       .select('*')
@@ -75,7 +77,7 @@ const GameEditionDashboard = () => {
     const { data: turnsData, error: turnsError } = await supabase
       .from('Turns')
       .select('*')
-      .eq('game', gameId)
+      .eq('game', parseInt(gameId))
       .order('turnnumber');
 
     if (turnsError) {
@@ -95,14 +97,12 @@ const GameEditionDashboard = () => {
       const newTurnNumber = turns.length + 1;
       const { data, error } = await supabase
         .from('Turns')
-        .insert([
-          { 
-            challenge: turn.challenge,
-            description: turn.description,
-            turnnumber: newTurnNumber,
-            game: gameId
-          }
-        ])
+        .insert({
+          challenge: turn.challenge,
+          description: turn.description,
+          turnnumber: newTurnNumber,
+          game: parseInt(gameId!)
+        })
         .select()
         .single();
 
@@ -114,7 +114,7 @@ const GameEditionDashboard = () => {
         title: "Success",
         description: "Turn created successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error creating turn",
         description: error.message,
@@ -184,7 +184,7 @@ const GameEditionDashboard = () => {
           <TurnsCard turns={turns} />
           {isNewTurnOpen && (
             <TurnEditDialog
-              turn={{ turnnumber: turns.length + 1 }}
+              turn={{ id: 0, turnnumber: turns.length + 1 }}
               open={isNewTurnOpen}
               onOpenChange={setIsNewTurnOpen}
               onSave={handleCreateTurn}
