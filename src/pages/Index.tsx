@@ -14,7 +14,7 @@ const Index = () => {
   const [showDashboard, setShowDashboard] = useState(false);
   const { toast } = useToast();
 
-  const { data: options, isLoading } = useQuery({
+  const { data: options, isLoading: optionsLoading } = useQuery({
     queryKey: ['options', currentTurn],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -36,14 +36,14 @@ const Index = () => {
     },
   });
 
-  const { data: turnData } = useQuery({
+  const { data: turnData, isLoading: turnLoading } = useQuery({
     queryKey: ['turn', currentTurn],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .single();
+        .maybeSingle();
 
       if (error) {
         toast({
@@ -52,6 +52,15 @@ const Index = () => {
           variant: "destructive",
         });
         throw error;
+      }
+
+      if (!data) {
+        toast({
+          title: "Turn not found",
+          description: `Turn ${currentTurn} data is not available`,
+          variant: "destructive",
+        });
+        return null;
       }
 
       return data;
@@ -70,6 +79,8 @@ const Index = () => {
     setShowDashboard(false);
     setSelectedHotel(null);
   };
+
+  const isLoading = optionsLoading || turnLoading;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,9 +105,9 @@ const Index = () => {
                 <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
               ))}
             </div>
-          ) : (
+          ) : options && options.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {options?.map((option) => (
+              {options.map((option) => (
                 <HotelCard
                   key={option.id}
                   id={String(option.id)}
@@ -106,6 +117,10 @@ const Index = () => {
                   onSelect={() => handleHotelSelect(String(option.id))}
                 />
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-gray-600">No options available for this turn.</p>
             </div>
           )}
         </div>
