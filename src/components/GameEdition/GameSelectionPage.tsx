@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Calendar, ArrowRight } from "lucide-react";
+import { Plus, Calendar, ArrowRight, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import CreateGameDialog from './CreateGameDialog';
+import DeleteGameDialog from './DeleteGameDialog';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import TeamsSection from './TeamsManagement/TeamsSection';
 
 const GameSelectionPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: games, isLoading } = useQuery({
     queryKey: ['games'],
@@ -30,6 +34,38 @@ const GameSelectionPage = () => {
 
   const handleGameSelect = (gameId: number) => {
     navigate(`/game-edition/${gameId}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, gameId: number) => {
+    e.stopPropagation();
+    setSelectedGameId(gameId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteGame = async () => {
+    if (!selectedGameId) return;
+
+    try {
+      const { error } = await supabase
+        .from('Games')
+        .delete()
+        .eq('id', selectedGameId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      setIsDeleteDialogOpen(false);
+      toast({
+        title: "Game deleted",
+        description: "The game has been successfully deleted.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting game",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const defaultImage = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop";
@@ -84,10 +120,20 @@ const GameSelectionPage = () => {
                     <Calendar className="h-4 w-4 mr-2" />
                     {new Date(game.created_at!).toLocaleDateString()}
                   </div>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    Edit Game
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => handleDeleteClick(e, game.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      Edit Game
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             ))}
@@ -102,6 +148,12 @@ const GameSelectionPage = () => {
           onGameCreated={(gameId) => {
             navigate(`/game-edition/${gameId}`);
           }}
+        />
+
+        <DeleteGameDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+          onConfirm={handleDeleteGame}
         />
       </div>
     </div>
