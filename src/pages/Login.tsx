@@ -24,7 +24,6 @@ const Login = () => {
       }
     });
 
-    // Cleanup subscription
     return () => {
       authListener?.subscription?.unsubscribe();
     };
@@ -46,11 +45,25 @@ const Login = () => {
               style: {
                 button: { background: 'rgb(59, 130, 246)', color: 'white' },
                 anchor: { color: 'rgb(59, 130, 246)' }
+              },
+              className: {
+                container: 'auth-container',
+                button: 'auth-button',
+                input: 'auth-input'
+              }
+            }}
+            localization={{
+              variables: {
+                sign_in: {
+                  email_label: 'Email',
+                  password_label: 'Password'
+                }
               }
             }}
             theme="light"
             providers={[]}
             redirectTo={window.location.origin}
+            onKeyDown={(e) => e.stopPropagation()}
           />
         </div>
       </div>
