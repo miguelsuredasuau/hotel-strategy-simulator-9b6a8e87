@@ -3,24 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import GameDetailsCard from './GameEdition/GameDetailsCard';
 import TeamsCard from './GameEdition/TeamsCard';
 import TurnsCard from './GameEdition/TurnsCard';
 import TurnEditDialog from './GameEdition/TurnEditDialog';
+import GameEditionHeader from './GameEdition/GameEditionHeader';
+import { useGameData } from '@/hooks/useGameData';
 
 const GameEditionDashboard = () => {
   const { gameId } = useParams();
-  const [gameName, setGameName] = useState('');
-  const [inspirationalImage, setInspirationalImage] = useState('');
-  const [teams, setTeams] = useState([]);
-  const [turns, setTurns] = useState([]);
   const [isGamemaster, setIsGamemaster] = useState(false);
   const [isNewTurnOpen, setIsNewTurnOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { gameData, turnsData } = useGameData(gameId);
 
   useEffect(() => {
     const checkRole = async () => {
@@ -47,73 +47,14 @@ const GameEditionDashboard = () => {
       }
 
       setIsGamemaster(true);
-      fetchGameData();
-      fetchTeamsData();
     };
 
     checkRole();
-  }, [navigate, toast, gameId]);
+  }, [navigate, toast]);
 
-  const fetchGameData = async () => {
-    if (!gameId) return;
-    
-    const { data: gameData, error: gameError } = await supabase
-      .from('Games')
-      .select('*')
-      .eq('id', parseInt(gameId))
-      .single();
-
-    if (gameError) {
-      toast({
-        title: "Error fetching game",
-        description: gameError.message,
-        variant: "destructive",
-      });
-      navigate('/game-edition');
-      return;
-    }
-
-    setGameName(gameData.name || '');
-    setInspirationalImage(gameData.inspirational_image || '');
-
-    const { data: turnsData, error: turnsError } = await supabase
-      .from('Turns')
-      .select('*')
-      .eq('game', parseInt(gameId))
-      .order('turnnumber');
-
-    if (turnsError) {
-      toast({
-        title: "Error fetching turns",
-        description: turnsError.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setTurns(turnsData || []);
-  };
-
-  const fetchTeamsData = async () => {
-    const { data: teamsData, error: teamsError } = await supabase
-      .from('teams')
-      .select('*');
-
-    if (teamsError) {
-      toast({
-        title: "Error fetching teams",
-        description: teamsError.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setTeams(teamsData || []);
-  };
-
-  const handleCreateTurn = async (turn) => {
+  const handleCreateTurn = async (turn: any) => {
     try {
-      const newTurnNumber = turns.length + 1;
+      const newTurnNumber = turnsData ? turnsData.length + 1 : 1;
       const { data, error } = await supabase
         .from('Turns')
         .insert({
@@ -127,7 +68,7 @@ const GameEditionDashboard = () => {
 
       if (error) throw error;
 
-      setTurns([...turns, data]);
+      queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
       setIsNewTurnOpen(false);
       toast({
         title: "Success",
@@ -165,35 +106,17 @@ const GameEditionDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Game Edition Dashboard</h1>
-          <div className="flex gap-4">
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/game-edition')}
-            >
-              Back to Games
-            </Button>
-            <Button 
-              variant="ghost"
-              onClick={handleLogout}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
+        <GameEditionHeader onLogout={handleLogout} />
 
         <div className="space-y-6">
           <GameDetailsCard
             gameId={parseInt(gameId!)}
-            gameName={gameName}
-            inspirationalImage={inspirationalImage}
-            setGameName={setGameName}
-            setInspirationalImage={setInspirationalImage}
+            gameName={gameData?.name || ''}
+            inspirationalImage={gameData?.inspirational_image || ''}
+            setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
+            setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
           />
-          <TeamsCard teams={teams} />
+          <TeamsCard teams={[]} />
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Game Turns</h2>
             <Button onClick={() => setIsNewTurnOpen(true)}>
@@ -201,10 +124,10 @@ const GameEditionDashboard = () => {
               Add Turn
             </Button>
           </div>
-          <TurnsCard turns={turns} />
+          <TurnsCard turns={turnsData || []} />
           {isNewTurnOpen && (
             <TurnEditDialog
-              turn={{ id: 0, turnnumber: turns.length + 1 }}
+              turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1 }}
               open={isNewTurnOpen}
               onOpenChange={setIsNewTurnOpen}
               onSave={handleCreateTurn}
