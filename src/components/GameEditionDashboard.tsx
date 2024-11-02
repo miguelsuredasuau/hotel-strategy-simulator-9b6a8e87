@@ -48,6 +48,7 @@ const GameEditionDashboard = () => {
 
       setIsGamemaster(true);
       fetchGameData();
+      fetchTeamsData();
     };
 
     checkRole();
@@ -59,7 +60,7 @@ const GameEditionDashboard = () => {
     const { data: gameData, error: gameError } = await supabase
       .from('Games')
       .select('*')
-      .eq('id', gameId)
+      .eq('id', parseInt(gameId))
       .single();
 
     if (gameError) {
@@ -90,6 +91,23 @@ const GameEditionDashboard = () => {
     }
 
     setTurns(turnsData || []);
+  };
+
+  const fetchTeamsData = async () => {
+    const { data: teamsData, error: teamsError } = await supabase
+      .from('teams')
+      .select('*');
+
+    if (teamsError) {
+      toast({
+        title: "Error fetching teams",
+        description: teamsError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTeams(teamsData || []);
   };
 
   const handleCreateTurn = async (turn) => {
