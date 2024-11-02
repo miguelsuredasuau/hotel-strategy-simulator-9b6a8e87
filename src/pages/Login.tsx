@@ -10,23 +10,28 @@ const Login = () => {
   const session = useSession();
 
   useEffect(() => {
-    const checkSession = async () => {
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
-          .single();
+    if (session) {
+      const checkRole = async () => {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile?.role === 'gamemaster') {
-          navigate('/game-edition');
-        } else {
+          if (profile?.role === 'gamemaster') {
+            navigate('/game-edition');
+          } else {
+            navigate('/');
+          }
+        } catch (error) {
+          console.error('Error checking role:', error);
           navigate('/');
         }
-      }
-    };
+      };
 
-    checkSession();
+      checkRole();
+    }
   }, [session, navigate]);
 
   return (
