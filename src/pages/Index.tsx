@@ -46,9 +46,9 @@ const Index = () => {
         .from('Turns')
         .select('*')
         .eq('id', currentTurn)
-        .single();
+        .maybeSingle();
 
-      if (error && (error as PostgrestError).code !== 'PGRST116') {
+      if (error && error.code !== 'PGRST116') {
         console.error('Error fetching turn data:', error);
         toast({
           title: "Error loading turn data",
