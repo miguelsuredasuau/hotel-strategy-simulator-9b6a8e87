@@ -26,8 +26,8 @@ const Index = () => {
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('Turn', currentTurn)
-        .order('OptionNumber');
+        .eq('turn', currentTurn)
+        .order('optionnumber');
 
       if (error) {
         console.error('Error fetching options:', error);
@@ -104,10 +104,10 @@ const Index = () => {
         <div className="p-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-hotel-text mb-2">
-              Turn {currentTurn}{turnData?.Challenge ? `: ${turnData.Challenge}` : ''}
+              Turn {currentTurn}{turnData?.challenge ? `: ${turnData.challenge}` : ''}
             </h2>
-            {turnData?.Description && (
-              <p className="text-gray-600">{turnData.Description}</p>
+            {turnData?.description && (
+              <p className="text-gray-600">{turnData.description}</p>
             )}
           </div>
 
@@ -123,9 +123,9 @@ const Index = () => {
                 <HotelCard
                   key={option.id}
                   id={String(option.id)}
-                  name={option.Title || ''}
-                  description={option.Description || ''}
-                  image={option.Image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.id}`}
+                  name={option.title || ''}
+                  description={option.description || ''}
+                  image={option.image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.id}`}
                   onSelect={() => handleHotelSelect(String(option.id))}
                 />
               ))}
