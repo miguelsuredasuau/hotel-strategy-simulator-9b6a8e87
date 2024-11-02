@@ -9,6 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Options: {
+        Row: {
+          created_at: string
+          Description: string | null
+          id: number
+          Image: string | null
+          ImpactKPI1: string | null
+          ImpactKPI1Amount: number | null
+          ImpactKPI2: string | null
+          ImpactKPI2Amount: number | null
+          ImpactKPI3: string | null
+          ImpactKPI3Amount: number | null
+          OptionNumber: number | null
+          Title: string | null
+          Turn: number | null
+        }
+        Insert: {
+          created_at?: string
+          Description?: string | null
+          id?: number
+          Image?: string | null
+          ImpactKPI1?: string | null
+          ImpactKPI1Amount?: number | null
+          ImpactKPI2?: string | null
+          ImpactKPI2Amount?: number | null
+          ImpactKPI3?: string | null
+          ImpactKPI3Amount?: number | null
+          OptionNumber?: number | null
+          Title?: string | null
+          Turn?: number | null
+        }
+        Update: {
+          created_at?: string
+          Description?: string | null
+          id?: number
+          Image?: string | null
+          ImpactKPI1?: string | null
+          ImpactKPI1Amount?: number | null
+          ImpactKPI2?: string | null
+          ImpactKPI2Amount?: number | null
+          ImpactKPI3?: string | null
+          ImpactKPI3Amount?: number | null
+          OptionNumber?: number | null
+          Title?: string | null
+          Turn?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Options_Turn_fkey"
+            columns: ["Turn"]
+            isOneToOne: false
+            referencedRelation: "Turns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Teams: {
         Row: {
           created_at: string
@@ -30,6 +86,27 @@ export type Database = {
           id?: number
           teamlogo?: string | null
           teamname?: string | null
+        }
+        Relationships: []
+      }
+      Turns: {
+        Row: {
+          Challenge: string | null
+          created_at: string
+          Description: string | null
+          id: number
+        }
+        Insert: {
+          Challenge?: string | null
+          created_at?: string
+          Description?: string | null
+          id?: number
+        }
+        Update: {
+          Challenge?: string | null
+          created_at?: string
+          Description?: string | null
+          id?: number
         }
         Relationships: []
       }
