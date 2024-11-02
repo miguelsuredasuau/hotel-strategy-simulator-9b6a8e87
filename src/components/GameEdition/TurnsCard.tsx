@@ -67,6 +67,9 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
       <OptionsPage
         turnId={selectedTurn.id}
         gameId={selectedTurn.game}
+        turnNumber={selectedTurn.turnnumber}
+        turnChallenge={selectedTurn.challenge}
+        turnDescription={selectedTurn.description}
         onBack={() => {
           setShowOptionsPage(false);
           setSelectedTurn(null);
