@@ -21,6 +21,7 @@ const GameEditionDashboard = () => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
+  const [showingOptions, setShowingOptions] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -114,18 +115,23 @@ const GameEditionDashboard = () => {
         <GameEditionHeader onLogout={handleLogout} />
 
         <div className="space-y-6">
-          <GameDetailsCard
-            gameId={parseInt(gameId!)}
-            gameName={gameData?.name || ''}
-            inspirationalImage={gameData?.inspirational_image || ''}
-            setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-            setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-          />
-          <TeamsCard gameId={parseInt(gameId!)} />
+          {!showingOptions && (
+            <>
+              <GameDetailsCard
+                gameId={parseInt(gameId!)}
+                gameName={gameData?.name || ''}
+                inspirationalImage={gameData?.inspirational_image || ''}
+                setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
+                setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
+              />
+              <TeamsCard gameId={parseInt(gameId!)} />
+            </>
+          )}
           <TurnsCard 
             turns={turnsData || []} 
             onEditOptions={(turn) => {
               setSelectedTurn(turn);
+              setShowingOptions(true);
               setIsOptionsOpen(true);
             }}
             onEditTurn={(turn) => {
@@ -165,7 +171,10 @@ const GameEditionDashboard = () => {
                 turnId={selectedTurn.id}
                 gameId={selectedTurn.game}
                 open={isOptionsOpen}
-                onOpenChange={setIsOptionsOpen}
+                onOpenChange={(open) => {
+                  setIsOptionsOpen(open);
+                  if (!open) setShowingOptions(false);
+                }}
               />
               <DeleteConfirmDialog
                 open={isDeleteOpen}
