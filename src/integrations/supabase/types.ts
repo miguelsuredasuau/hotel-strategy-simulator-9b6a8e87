@@ -9,6 +9,83 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Games: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          name?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          name?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      Options: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          image: string | null
+          impactkpi1: string | null
+          impactkpi1amount: number | null
+          impactkpi2: string | null
+          impactkpi2amount: number | null
+          impactkpi3: string | null
+          impactkpi3amount: number | null
+          optionnumber: number | null
+          title: string | null
+          turn: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: never
+          image?: string | null
+          impactkpi1?: string | null
+          impactkpi1amount?: number | null
+          impactkpi2?: string | null
+          impactkpi2amount?: number | null
+          impactkpi3?: string | null
+          impactkpi3amount?: number | null
+          optionnumber?: number | null
+          title?: string | null
+          turn?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: never
+          image?: string | null
+          impactkpi1?: string | null
+          impactkpi1amount?: number | null
+          impactkpi2?: string | null
+          impactkpi2amount?: number | null
+          impactkpi3?: string | null
+          impactkpi3amount?: number | null
+          optionnumber?: number | null
+          title?: string | null
+          turn?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Options_turn_fkey"
+            columns: ["turn"]
+            isOneToOne: false
+            referencedRelation: "Turns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -58,6 +135,41 @@ export type Database = {
           teamname?: string | null
         }
         Relationships: []
+      }
+      Turns: {
+        Row: {
+          challenge: string | null
+          created_at: string | null
+          description: string | null
+          game: number | null
+          id: number
+          turnnumber: number | null
+        }
+        Insert: {
+          challenge?: string | null
+          created_at?: string | null
+          description?: string | null
+          game?: number | null
+          id?: never
+          turnnumber?: number | null
+        }
+        Update: {
+          challenge?: string | null
+          created_at?: string | null
+          description?: string | null
+          game?: number | null
+          id?: never
+          turnnumber?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Turns_game_fkey"
+            columns: ["game"]
+            isOneToOne: false
+            referencedRelation: "Games"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

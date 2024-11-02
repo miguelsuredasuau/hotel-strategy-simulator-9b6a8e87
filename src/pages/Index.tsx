@@ -7,8 +7,12 @@ import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
 import Header from "@/components/Header/Header";
 import { PostgrestError } from "@supabase/supabase-js";
+import { Database } from "@/integrations/supabase/types";
 
 const TOTAL_TURNS = 20;
+
+type Option = Database['public']['Tables']['Options']['Row'];
+type Turn = Database['public']['Tables']['Turns']['Row'];
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
@@ -35,7 +39,7 @@ const Index = () => {
         throw error;
       }
 
-      return data;
+      return data as Option[];
     },
   });
 
@@ -58,7 +62,7 @@ const Index = () => {
         throw error;
       }
 
-      return data;
+      return data as Turn;
     },
   });
 
