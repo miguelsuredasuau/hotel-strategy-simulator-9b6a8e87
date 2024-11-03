@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
@@ -24,6 +25,7 @@ const GameEditionDashboard = () => {
   const [name, setName] = useState(gameData?.name || '');
   const [description, setDescription] = useState(gameData?.description || '');
   const [inspirationalImage, setInspirationalImage] = useState(gameData?.inspirational_image || '');
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Update state when gameData is loaded
   useEffect(() => {
@@ -31,8 +33,20 @@ const GameEditionDashboard = () => {
       setName(gameData.name || '');
       setDescription(gameData.description || '');
       setInspirationalImage(gameData.inspirational_image || '');
+      setHasChanges(false);
     }
   }, [gameData]);
+
+  // Check for changes
+  useEffect(() => {
+    if (gameData) {
+      const changed = 
+        name !== (gameData.name || '') ||
+        description !== (gameData.description || '') ||
+        inspirationalImage !== (gameData.inspirational_image || '');
+      setHasChanges(changed);
+    }
+  }, [name, description, inspirationalImage, gameData]);
 
   const handleLogout = async () => {
     try {
@@ -64,6 +78,7 @@ const GameEditionDashboard = () => {
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['game', gameId] });
+      setHasChanges(false);
       toast({
         title: "Success",
         description: "Game details updated successfully",
@@ -126,7 +141,15 @@ const GameEditionDashboard = () => {
                 placeholder="Enter image URL"
               />
             </div>
-            <Button onClick={handleSaveGame}>Save Game Details</Button>
+            <Button 
+              onClick={handleSaveGame}
+              disabled={!hasChanges}
+              className={cn(
+                hasChanges ? "bg-hotel-primary hover:bg-hotel-primary/90" : "opacity-50 cursor-not-allowed"
+              )}
+            >
+              Save Game Details
+            </Button>
           </CardContent>
         </Card>
 
