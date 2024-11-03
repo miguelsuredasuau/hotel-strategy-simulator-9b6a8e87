@@ -50,7 +50,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
         } else if (['+', '-', '*', '/', '(', ')', '=', '!=', '>', '<', '>=', '<=', '&&', '||', '?', ':'].includes(part)) {
           return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-purple-100 text-purple-800 mx-0.5">${part}</span>`;
         }
-        return part;
+        return `<span class="text-white">${part}</span>`;
       })
       .join('');
     
@@ -84,7 +84,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2"
+            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2 text-transparent"
           />
           <div 
             className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden whitespace-pre-wrap break-words"
