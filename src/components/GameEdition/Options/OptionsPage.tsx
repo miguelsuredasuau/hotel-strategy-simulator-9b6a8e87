@@ -191,13 +191,15 @@ const OptionsPage = () => {
           </Droppable>
         </DragDropContext>
 
-        <OptionEditDialog
-          option={selectedOption}
-          turnId={Number(turnId)}
-          gameId={Number(gameId)}
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-        />
+        {(isEditDialogOpen || selectedOption) && (
+          <OptionEditDialog
+            option={selectedOption}
+            turnId={Number(turnId)}
+            gameId={Number(gameId)}
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+          />
+        )}
 
         <DeleteConfirmDialog
           open={isDeleteDialogOpen}

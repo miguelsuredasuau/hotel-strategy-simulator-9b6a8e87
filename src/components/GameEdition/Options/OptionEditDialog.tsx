@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
 
 interface OptionEditDialogProps {
-  option: Partial<Option> | null;
+  option: Option | null;
   turnId: number;
   gameId: number;
   open: boolean;
@@ -24,15 +24,14 @@ interface OptionEditDialogProps {
 }
 
 const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: OptionEditDialogProps) => {
-  const [formData, setFormData] = useState<Omit<Option, 'id'>>({});
+  const [formData, setFormData] = useState<Partial<Option>>({});
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (option) {
-      const { id, ...rest } = option;
-      setFormData(rest);
+      setFormData(option);
     } else {
       setFormData({});
     }
@@ -47,6 +46,7 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
         ...formData,
         turn: turnId,
         game: gameId,
+        optionnumber: option?.optionnumber || (await getNextOptionNumber())
       };
 
       if (option?.id) {
@@ -79,6 +79,18 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getNextOptionNumber = async () => {
+    const { data } = await supabase
+      .from('Options')
+      .select('optionnumber')
+      .eq('turn', turnId)
+      .eq('game', gameId)
+      .order('optionnumber', { ascending: false })
+      .limit(1);
+
+    return data && data.length > 0 ? (data[0].optionnumber || 0) + 1 : 1;
   };
 
   return (
