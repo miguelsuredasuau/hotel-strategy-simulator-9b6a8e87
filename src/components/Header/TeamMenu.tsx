@@ -9,18 +9,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const TeamMenu = () => {
+interface TeamMenuProps {
+  onLogout: () => void;
+}
+
+const TeamMenu = ({ onLogout }: TeamMenuProps) => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
@@ -64,22 +64,6 @@ const TeamMenu = () => {
     fetchTeamInfo();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      queryClient.clear();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      window.location.href = '/login';
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Error signing out",
-        description: error.message || "Failed to sign out",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleEditProfile = () => {
     navigate("/profile");
   };
@@ -102,7 +86,7 @@ const TeamMenu = () => {
         <DropdownMenuItem onClick={handleEditProfile}>
           Edit Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={onLogout}>
           Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
