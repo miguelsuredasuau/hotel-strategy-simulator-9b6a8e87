@@ -7,13 +7,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
+import OptionForm from "./OptionForm";
 
 interface OptionEditDialogProps {
   option: Option | null;
@@ -30,12 +28,10 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
   const { toast } = useToast();
 
   useEffect(() => {
-    if (option) {
-      setFormData(option);
-    } else {
-      setFormData({});
+    if (open) {
+      setFormData(option || {});
     }
-  }, [option]);
+  }, [option, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,8 +42,21 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
         ...formData,
         turn: turnId,
         game: gameId,
-        optionnumber: option?.optionnumber || (await getNextOptionNumber())
       };
+
+      if (!dataToSend.optionnumber) {
+        const { data: existingOptions } = await supabase
+          .from('Options')
+          .select('optionnumber')
+          .eq('turn', turnId)
+          .eq('game', gameId)
+          .order('optionnumber', { ascending: false })
+          .limit(1);
+
+        dataToSend.optionnumber = existingOptions && existingOptions.length > 0 
+          ? (existingOptions[0].optionnumber || 0) + 1 
+          : 1;
+      }
 
       if (option?.id) {
         const { error } = await supabase
@@ -64,11 +73,13 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
         if (error) throw error;
       }
 
-      // Invalidate both the options query and the turn query to ensure fresh data
-      await queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
-      await queryClient.invalidateQueries({ queryKey: ['turn', turnId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] }),
+        queryClient.invalidateQueries({ queryKey: ['turn', turnId] })
+      ]);
       
       onOpenChange(false);
+      setFormData({});
       toast({
         title: "Success",
         description: `Option ${option ? 'updated' : 'created'} successfully`,
@@ -84,76 +95,15 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
     }
   };
 
-  const getNextOptionNumber = async () => {
-    const { data } = await supabase
-      .from('Options')
-      .select('optionnumber')
-      .eq('turn', turnId)
-      .eq('game', gameId)
-      .order('optionnumber', { ascending: false })
-      .limit(1);
-
-    return data && data.length > 0 ? (data[0].optionnumber || 0) + 1 : 1;
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{option ? 'Edit' : 'Create'} Option</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
-              <Input
-                id="title"
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Enter title"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
-              <Input
-                id="image"
-                value={formData.image || ''}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                placeholder="Enter image URL"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Enter description"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="kpi1">KPI 1</Label>
-              <Input
-                id="kpi1"
-                value={formData.impactkpi1 || ''}
-                onChange={(e) => setFormData({ ...formData, impactkpi1: e.target.value })}
-                placeholder="KPI name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="kpi1amount">Amount</Label>
-              <Input
-                id="kpi1amount"
-                type="number"
-                value={formData.impactkpi1amount || ''}
-                onChange={(e) => setFormData({ ...formData, impactkpi1amount: parseFloat(e.target.value) })}
-                placeholder="Impact amount"
-              />
-            </div>
-          </div>
-          <DialogFooter>
+        <form onSubmit={handleSubmit}>
+          <OptionForm formData={formData} onChange={setFormData} />
+          <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
