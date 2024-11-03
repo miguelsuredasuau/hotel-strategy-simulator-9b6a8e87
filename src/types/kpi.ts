@@ -11,4 +11,6 @@ export interface KPI {
   description?: string;
   unit?: string;
   is_percentage?: boolean;
+  formula?: string;
+  depends_on?: string[];
 }
