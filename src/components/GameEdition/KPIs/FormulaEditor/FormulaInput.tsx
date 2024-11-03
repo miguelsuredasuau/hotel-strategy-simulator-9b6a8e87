@@ -3,18 +3,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Database, Calculator } from "lucide-react";
+import { Database, Calculator, Plus } from "lucide-react";
 import { KPI } from "@/types/kpi";
+import { KPICreateDialog } from "../KPICreateDialog";
 
 interface FormulaInputProps {
   value: string;
   onChange: (value: string) => void;
   availableKPIs: KPI[];
+  gameId: string;
 }
 
-export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputProps) => {
+export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [formattedValue, setFormattedValue] = useState("");
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   const operators = [
     // Basic arithmetic
@@ -95,22 +98,32 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
 
       <div className="grid grid-cols-3 gap-4">
         <Card className="col-span-2 p-4 bg-white/50 backdrop-blur-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Database className="h-4 w-4" />
-            <h3 className="font-medium">Variables</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              <h3 className="font-medium">Variables</h3>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCreateDialog(true)}
+              className="gap-1"
+            >
+              <Plus className="h-4 w-4" /> New KPI
+            </Button>
           </div>
           <ScrollArea className="h-[calc(100vh-24rem)]">
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {availableKPIs.map((kpi) => (
                 <Button
                   key={kpi.uuid}
                   variant="outline"
                   size="sm"
-                  className="justify-start h-auto py-2 px-3 hover:bg-blue-50 group text-left"
+                  className="justify-start h-auto py-2 px-2 hover:bg-blue-50 group text-left"
                   onClick={() => handleKPIClick(kpi.name)}
                 >
                   <div>
-                    <div className="font-medium group-hover:text-blue-700 truncate">{kpi.name}</div>
+                    <div className="font-medium group-hover:text-blue-700 truncate text-sm">{kpi.name}</div>
                     {kpi.unit && (
                       <div className="text-xs text-muted-foreground truncate">{kpi.unit}</div>
                     )}
@@ -141,6 +154,12 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
           </ScrollArea>
         </Card>
       </div>
+
+      <KPICreateDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        gameId={gameId}
+      />
     </div>
   );
 };
