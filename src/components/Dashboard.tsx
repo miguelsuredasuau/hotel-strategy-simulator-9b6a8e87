@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Check, TrendingUp, Quote } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
+import TeamsSection from './GameEdition/TeamsManagement/TeamsSection'; // Import TeamsSection
 
 interface DashboardProps {
   onNextTurn: () => void;
@@ -35,6 +36,9 @@ const Dashboard = ({ onNextTurn }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 space-y-6">
+        {/* Add TeamsSection here */}
+        <TeamsSection gameId="your-game-id" /> {/* Replace with actual gameId */}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
