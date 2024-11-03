@@ -8,7 +8,7 @@ import { StatisticsCards } from "./Dashboard/StatisticsCards";
 import { ChartSection } from "./Dashboard/ChartSection";
 import { Button } from "@/components/ui/button";
 import { Option } from "@/types/game";
-import { Loader2 } from "lucide-react";
+import { Loader2, ImageOff } from "lucide-react";
 
 interface DashboardProps {
   onNextTurn: () => void;
@@ -57,8 +57,25 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
         <div className="flex gap-6">
           {selectedOption && (
             <div className="flex-grow bg-white p-6 rounded-lg shadow-sm">
-              <h2 className="text-xl font-semibold mb-2">Selected Option: {selectedOption.title}</h2>
-              <p className="text-gray-600">{selectedOption.description}</p>
+              <div className="flex gap-6">
+                <div className="w-48 h-32 rounded-lg overflow-hidden bg-gray-100">
+                  {selectedOption.image ? (
+                    <img
+                      src={selectedOption.image}
+                      alt={selectedOption.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageOff className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold mb-2">Selected Option: {selectedOption.title}</h2>
+                  <p className="text-gray-600">{selectedOption.description}</p>
+                </div>
+              </div>
             </div>
           )}
           
