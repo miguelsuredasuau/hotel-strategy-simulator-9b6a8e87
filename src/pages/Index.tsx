@@ -71,6 +71,24 @@ const Index = () => {
     setShowDashboard(false);
   };
 
+  // Add a proper type to the event parameter
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key && event.key.toLowerCase() === 'escape') {
+      // Handle escape key press
+      setShowDashboard(false);
+    }
+  };
+
+  useEffect(() => {
+    // Add event listener with proper typing
+    document.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []); // Empty dependency array since handleKeyDown doesn't depend on any state
+
   if (gameLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
