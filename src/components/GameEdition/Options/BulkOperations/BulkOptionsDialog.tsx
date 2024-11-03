@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Upload, Loader2 } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { Turn } from "@/types/game";
 
 interface BulkOptionsDialogProps {
   turnId: string;
@@ -26,6 +27,22 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch turn data to get UUID
+  const { data: turnData } = useQuery({
+    queryKey: ['turn', turnId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Turns')
+        .select('*')
+        .eq('uuid', turnId)
+        .single();
+
+      if (error) throw error;
+      return data as Turn;
+    },
+    enabled: !!turnId
+  });
 
   const handleDownload = async () => {
     try {
@@ -81,14 +98,27 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!turnData?.uuid) {
+      toast({
+        title: "Error",
+        description: "Turn data not found",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('turnId', turnId);
+      formData.append('turnId', turnData.uuid);
       formData.append('gameId', gameId);
 
-      console.log('Uploading with data:', { turnId, gameId, fileName: file.name });
+      console.log('Uploading with data:', { 
+        turnId: turnData.uuid, 
+        gameId, 
+        fileName: file.name 
+      });
 
       const { error } = await supabase.functions.invoke('bulk-upload-options', {
         body: formData,
