@@ -62,7 +62,7 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-6">
+      <div className="flex items-center justify-center p-4">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -70,9 +70,9 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
 
   return (
     <Card className="bg-white/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5" />
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <DollarSign className="h-4 w-4" />
           Financial KPIs
         </CardTitle>
       </CardHeader>
@@ -82,7 +82,7 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className="space-y-4"
+              className="space-y-2"
             >
               {kpis?.map((kpi, index) => (
                 <Draggable 
@@ -90,17 +90,11 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
                   draggableId={kpi.uuid} 
                   index={index}
                 >
-                  {(provided, snapshot) => (
+                  {(provided) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      className="transform-none"
-                      style={{
-                        ...provided.draggableProps.style,
-                        transform: snapshot.isDragging
-                          ? provided.draggableProps.style?.transform
-                          : "none",
-                      }}
+                      style={provided.draggableProps.style}
                     >
                       <KPICard
                         kpi={kpi}
