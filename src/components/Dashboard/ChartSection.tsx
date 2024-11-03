@@ -13,7 +13,7 @@ export const ChartSection = () => {
         <CardContent className="p-4">
           <div className="text-2xl font-bold mb-2">€1,565,367</div>
           <div className="text-sm text-green-500">+30% vs last month</div>
-          <div className="mt-4 w-full h-[80px]">
+          <div className="mt-4 w-full h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={mockRevenueData}>
                 <Bar dataKey="revenue" fill="#1E40AF" />
