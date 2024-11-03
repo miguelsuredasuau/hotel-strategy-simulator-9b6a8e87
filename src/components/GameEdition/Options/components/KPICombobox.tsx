@@ -23,13 +23,13 @@ interface KPIComboboxProps {
   gameId: string;
   kpis?: { uuid: string; name: string }[];
   onChange: (value: string) => void;
-  onCreateNew?: (name: string) => void;
+  onCreateNew?: () => void;
 }
 
 export function KPICombobox({ 
   value, 
   gameId, 
-  kpis = [], // Provide default empty array
+  kpis = [], 
   onChange, 
   onCreateNew 
 }: KPIComboboxProps) {
@@ -64,7 +64,7 @@ export function KPICombobox({
 
       onChange(search);
       setOpen(false);
-      onCreateNew?.(search);
+      onCreateNew?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -73,6 +73,12 @@ export function KPICombobox({
       });
     }
   };
+
+  const filteredKpis = React.useMemo(() => {
+    return kpis.filter(kpi => 
+      kpi.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [kpis, search]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -83,9 +89,7 @@ export function KPICombobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value
-            ? kpis.find((kpi) => kpi.name === value)?.name || value
-            : "Select KPI..."}
+          {value || "Select KPI..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -96,40 +100,42 @@ export function KPICombobox({
             value={search}
             onValueChange={setSearch}
           />
-          <CommandEmpty>
-            <div className="px-2 py-1.5 text-sm">
-              No KPI found. 
+          <CommandEmpty className="py-2 px-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">No KPI found</span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="ml-2"
                 onClick={handleCreateNewKPI}
+                className="h-8"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Create "{search}"
               </Button>
             </div>
           </CommandEmpty>
-          <CommandGroup>
-            {kpis.map((kpi) => (
-              <CommandItem
-                key={kpi.uuid}
-                value={kpi.name}
-                onSelect={() => {
-                  onChange(kpi.name);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === kpi.name ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {kpi.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          {filteredKpis.length > 0 && (
+            <CommandGroup>
+              {filteredKpis.map((kpi) => (
+                <CommandItem
+                  key={kpi.uuid}
+                  value={kpi.name}
+                  onSelect={() => {
+                    onChange(kpi.name);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === kpi.name ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {kpi.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
         </Command>
       </PopoverContent>
     </Popover>
