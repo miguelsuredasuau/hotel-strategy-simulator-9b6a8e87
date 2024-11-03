@@ -1,4 +1,3 @@
-```typescript
 import { useState } from "react";
 import {
   Dialog,
@@ -64,7 +63,7 @@ const OptionEditDialog = ({
       
       toast({
         title: "Success",
-        description: `Option ${option ? 'updated' : 'created'} successfully`,
+        description: "Option " + (option ? "updated" : "created") + " successfully"
       });
     } catch (error: any) {
       toast({
@@ -105,4 +104,3 @@ const OptionEditDialog = ({
 };
 
 export default OptionEditDialog;
-```
