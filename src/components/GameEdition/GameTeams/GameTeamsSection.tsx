@@ -34,7 +34,9 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
         .eq('game_uuid', gameId);
 
       if (error) throw error;
-      return data.map(item => item.teams) as Team[];
+      
+      // Transform the data to match the Team type
+      return (data?.map(item => item.teams) || []) as Team[];
     },
   });
 

@@ -136,21 +136,18 @@ export type Database = {
           created_at: string | null
           game_uuid: string | null
           team_uuid: string | null
-          turn_uuid: string | null
           uuid: string
         }
         Insert: {
           created_at?: string | null
           game_uuid?: string | null
           team_uuid?: string | null
-          turn_uuid?: string | null
           uuid?: string
         }
         Update: {
           created_at?: string | null
           game_uuid?: string | null
           team_uuid?: string | null
-          turn_uuid?: string | null
           uuid?: string
         }
         Relationships: [
@@ -166,13 +163,6 @@ export type Database = {
             columns: ["team_uuid"]
             isOneToOne: false
             referencedRelation: "teams"
-            referencedColumns: ["uuid"]
-          },
-          {
-            foreignKeyName: "round_teams_turn_uuid_fkey"
-            columns: ["turn_uuid"]
-            isOneToOne: false
-            referencedRelation: "Turns"
             referencedColumns: ["uuid"]
           },
         ]
