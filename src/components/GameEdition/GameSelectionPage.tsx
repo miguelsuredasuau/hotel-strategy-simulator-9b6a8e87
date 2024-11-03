@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Calendar, ArrowRight, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import CreateGameDialog from './CreateGameDialog';
-import DeleteGameDialog from './DeleteGameDialog';
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import TeamsSection from './TeamsManagement/TeamsSection';
+import CreateGameDialog from "./CreateGameDialog";
+import DeleteGameDialog from "./DeleteGameDialog";
+import GameDetailsCard from "./GameDetailsCard";
+import Header from "../Header/Header";
+import TeamMenu from "../Header/TeamMenu";
 
 const GameSelectionPage = () => {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
+  const [isDeleteGameOpen, setIsDeleteGameOpen] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: games, isLoading } = useQuery({
+  const { data: games = [], isLoading } = useQuery({
     queryKey: ['games'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,146 +32,56 @@ const GameSelectionPage = () => {
     },
   });
 
-  const handleGameSelect = (gameId: string) => {
+  const handleGameClick = (gameId: string) => {
     navigate(`/game-edition/${gameId}`);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, gameId: string) => {
-    e.stopPropagation();
+  const handleDeleteClick = (gameId: string) => {
     setSelectedGameId(gameId);
-    setIsDeleteDialogOpen(true);
+    setIsDeleteGameOpen(true);
   };
-
-  const handleDeleteGame = async () => {
-    if (!selectedGameId) return;
-
-    try {
-      // First, delete all options associated with the game
-      const { error: optionsError } = await supabase
-        .from('Options')
-        .delete()
-        .eq('game_uuid', selectedGameId);
-
-      if (optionsError) throw optionsError;
-
-      // Then, delete all turns associated with the game
-      const { error: turnsError } = await supabase
-        .from('Turns')
-        .delete()
-        .eq('game_uuid', selectedGameId);
-
-      if (turnsError) throw turnsError;
-
-      // Finally, delete the game itself
-      const { error: gameError } = await supabase
-        .from('Games')
-        .delete()
-        .eq('uuid', selectedGameId);
-
-      if (gameError) throw gameError;
-
-      queryClient.invalidateQueries({ queryKey: ['games'] });
-      setIsDeleteDialogOpen(false);
-      toast({
-        title: "Game deleted",
-        description: "The game and all its associated data have been successfully deleted.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error deleting game",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const defaultImage = "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop";
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header>
+        <h1 className="text-2xl font-bold">Game Selection</h1>
+      </Header>
       <div className="max-w-7xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Game Selection</h1>
-            <p className="text-gray-500 mt-2">Select a game to edit or create a new one</p>
-          </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-xl font-semibold">Available Games</h2>
+          <Button onClick={() => setIsCreateGameOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Create New Game
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="h-48" />
-              </Card>
-            ))}
-          </div>
+          <div>Loading...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {games?.map((game) => (
-              <Card 
-                key={game.uuid} 
-                className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
-                onClick={() => handleGameSelect(game.uuid)}
-              >
-                <div className="relative">
-                  <AspectRatio ratio={16 / 9}>
-                    <img
-                      src={game.inspirational_image || defaultImage}
-                      alt={game.name}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </AspectRatio>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                </div>
-                <CardHeader className="relative z-10 -mt-20 pb-4">
-                  <CardTitle className="text-white text-2xl font-bold">
-                    {game.name || 'Untitled Game'}
-                  </CardTitle>
-                </CardHeader>
-                <CardFooter className="flex justify-between items-center p-4 bg-white">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    {new Date(game.created_at!).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => handleDeleteClick(e, game.uuid)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      Edit Game
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
+            {games.map((game) => (
+              <GameDetailsCard
+                key={game.uuid}
+                game={game}
+                onGameClick={() => handleGameClick(game.uuid)}
+                onDeleteClick={() => handleDeleteClick(game.uuid)}
+              />
             ))}
           </div>
         )}
 
-        <TeamsSection />
-
-        <CreateGameDialog 
-          open={isCreateDialogOpen} 
-          onOpenChange={setIsCreateDialogOpen}
-          onGameCreated={(gameId) => {
-            navigate(`/game-edition/${gameId}`);
-          }}
+        <CreateGameDialog
+          open={isCreateGameOpen}
+          onOpenChange={setIsCreateGameOpen}
         />
 
-        <DeleteGameDialog
-          open={isDeleteDialogOpen}
-          onOpenChange={setIsDeleteDialogOpen}
-          onConfirm={handleDeleteGame}
-        />
+        {selectedGameId && (
+          <DeleteGameDialog
+            gameId={selectedGameId}
+            open={isDeleteGameOpen}
+            onOpenChange={setIsDeleteGameOpen}
+          />
+        )}
       </div>
     </div>
   );
