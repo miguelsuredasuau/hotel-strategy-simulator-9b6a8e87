@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings2, Pencil, Trash2 } from "lucide-react";
+import { Settings2, Pencil, Trash2, GripVertical } from "lucide-react";
 import { Turn } from "@/types/game";
 import { Draggable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
@@ -16,18 +16,23 @@ const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
   const navigate = useNavigate();
 
   return (
-    <Draggable draggableId={`turn-${turn.uuid}`} index={index}>
-      {(provided) => (
+    <Draggable draggableId={turn.uuid} index={index}>
+      {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          className="group"
+          className={`group transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''}`}
         >
           <Card className="mb-4 hover:shadow-md transition-shadow">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
+                  <div
+                    {...provided.dragHandleProps}
+                    className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+                  >
+                    <GripVertical className="h-5 w-5 text-gray-400" />
+                  </div>
                   <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
                     {turn.turnnumber}
                   </div>

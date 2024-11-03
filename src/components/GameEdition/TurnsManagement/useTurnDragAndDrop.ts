@@ -9,38 +9,35 @@ export const useTurnDragAndDrop = (gameId: string) => {
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
-
+    
     const turns = queryClient.getQueryData(['turns', gameId]) as Turn[];
     if (!turns) return;
+
+    // Don't do anything if the position hasn't changed
+    if (result.destination.index === result.source.index) return;
 
     const items = Array.from(turns);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update the turn numbers
+    // Optimistically update the cache
     const updatedTurns = items.map((turn, index) => ({
       ...turn,
       turnnumber: index + 1
     }));
 
-    // Optimistically update the cache
     queryClient.setQueryData(['turns', gameId], updatedTurns);
 
     try {
-      // Update each turn's number in the database
-      const promises = updatedTurns.map(turn => 
-        supabase
-          .from('Turns')
-          .update({ turnnumber: turn.turnnumber })
-          .eq('uuid', turn.uuid)
-      );
+      // Update all turns in a single transaction
+      const { error } = await supabase.rpc('update_turn_numbers', {
+        turn_updates: updatedTurns.map(turn => ({
+          turn_uuid: turn.uuid,
+          new_number: turn.turnnumber
+        }))
+      });
 
-      const results = await Promise.all(promises);
-      const errors = results.filter(result => result.error);
-
-      if (errors.length > 0) {
-        throw new Error('Failed to update turn order');
-      }
+      if (error) throw error;
 
       toast({
         title: "Success",
