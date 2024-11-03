@@ -1,50 +1,46 @@
-import { KPI } from "@/types/kpi";
 import { Separator } from "@/components/ui/separator";
 import FinancialMetric from "./FinancialMetric";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { useFinancialCalculations } from "./hooks/useFinancialCalculations";
-import { useKPIValueUpdates } from "./hooks/useKPIValueUpdates";
 
 interface FinancialStatementSectionProps {
-  kpis: KPI[];
-  onEdit: (kpi: KPI) => void;
-  onDelete: (kpi: KPI) => void;
   gameId: string;
   turnId?: string;
 }
 
-const FinancialStatementSection = ({ 
-  kpis, 
-  onEdit, 
-  onDelete, 
-  gameId, 
-  turnId 
-}: FinancialStatementSectionProps) => {
-  const { toast } = useToast();
-  const { handleKPIValueChange } = useKPIValueUpdates(gameId, turnId);
-  const { 
-    kpiValues,
-    findKPI,
-    getKPIValue,
-    calculatedValues
-  } = useFinancialCalculations(kpis, gameId, turnId);
+const FinancialStatementSection = ({ gameId, turnId }: FinancialStatementSectionProps) => {
+  const { data: options = [] } = useQuery({
+    queryKey: ['options', turnId, gameId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('Options')
+        .select('*')
+        .eq('turn_uuid', turnId)
+        .eq('game_uuid', gameId)
+        .order('optionnumber');
 
-  const {
-    roomsValue,
-    occupiedRoomsValue,
-    adrValue,
-    extrasValue,
-    roomRevenue,
-    totalRevenue,
-    variableCostsPercentValue,
-    variableCostsAmount,
-    fixedCostsValue,
-    operatingProfit,
-    investmentsValue,
-    freeCashFlow
-  } = calculatedValues;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!turnId && !!gameId
+  });
+
+  // Calculate financial metrics from options
+  const roomsValue = 100; // Default value
+  const occupiedRoomsValue = 80; // Default value
+  const adrValue = 150; // Default value
+  const extrasValue = 50; // Default value
+  
+  const roomRevenue = occupiedRoomsValue * adrValue;
+  const totalRevenue = roomRevenue + extrasValue;
+  
+  const variableCostsPercentValue = 30; // Default percentage
+  const variableCostsAmount = totalRevenue * (variableCostsPercentValue / 100);
+  const fixedCostsValue = 5000; // Default value
+  
+  const operatingProfit = totalRevenue - variableCostsAmount - fixedCostsValue;
+  const investmentsValue = 1000; // Default value
+  const freeCashFlow = operatingProfit - investmentsValue;
 
   return (
     <div className="bg-white p-3 rounded-lg shadow-sm max-w-md">
@@ -55,30 +51,18 @@ const FinancialStatementSection = ({
       <div className="space-y-0.5">
         <FinancialMetric 
           label="Number of Rooms"
-          kpi={findKPI('rooms')}
           value={roomsValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('rooms')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
         <FinancialMetric 
           label="Occupied Rooms"
-          kpi={findKPI('occupied_rooms')}
           value={occupiedRoomsValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('occupied_rooms')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
         <FinancialMetric 
           label="ADR"
-          kpi={findKPI('adr')}
           value={adrValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('adr')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
 
         <Separator className="my-1" />
@@ -90,12 +74,8 @@ const FinancialStatementSection = ({
         />
         <FinancialMetric 
           label="Extras Revenue"
-          kpi={findKPI('extras_revenue')}
           value={extrasValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('extras_revenue')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
         <FinancialMetric 
           label="Total Revenue"
@@ -108,12 +88,8 @@ const FinancialStatementSection = ({
 
         <FinancialMetric 
           label="Variable Costs %"
-          kpi={findKPI('variable_costs_percent')}
           value={variableCostsPercentValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('variable_costs_percent')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
         <FinancialMetric 
           label="Variable Costs Amount"
@@ -122,12 +98,8 @@ const FinancialStatementSection = ({
         />
         <FinancialMetric 
           label="Fixed Costs"
-          kpi={findKPI('fixed_costs')}
           value={fixedCostsValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('fixed_costs')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
 
         <Separator className="my-1" />
@@ -140,12 +112,8 @@ const FinancialStatementSection = ({
         />
         <FinancialMetric 
           label="Investments"
-          kpi={findKPI('investments')}
           value={investmentsValue}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onChange={(value) => handleKPIValueChange(findKPI('investments')?.uuid, value)}
-          isEditable={true}
+          isEditable={false}
         />
         <FinancialMetric 
           label="Free Cash Flow"

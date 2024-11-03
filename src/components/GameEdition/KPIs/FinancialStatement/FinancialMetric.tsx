@@ -4,25 +4,16 @@ import { useState, useEffect } from "react";
 
 interface FinancialMetricProps {
   label: string;
-  kpi?: {
-    uuid: string;
-    name: string;
-  };
   value?: string | number;
   isEditable?: boolean;
-  onEdit?: (kpi: any) => void;
-  onDelete?: (kpi: any) => void;
   onChange?: (value: number) => void;
   className?: string;
 }
 
 const FinancialMetric = ({ 
   label, 
-  kpi, 
   value = 0, 
   isEditable = true,
-  onEdit,
-  onDelete,
   onChange,
   className = ""
 }: FinancialMetricProps) => {
@@ -81,18 +72,6 @@ const FinancialMetric = ({
           >
             {formatNumber(Number(value))}
           </span>
-        )}
-        {isEditable && kpi && onEdit && (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit(kpi)}
-              className="h-6 px-2 text-xs"
-            >
-              Edit
-            </Button>
-          </div>
         )}
       </div>
     </div>
