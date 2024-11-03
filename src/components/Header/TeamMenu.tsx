@@ -30,7 +30,7 @@ const TeamMenu = () => {
 
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('team_id')
+          .select('team_uuid')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -39,11 +39,11 @@ const TeamMenu = () => {
           return;
         }
 
-        if (profileData?.team_id) {
+        if (profileData?.team_uuid) {
           const { data: teamData, error: teamError } = await supabase
             .from('teams')
             .select('teamlogo, teamname')
-            .eq('id', profileData.team_id)
+            .eq('uuid', profileData.team_uuid)
             .single();
 
           if (teamError) {
@@ -66,14 +66,9 @@ const TeamMenu = () => {
 
   const handleLogout = async () => {
     try {
-      // First clear all cached data
       queryClient.clear();
-      
-      // Then sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-
-      // Force a hard navigation to login page
       window.location.href = '/login';
     } catch (error: any) {
       console.error('Logout error:', error);

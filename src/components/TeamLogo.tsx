@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Image } from "lucide-react";
 
 const TeamLogo = () => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
@@ -17,7 +15,7 @@ const TeamLogo = () => {
 
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('team_id')
+          .select('team_uuid')
           .eq('id', user.id)
           .maybeSingle();
 
@@ -26,11 +24,11 @@ const TeamLogo = () => {
           return;
         }
 
-        if (profileData?.team_id) {
+        if (profileData?.team_uuid) {
           const { data: teamData, error: teamError } = await supabase
             .from('teams')
             .select('teamlogo, teamname')
-            .eq('id', profileData.team_id)
+            .eq('uuid', profileData.team_uuid)
             .single();
 
           if (teamError) {
@@ -45,27 +43,19 @@ const TeamLogo = () => {
         }
       } catch (error) {
         console.error('Error:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load team information",
-          variant: "destructive",
-        });
       }
     };
 
     fetchTeamInfo();
-  }, [toast]);
+  }, []);
 
   return (
-    <div className="absolute top-4 right-4 flex items-center gap-2">
-      <Avatar>
-        <AvatarImage src={teamLogo || ''} alt={teamName || 'Team logo'} />
-        <AvatarFallback>
-          <Image className="w-4 h-4 text-gray-400" />
-        </AvatarFallback>
-      </Avatar>
-      {teamName && <span className="text-sm font-medium">{teamName}</span>}
-    </div>
+    <Avatar>
+      <AvatarImage src={teamLogo || ''} alt={teamName || 'Team logo'} />
+      <AvatarFallback>
+        <Image className="h-4 w-4 text-gray-400" />
+      </AvatarFallback>
+    </Avatar>
   );
 };
 
