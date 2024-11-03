@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 import { useGameData } from '@/hooks/useGameData';
 import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import TurnsSection from './GameEdition/TurnsManagement/TurnsSection';
@@ -15,10 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import GameEditionHeader from './GameEdition/Layout/GameEditionHeader';
 
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
-  const navigate = useNavigate();
   const isGamemaster = useGameMasterCheck();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -28,7 +27,6 @@ const GameEditionDashboard = () => {
   const [inspirationalImage, setInspirationalImage] = useState(gameData?.inspirational_image || '');
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Update state when gameData is loaded
   useEffect(() => {
     if (gameData) {
       setName(gameData.name || '');
@@ -38,7 +36,6 @@ const GameEditionDashboard = () => {
     }
   }, [gameData]);
 
-  // Check for changes
   useEffect(() => {
     if (gameData) {
       const changed = 
@@ -48,22 +45,6 @@ const GameEditionDashboard = () => {
       setHasChanges(changed);
     }
   }, [name, description, inspirationalImage, gameData]);
-
-  const handleLogout = async () => {
-    try {
-      queryClient.clear();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      window.location.href = '/login';
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      toast({
-        title: "Error signing out",
-        description: error.message || "Failed to sign out",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleSaveGame = async () => {
     try {
@@ -107,9 +88,9 @@ const GameEditionDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <GameEditionHeader />
       <div className="max-w-5xl mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <DashboardHeader onLogout={handleLogout} />
+        <div className="flex justify-end">
           <GameBulkOperations gameId={gameId} />
         </div>
         
