@@ -22,7 +22,7 @@ export const useKPIValueUpdates = (gameId: string, turnId?: string) => {
       const { error } = await supabase
         .from('kpi_values')
         .upsert({
-          uuid: existingValue?.uuid, // Include the UUID if updating
+          uuid: existingValue?.uuid,
           kpi_uuid: kpiUuid,
           game_uuid: gameId,
           turn_uuid: turnId,

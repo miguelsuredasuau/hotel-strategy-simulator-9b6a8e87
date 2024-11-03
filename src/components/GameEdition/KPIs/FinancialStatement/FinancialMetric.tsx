@@ -29,7 +29,6 @@ const FinancialMetric = ({
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value.toString());
 
-  // Update local value when prop changes
   useEffect(() => {
     setLocalValue(value.toString());
   }, [value]);
