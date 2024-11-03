@@ -74,15 +74,16 @@ export function KPICombobox({
   };
 
   const filteredKpis = React.useMemo(() => {
-    if (!kpis?.length) return [];
-    return kpis.filter(kpi => 
-      kpi.name.toLowerCase().includes(search.toLowerCase())
+    const kpisArray = Array.isArray(kpis) ? kpis : [];
+    return kpisArray.filter(kpi => 
+      kpi?.name?.toLowerCase().includes(search.toLowerCase())
     );
   }, [kpis, search]);
 
   const displayValue = React.useMemo(() => {
     if (!value) return "Select KPI...";
-    const kpi = kpis?.find(k => k.name === value);
+    const kpiArray = Array.isArray(kpis) ? kpis : [];
+    const kpi = kpiArray.find(k => k?.name === value);
     return kpi ? kpi.name : value;
   }, [value, kpis]);
 
