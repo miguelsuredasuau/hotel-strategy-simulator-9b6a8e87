@@ -23,12 +23,12 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       const { data, error } = await supabase
         .from('round_teams')
         .select(`
-          team_uuid,
-          teams:team_uuid (
+          teams: team_uuid (
             uuid,
             teamname,
             teamlogo,
-            email
+            email,
+            created_at
           )
         `)
         .eq('game_uuid', gameId);
