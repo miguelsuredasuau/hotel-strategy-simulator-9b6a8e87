@@ -6,89 +6,116 @@ import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
 import Header from "@/components/Header/Header";
-import { PostgrestError } from "@supabase/supabase-js";
-import { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
+import { Option, Turn } from "@/types/game";
 
 const TOTAL_TURNS = 20;
-
-type Option = Database['public']['Tables']['Options']['Row'];
-type Turn = Database['public']['Tables']['Turns']['Row'];
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
   const [selectedHotel, setSelectedHotel] = useState<string | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [gameId, setGameId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Fetch active game for the user's team
   useEffect(() => {
-    const checkRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        return;
-      }
+    const fetchActiveGame = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          navigate('/login');
+          return;
+        }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+        // Get user's team
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('team_uuid, role')
+          .eq('id', user.id)
+          .single();
 
-      if (profile?.role === 'gamemaster') {
-        navigate('/game-edition');
-        return;
+        if (profile?.role === 'gamemaster') {
+          navigate('/game-edition');
+          return;
+        }
+
+        if (!profile?.team_uuid) {
+          toast({
+            title: "No team assigned",
+            description: "Please contact your game master to be assigned to a team.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Get active game for the team
+        const { data: gameTeam } = await supabase
+          .from('game_teams')
+          .select('game_uuid')
+          .eq('team_uuid', profile.team_uuid)
+          .single();
+
+        if (gameTeam?.game_uuid) {
+          setGameId(gameTeam.game_uuid);
+        }
+      } catch (error: any) {
+        console.error('Error fetching active game:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load game data",
+          variant: "destructive",
+        });
       }
     };
 
-    checkRole();
-  }, [navigate]);
+    fetchActiveGame();
+  }, [navigate, toast]);
 
-  const { data: options, isLoading: optionsLoading, error: optionsError } = useQuery({
-    queryKey: ['options', currentTurn],
+  const { data: options, isLoading: optionsLoading } = useQuery({
+    queryKey: ['options', gameId, currentTurn],
     queryFn: async () => {
+      if (!gameId) return null;
+
+      const { data: turn } = await supabase
+        .from('Turns')
+        .select('uuid')
+        .eq('game_uuid', gameId)
+        .eq('turnnumber', currentTurn)
+        .single();
+
+      if (!turn) return null;
+
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('turn', currentTurn)
+        .eq('game_uuid', gameId)
+        .eq('turn_uuid', turn.uuid)
         .order('optionnumber');
 
-      if (error) {
-        console.error('Error fetching options:', error);
-        toast({
-          title: "Error loading options",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
+      if (error) throw error;
       return data as Option[];
     },
+    enabled: !!gameId
   });
 
-  const { data: turnData, isLoading: turnLoading, error: turnError } = useQuery({
-    queryKey: ['turn', currentTurn],
+  const { data: turnData } = useQuery({
+    queryKey: ['turn', gameId, currentTurn],
     queryFn: async () => {
+      if (!gameId) return null;
+
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
-        .eq('id', currentTurn)
-        .maybeSingle();
+        .eq('game_uuid', gameId)
+        .eq('turnnumber', currentTurn)
+        .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching turn data:', error);
-        toast({
-          title: "Error loading turn data",
-          description: error.message,
-          variant: "destructive",
-        });
-        throw error;
-      }
-
+      if (error) throw error;
       return data as Turn;
     },
+    enabled: !!gameId
   });
 
   const handleHotelSelect = (hotelId: string) => {
@@ -112,20 +139,12 @@ const Index = () => {
     }
   };
 
-  const isLoading = optionsLoading || turnLoading;
-
-  if (optionsError || (turnError && (turnError as PostgrestError).code !== 'PGRST116')) {
+  if (!gameId) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <Header 
-          currentTurn={currentTurn} 
-          totalTurns={TOTAL_TURNS} 
-          onTurnSelect={handleTurnSelect}
-        >
-          <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
-        </Header>
-        <div className="text-center py-8 text-red-600">
-          <p>Error loading game data. Please try again later.</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Loading Game...</h1>
+          <p className="text-gray-600">Please wait while we load your game data.</p>
         </div>
       </div>
     );
@@ -150,7 +169,7 @@ const Index = () => {
             )}
           </div>
 
-          {isLoading ? (
+          {optionsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(3)].map((_, index) => (
                 <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -176,7 +195,7 @@ const Index = () => {
           )}
         </div>
       ) : (
-        <Dashboard onNextTurn={handleNextTurn} />
+        <Dashboard onNextTurn={handleNextTurn} gameId={gameId} />
       )}
 
       <Toaster />
