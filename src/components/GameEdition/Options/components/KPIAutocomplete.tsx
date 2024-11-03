@@ -92,10 +92,10 @@ export function KPIAutocomplete({
 
   return (
     <Select value={inputValue} onValueChange={handleValueChange}>
-      <SelectTrigger>
+      <SelectTrigger className="bg-white">
         <SelectValue placeholder="Select or create KPI..." />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-white">
         {safeKpis.map((kpi) => (
           <SelectItem key={kpi.uuid} value={kpi.name}>
             {kpi.name}
