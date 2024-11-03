@@ -3,16 +3,14 @@ export interface Turn {
   turnnumber: number;
   challenge?: string;
   description?: string;
-  game?: number;
-  created_at?: string;
   game_uuid?: string;
+  created_at?: string;
 }
 
 export interface Option {
   uuid: string;
   created_at?: string;
   description?: string;
-  game?: number;
   game_uuid?: string;
   image?: string;
   impactkpi1?: string;
@@ -23,7 +21,6 @@ export interface Option {
   impactkpi3amount?: number;
   optionnumber?: number;
   title?: string;
-  turn?: number;
   turn_uuid?: string;
 }
 

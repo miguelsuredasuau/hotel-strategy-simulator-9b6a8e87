@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Draggable } from "@hello-pangea/dnd";
 import { Option } from "@/types/game";
-import KpiTag from "./KpiTag";
 
 interface OptionCardProps {
   option: Option;
@@ -54,17 +53,6 @@ const OptionCard = ({ option, index, onEdit, onDelete }: OptionCardProps) => {
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    {option.impactkpi1 && (
-                      <KpiTag label={option.impactkpi1} value={option.impactkpi1amount || 0} />
-                    )}
-                    {option.impactkpi2 && (
-                      <KpiTag label={option.impactkpi2} value={option.impactkpi2amount || 0} />
-                    )}
-                    {option.impactkpi3 && (
-                      <KpiTag label={option.impactkpi3} value={option.impactkpi3amount || 0} />
-                    )}
                   </div>
                 </div>
               </div>
