@@ -12,6 +12,7 @@ export type Database = {
       Games: {
         Row: {
           created_at: string | null
+          description: string | null
           inspirational_image: string | null
           name: string | null
           status: string | null
@@ -19,6 +20,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
           inspirational_image?: string | null
           name?: string | null
           status?: string | null
@@ -26,6 +28,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          description?: string | null
           inspirational_image?: string | null
           name?: string | null
           status?: string | null

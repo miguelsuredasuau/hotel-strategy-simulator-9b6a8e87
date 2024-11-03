@@ -25,9 +25,16 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Only query if gameId is a valid UUID
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gameId);
+
   const { data: turns, isLoading } = useQuery({
     queryKey: ['turns', gameId],
     queryFn: async () => {
+      if (!isValidUUID) {
+        throw new Error('Invalid game ID');
+      }
+
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
@@ -37,7 +44,7 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
       if (error) throw error;
       return data as Turn[];
     },
-    enabled: !!gameId
+    enabled: isValidUUID // Only run query if gameId is valid
   });
 
   const handleDeleteTurn = async (turnUuid: string) => {
@@ -109,6 +116,19 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
       });
     }
   };
+
+  if (!isValidUUID) {
+    return (
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Invalid Game ID</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500">Unable to load turns: Invalid game ID provided.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="mt-8">
