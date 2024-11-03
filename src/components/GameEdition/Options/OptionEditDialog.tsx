@@ -64,7 +64,10 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
         if (error) throw error;
       }
 
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
+      // Invalidate both the options query and the turn query to ensure fresh data
+      await queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
+      await queryClient.invalidateQueries({ queryKey: ['turn', turnId] });
+      
       onOpenChange(false);
       toast({
         title: "Success",
