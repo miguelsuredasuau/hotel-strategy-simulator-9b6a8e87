@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Turn } from "@/types/game";
 
 interface TurnEditDialogProps {
@@ -20,7 +20,16 @@ interface TurnEditDialogProps {
 }
 
 const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProps) => {
-  const [editedTurn, setEditedTurn] = useState(turn);
+  const [editedTurn, setEditedTurn] = useState<Turn>(turn);
+
+  useEffect(() => {
+    setEditedTurn(turn);
+  }, [turn]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(editedTurn);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -28,7 +37,7 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
         <DialogHeader>
           <DialogTitle>Turn {turn.turnnumber}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="challenge">Challenge</Label>
             <Input
@@ -49,13 +58,13 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
               }
             />
           </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => onSave(editedTurn)}>Save Changes</Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Save Changes</Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
