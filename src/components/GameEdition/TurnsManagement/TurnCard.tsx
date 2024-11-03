@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings2, Pencil, Trash2, GripVertical } from "lucide-react";
+import { Settings2, Pencil, Trash2 } from "lucide-react";
 import { Turn } from "@/types/game";
 import { Draggable } from "@hello-pangea/dnd";
 import { useNavigate } from "react-router-dom";
@@ -21,26 +21,21 @@ const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
+          {...provided.dragHandleProps}
           style={{
             ...provided.draggableProps.style,
             transform: snapshot.isDragging
               ? provided.draggableProps.style?.transform
               : "none",
           }}
-          className="mb-4"
+          className="mb-4 group"
         >
-          <Card className={`transition-shadow duration-200 ${
+          <Card className={`transition-all duration-200 ${
             snapshot.isDragging ? 'shadow-lg ring-2 ring-primary/20' : 'hover:shadow-md'
           }`}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div
-                    {...provided.dragHandleProps}
-                    className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-gray-100 rounded-md transition-colors"
-                  >
-                    <GripVertical className="h-5 w-5 text-gray-400" />
-                  </div>
                   <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
                     {turn.turnnumber}
                   </div>
@@ -55,24 +50,32 @@ const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="hover:bg-blue-50"
                     onClick={() => navigate(`/game-edition/${turn.game_uuid}/turn/${turn.uuid}/options`)}
                   >
-                    <Settings2 className="h-4 w-4" />
+                    <Settings2 className="h-4 w-4 text-blue-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onEditTurn(turn)}
+                    className="hover:bg-blue-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditTurn(turn);
+                    }}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 text-blue-600" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => onDeleteTurn(turn)}
+                    className="hover:bg-red-50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteTurn(turn);
+                    }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-4 w-4 text-red-600" />
                   </Button>
                 </div>
               </div>
