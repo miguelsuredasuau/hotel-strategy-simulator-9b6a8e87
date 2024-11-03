@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Check, TrendingUp, Users, Hotel, Star, DollarSign, Banknote } from "lucide-react";
 import { mockHotels } from "./dashboardData";
 import StarRating from "../StarRating";
@@ -18,40 +17,51 @@ export const StatisticsCards = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-hotel-muted">Revenue</CardTitle>
-          <DollarSign className="h-4 w-4 text-hotel-primary" />
+          <CardTitle className="text-lg font-medium text-gray-600">Revenue</CardTitle>
+          <DollarSign className="h-5 w-5 text-blue-600" />
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-4">
+        <CardContent className="pt-6">
+          <div className="space-y-8">
             <div>
-              <div className="text-3xl font-bold text-hotel-text">€{revenueData.total}</div>
-              <div className="flex items-center text-sm text-green-500 font-medium">
+              <div className="text-4xl font-bold text-gray-900">€{revenueData.total}</div>
+              <div className="flex items-center text-sm text-green-500 font-medium mt-1">
                 <TrendingUp className="w-4 h-4 mr-1" />
                 {revenueData.change} vs last period
               </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center text-sm">
-              <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text flex-1">Income {revenueData.income.amount}</span>
-              <span className="text-green-500">{revenueData.income.percentage}</span>
-            </div>
-            <div className="flex items-center text-sm">
-              <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text flex-1">Expenses {revenueData.expenses.amount}</span>
-              <span className="text-red-500">{revenueData.expenses.percentage}</span>
-            </div>
-            <div className="flex items-center text-sm">
-              <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text flex-1">Profit {revenueData.profit.amount}</span>
-              <span className="text-green-500">{revenueData.profit.percentage}</span>
-            </div>
-            <div className="flex items-center text-sm border-t pt-2">
-              <Banknote className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text flex-1">Investments {revenueData.investments.amount}</span>
-              <span className="text-blue-500">{revenueData.investments.percentage}</span>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between text-base">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 mr-3 text-blue-600" />
+                  <span className="text-gray-900">Income {revenueData.income.amount}</span>
+                </div>
+                <span className="text-green-500 font-medium">{revenueData.income.percentage}</span>
+              </div>
+              
+              <div className="flex items-center justify-between text-base">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 mr-3 text-blue-600" />
+                  <span className="text-gray-900">Expenses {revenueData.expenses.amount}</span>
+                </div>
+                <span className="text-red-500 font-medium">{revenueData.expenses.percentage}</span>
+              </div>
+              
+              <div className="flex items-center justify-between text-base">
+                <div className="flex items-center">
+                  <Check className="w-4 h-4 mr-3 text-blue-600" />
+                  <span className="text-gray-900">Profit {revenueData.profit.amount}</span>
+                </div>
+                <span className="text-green-500 font-medium">{revenueData.profit.percentage}</span>
+              </div>
+              
+              <div className="flex items-center justify-between text-base pt-4 border-t">
+                <div className="flex items-center">
+                  <Banknote className="w-4 h-4 mr-3 text-blue-600" />
+                  <span className="text-gray-900">Investments {revenueData.investments.amount}</span>
+                </div>
+                <span className="text-blue-500 font-medium">{revenueData.investments.percentage}</span>
+              </div>
             </div>
           </div>
         </CardContent>
