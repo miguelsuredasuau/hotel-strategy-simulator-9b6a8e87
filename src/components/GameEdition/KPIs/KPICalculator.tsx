@@ -115,9 +115,11 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
           <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
             <div className="space-y-0.5">
-              <Label>Calculated KPI</Label>
+              <Label>{isCalculated ? "Calculated KPI" : "Constant KPI"}</Label>
               <p className="text-sm text-gray-500">
-                {isCalculated ? "This KPI will be calculated using a formula" : "This KPI will have a constant value"}
+                {isCalculated 
+                  ? "This KPI will be calculated using a formula" 
+                  : "This KPI will have a constant value"}
               </p>
             </div>
             <Switch
