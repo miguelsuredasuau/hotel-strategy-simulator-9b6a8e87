@@ -4,8 +4,8 @@ import { Option, Turn } from "@/types/game";
 import { Loader2, DollarSign } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 
 interface TurnContentProps {
   gameId: string;
@@ -14,7 +14,7 @@ interface TurnContentProps {
 }
 
 export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentProps) => {
-  const [adr, setAdr] = useState<string>('');
+  const [adr, setAdr] = useState<number>(150);
 
   const { data: options, isLoading: optionsLoading } = useQuery({
     queryKey: ['options', gameId, currentTurn],
@@ -86,27 +86,28 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
           )}
         </div>
 
-        <div className="w-[20%] shrink-0">
+        <div className="w-[30%] shrink-0">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <Label 
               htmlFor="adr" 
-              className="text-lg font-semibold text-hotel-primary flex items-center gap-2 mb-3"
+              className="text-lg font-semibold text-hotel-primary flex items-center gap-2 mb-4"
             >
               <DollarSign className="h-5 w-5" />
               Average Daily Rate (ADR)
             </Label>
-            <div className="relative">
-              <Input
+            <div className="space-y-4">
+              <Slider
                 id="adr"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="Enter ADR..."
-                value={adr}
-                onChange={(e) => setAdr(e.target.value)}
-                className="text-xl font-medium pl-8"
+                min={50}
+                max={500}
+                step={1}
+                value={[adr]}
+                onValueChange={(value) => setAdr(value[0])}
+                className="w-full"
               />
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+              <div className="text-2xl font-semibold text-center text-hotel-primary">
+                <span className="text-lg">$</span>{adr}
+              </div>
             </div>
           </div>
         </div>
