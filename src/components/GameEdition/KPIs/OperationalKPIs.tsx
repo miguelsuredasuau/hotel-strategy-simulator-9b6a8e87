@@ -33,6 +33,7 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
       if (error) throw error;
       return data as KPI[];
     },
+    refetchInterval: 5000, // Refetch every 5 seconds to keep values updated
   });
 
   const handleDeleteKPI = async () => {
@@ -94,7 +95,6 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      style={provided.draggableProps.style}
                     >
                       <KPICard
                         kpi={kpi}

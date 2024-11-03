@@ -16,15 +16,20 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const displayValue = kpi.current_value ?? kpi.default_value ?? 0;
 
   return (
-    <Card className="bg-white hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing">
-      <div className="p-3" {...dragHandleProps}>
-        <div className="flex items-center justify-between">
+    <Card className="bg-white hover:shadow-md transition-all duration-200">
+      <div 
+        className="p-3 cursor-grab active:cursor-grabbing" 
+        {...dragHandleProps}
+      >
+        <div className="flex items-center justify-between group">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               {isCalculated && (
                 <Calculator className="h-3.5 w-3.5 text-blue-500 shrink-0" />
               )}
-              <h3 className="font-medium text-sm text-gray-900 truncate">{kpi.name}</h3>
+              <h3 className="font-medium text-sm text-gray-900 truncate">
+                {kpi.name}
+              </h3>
             </div>
             <div className="flex items-baseline gap-1 mt-0.5">
               <span className="text-base font-semibold text-gray-900">
@@ -39,7 +44,7 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="sm"
