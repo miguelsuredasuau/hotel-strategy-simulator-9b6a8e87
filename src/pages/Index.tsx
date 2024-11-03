@@ -4,21 +4,24 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
+import HotelCard from "@/components/HotelCard";
 import GameHeader from "@/components/GameHeader";
+import { useNavigate } from "react-router-dom";
+import { Option, Turn } from "@/types/game";
+import { Loader2 } from "lucide-react";
 import { TurnContent } from "./components/TurnContent";
 import { useGameSetup } from "./hooks/useGameSetup";
-import type { Option } from "@/types/game";
 
 const TOTAL_TURNS = 20;
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
   const [latestTurn, setLatestTurn] = useState(1);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [selectedTurnNumber, setSelectedTurnNumber] = useState<number | null>(null);
   const { gameId, loading: gameLoading } = useGameSetup();
   const { toast } = useToast();
 
-  // Check if the current turn has a selected option
   const { data: selectedOption, isLoading: optionLoading } = useQuery({
     queryKey: ['selected-option', gameId, selectedTurnNumber || currentTurn],
     queryFn: async () => {
@@ -39,44 +42,14 @@ const Index = () => {
 
       return (options as Option[])?.[0] || null;
     },
-    enabled: !!gameId && !!currentTurn // Only fetch when both gameId and currentTurn are available
+    enabled: !!gameId
   });
 
-  // Find the latest completed turn
   useEffect(() => {
-    const findLatestCompletedTurn = async () => {
-      if (!gameId) return;
-
-      for (let turn = 1; turn <= TOTAL_TURNS; turn++) {
-        const { data: turnData } = await supabase
-          .from('Turns')
-          .select('uuid')
-          .eq('game_uuid', gameId)
-          .eq('turnnumber', turn)
-          .single();
-
-        if (!turnData) break;
-
-        const { data: options } = await supabase
-          .from('Options')
-          .select('*')
-          .eq('game_uuid', gameId)
-          .eq('turn_uuid', turnData.uuid);
-
-        if (!options?.[0]) {
-          setLatestTurn(turn);
-          if (!selectedTurnNumber) {
-            setCurrentTurn(turn);
-          }
-          break;
-        }
-
-        setLatestTurn(turn);
-      }
-    };
-
-    findLatestCompletedTurn();
-  }, [gameId, selectedTurnNumber]);
+    if (!optionLoading) {
+      setShowDashboard(!!selectedOption);
+    }
+  }, [selectedOption, optionLoading]);
 
   const handleTurnClick = (turnNumber: number) => {
     if (turnNumber <= latestTurn) {
@@ -85,18 +58,17 @@ const Index = () => {
   };
 
   const handleHotelSelect = () => {
-    // After selecting an option, refresh the latest turn data
-    const newLatestTurn = Math.max(latestTurn, selectedTurnNumber || currentTurn);
-    setLatestTurn(newLatestTurn);
+    setShowDashboard(true);
   };
 
   const handleNextTurn = () => {
     if (currentTurn < TOTAL_TURNS) {
       const nextTurn = currentTurn + 1;
       setCurrentTurn(nextTurn);
-      setLatestTurn(Math.max(latestTurn, nextTurn));
+      setLatestTurn(prev => Math.max(prev, nextTurn));
       setSelectedTurnNumber(null);
     }
+    setShowDashboard(false);
   };
 
   if (gameLoading) {
@@ -119,7 +91,7 @@ const Index = () => {
         latestTurn={latestTurn}
       />
       
-      {!optionLoading && selectedOption ? (
+      {showDashboard ? (
         <Dashboard 
           onNextTurn={handleNextTurn} 
           gameId={gameId || ''} 
