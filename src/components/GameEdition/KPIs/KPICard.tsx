@@ -17,10 +17,10 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
     <div className="relative transform-none">
       <Card 
         {...dragHandleProps}
-        className="group bg-white hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing"
+        className="bg-white hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing"
       >
         <div className="p-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 {isCalculated && (
@@ -36,28 +36,29 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8"
+                size="sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onClick();
                 }}
               >
-                <Pencil className="h-4 w-4" />
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                size="sm"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete();
                 }}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete
               </Button>
             </div>
           </div>
