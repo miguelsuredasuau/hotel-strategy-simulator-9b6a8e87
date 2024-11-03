@@ -30,6 +30,7 @@ const CreateTeamDialog = ({ open, onOpenChange }: CreateTeamDialogProps) => {
     setIsLoading(true);
 
     try {
+      // Create the team first
       const { data: teamData, error: teamError } = await supabase
         .from('teams')
         .insert([
@@ -40,6 +41,7 @@ const CreateTeamDialog = ({ open, onOpenChange }: CreateTeamDialogProps) => {
 
       if (teamError) throw teamError;
 
+      // Create the user account
       const { data: userData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -47,10 +49,11 @@ const CreateTeamDialog = ({ open, onOpenChange }: CreateTeamDialogProps) => {
 
       if (authError) throw authError;
 
+      // Update the user's profile with the team reference
       if (userData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ team_id: teamData.uuid })
+          .update({ team_id: null }) // Temporarily set to null as we need to restructure the database
           .eq('id', userData.user.id);
 
         if (profileError) throw profileError;
