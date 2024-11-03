@@ -82,7 +82,7 @@ const GameEditionDashboard = () => {
 
         {isNewTurnOpen && (
           <TurnEditDialog
-            turn={{ id: 0, turnnumber: turnsData ? turnsData.length + 1 : 1, game: parseInt(gameId!) }}
+            turn={{ uuid: '', turnnumber: turnsData ? turnsData.length + 1 : 1, game_uuid: gameId }}
             open={isNewTurnOpen}
             onOpenChange={setIsNewTurnOpen}
             onSave={handleCreateTurn}
@@ -105,8 +105,8 @@ const GameEditionDashboard = () => {
               }}
             />
             <OptionsEditDialog
-              turnId={selectedTurn.id}
-              gameId={selectedTurn.game}
+              turnId={selectedTurn.uuid}
+              gameId={gameId!}
               open={isOptionsOpen}
               onOpenChange={(open) => {
                 setIsOptionsOpen(open);
@@ -121,7 +121,7 @@ const GameEditionDashboard = () => {
                   const { error } = await supabase
                     .from('Turns')
                     .delete()
-                    .eq('id', selectedTurn.id);
+                    .eq('uuid', selectedTurn.uuid);
                   
                   if (error) throw error;
                   
