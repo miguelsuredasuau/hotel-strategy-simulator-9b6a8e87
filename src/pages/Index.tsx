@@ -137,9 +137,7 @@ const Index = () => {
         currentTurn={currentTurn} 
         totalTurns={TOTAL_TURNS}
         onTurnSelect={handleTurnSelect}
-      >
-        <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
-      </Header>
+      />
       
       {!showDashboard ? (
         <div className="p-6">

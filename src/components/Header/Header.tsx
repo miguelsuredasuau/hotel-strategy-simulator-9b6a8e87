@@ -1,21 +1,22 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TeamMenu from "./TeamMenu";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 interface HeaderProps {
+  currentTurn: number;
+  totalTurns: number;
+  onTurnSelect: (turn: number) => void;
   children?: React.ReactNode;
-  currentTurn?: number;
-  totalTurns?: number;
-  onTurnSelect?: (turn: number) => void;
 }
 
-const Header = ({ children, currentTurn, totalTurns, onTurnSelect }: HeaderProps) => {
+const Header = ({ currentTurn, totalTurns, onTurnSelect, children }: HeaderProps) => {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     try {
@@ -30,22 +31,47 @@ const Header = ({ children, currentTurn, totalTurns, onTurnSelect }: HeaderProps
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({
-        title: "Error signing out",
-        description: error.message || "Failed to sign out",
+        title: "Error",
+        description: error.message,
         variant: "destructive",
       });
     }
   };
 
   return (
-    <header className="w-full bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <div className="flex items-center">
-            {children}
+    <header className="w-full bg-white shadow-sm py-4 px-6 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-hotel-text">THE HOTEL GAME</h1>
+        {children}
+      </div>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-hotel-primary" />
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: totalTurns }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer ${
+                  i + 1 === currentTurn
+                    ? "bg-hotel-primary text-white"
+                    : i + 1 < currentTurn
+                    ? "bg-hotel-accent text-hotel-primary"
+                    : "bg-gray-100 text-hotel-muted"
+                }`}
+                onClick={() => onTurnSelect(i + 1)}
+              >
+                {i + 1}
+              </div>
+            ))}
           </div>
-          <TeamMenu onLogout={handleLogout} />
         </div>
+        <div className="bg-hotel-accent text-hotel-primary px-4 py-2 rounded-lg font-medium">
+          €4,000,000
+        </div>
+        <TeamMenu />
+        <Button variant="outline" onClick={handleLogout}>
+          Logout
+        </Button>
       </div>
     </header>
   );
