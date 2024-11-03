@@ -12,6 +12,7 @@ interface KPICardProps {
 
 const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = !!kpi.formula;
+  const displayValue = kpi.current_value ?? kpi.default_value ?? 0;
 
   return (
     <div className="relative transform-none">
@@ -30,7 +31,10 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
               </div>
               <div className="flex items-baseline gap-2 mt-1">
                 <span className="text-2xl font-bold text-gray-900">
-                  {kpi.default_value}
+                  {displayValue.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                  })}
                   {kpi.unit && <span className="text-sm ml-1 text-gray-500">{kpi.unit}</span>}
                 </span>
               </div>

@@ -9,6 +9,8 @@ import { OperationalKPIs } from "./OperationalKPIs";
 import { KPICalculatorDialog } from "./KPICalculatorDialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useKPICalculations } from "./hooks/useKPICalculations";
 
 interface KPIManagementProps {
   gameId: string;
@@ -18,6 +20,22 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const { data: kpis } = useQuery({
+    queryKey: ['kpis', gameId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kpis')
+        .select('*')
+        .eq('game_uuid', gameId);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Use the new hook to handle KPI calculations
+  useKPICalculations(kpis, gameId);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
