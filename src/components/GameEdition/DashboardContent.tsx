@@ -1,34 +1,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Game } from "@/types/game";
+import { Game, Turn } from "@/types/game";
 
-const DashboardContent = () => {
-  const { gameId } = useParams<{ gameId: string }>();
+interface DashboardContentProps {
+  gameId: string;
+  gameData: Game;
+  turnsData: Turn[];
+  showingOptions: boolean;
+  onEditOptions: (turn: Turn) => void;
+  onEditTurn: (turn: Turn) => void;
+  onDeleteTurn: (turn: Turn) => void;
+  onAddTurn: () => void;
+}
 
-  const { data: game } = useQuery({
-    queryKey: ['game', gameId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Games')
-        .select('*')
-        .eq('uuid', gameId)
-        .single();
-
-      if (error) throw error;
-      return data as Game;
-    },
-    enabled: !!gameId,
-  });
-
+const DashboardContent = ({
+  gameId,
+  gameData,
+  turnsData,
+  showingOptions,
+  onEditOptions,
+  onEditTurn,
+  onDeleteTurn,
+  onAddTurn
+}: DashboardContentProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{game?.name}</CardTitle>
+        <CardTitle>{gameData?.name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>{game?.description}</p>
+        <p>{gameData?.description}</p>
+        {/* Add your turns list rendering here */}
       </CardContent>
     </Card>
   );

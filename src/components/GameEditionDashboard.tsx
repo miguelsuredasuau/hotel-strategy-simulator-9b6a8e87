@@ -10,6 +10,7 @@ import { useGameData } from '@/hooks/useGameData';
 import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import { useTurnManagement } from './GameEdition/Dashboard/useTurnManagement';
 import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
+import { Game, Turn } from '@/types/game';
 
 interface DashboardContentProps {
   gameId: string;
