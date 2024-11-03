@@ -7,6 +7,7 @@ import { useGameData } from '@/hooks/useGameData';
 import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import TurnsSection from './GameEdition/TurnsManagement/TurnsSection';
 import { GameBulkOperations } from './GameEdition/BulkOperations/GameBulkOperations';
+import GameTeamsSection from './GameEdition/GameTeams/GameTeamsSection';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -139,6 +140,7 @@ const GameEditionDashboard = () => {
           </CardContent>
         </Card>
 
+        <GameTeamsSection gameId={gameId} />
         <TurnsSection gameId={gameId} />
       </div>
     </div>
