@@ -70,7 +70,23 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
   return (
     <div className="max-w-[1600px] mx-auto px-6 pt-6">
       <div className="flex gap-6 mb-6">
-        <div className="w-[15%] shrink-0">
+        <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
+          <div className="flex items-baseline gap-3 mb-2">
+            <h2 className="text-2xl font-bold text-hotel-text">
+              Turn {currentTurn}
+            </h2>
+            {turnData?.challenge && (
+              <h3 className="text-xl text-hotel-text/80">
+                {turnData.challenge}
+              </h3>
+            )}
+          </div>
+          {turnData?.description && (
+            <p className="text-gray-600">{turnData.description}</p>
+          )}
+        </div>
+
+        <div className="w-[20%] shrink-0">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <Label 
               htmlFor="adr" 
@@ -93,22 +109,6 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
             </div>
           </div>
-        </div>
-
-        <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-baseline gap-3 mb-2">
-            <h2 className="text-2xl font-bold text-hotel-text">
-              Turn {currentTurn}
-            </h2>
-            {turnData?.challenge && (
-              <h3 className="text-xl text-hotel-text/80">
-                {turnData.challenge}
-              </h3>
-            )}
-          </div>
-          {turnData?.description && (
-            <p className="text-gray-600">{turnData.description}</p>
-          )}
         </div>
       </div>
 
