@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, Loader2 } from "lucide-react";
+import { Activity, Loader2, GripHorizontal } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIEditDialog } from "./KPIEditDialog";
 import { useState } from "react";
@@ -59,24 +59,51 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="flex justify-between items-center p-3 bg-muted rounded-lg cursor-move hover:bg-muted/80 transition-colors"
-                      onClick={() => setSelectedKPI(kpi)}
+                      className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <div>
-                        <h4 className="font-medium">{kpi.name}</h4>
-                        {kpi.description && (
-                          <p className="text-sm text-muted-foreground">{kpi.description}</p>
-                        )}
+                      <div className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3">
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab hover:text-blue-500"
+                              >
+                                <GripHorizontal className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-lg">{kpi.name}</h4>
+                                {kpi.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {kpi.description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            {kpi.formula && (
+                              <div className="mt-2 text-sm text-muted-foreground bg-muted p-2 rounded">
+                                Formula: {kpi.formula}
+                              </div>
+                            )}
+                            <div className="mt-3 flex items-center gap-4">
+                              <div className="text-2xl font-semibold">
+                                {kpi.current_value}
+                                {kpi.unit && (
+                                  <span className="text-base ml-1">{kpi.unit}</span>
+                                )}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Default: {kpi.default_value}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-lg font-semibold">
-                          {kpi.current_value}
-                          {kpi.unit && <span className="text-sm ml-1">{kpi.unit}</span>}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          Default: {kpi.default_value}
-                        </div>
+                      <div
+                        className="p-2 border-t bg-muted/50 cursor-pointer hover:bg-muted transition-colors text-center text-sm text-muted-foreground"
+                        onClick={() => setSelectedKPI(kpi)}
+                      >
+                        Click to edit
                       </div>
                     </div>
                   )}
