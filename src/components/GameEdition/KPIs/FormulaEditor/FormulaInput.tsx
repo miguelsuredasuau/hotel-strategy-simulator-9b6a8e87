@@ -41,14 +41,14 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
   ];
 
   useEffect(() => {
-    // Format the formula with syntax highlighting
+    // Format the formula with tag-like syntax highlighting
     const formatted = value
       .split(/(\bkpi:[a-zA-Z0-9_]+\b|[-+*/()=<>!&|?:])/g)
       .map((part, index) => {
         if (part.startsWith('kpi:')) {
-          return `<span class="text-blue-500 font-medium">${part}</span>`;
+          return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mx-0.5">${part}</span>`;
         } else if (['+', '-', '*', '/', '(', ')', '=', '!=', '>', '<', '>=', '<=', '&&', '||', '?', ':'].includes(part)) {
-          return `<span class="text-purple-500 font-medium">${part}</span>`;
+          return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-purple-100 text-purple-800 mx-0.5">${part}</span>`;
         }
         return part;
       })
@@ -84,10 +84,10 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white/50 backdrop-blur-sm"
+            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2"
           />
           <div 
-            className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden"
+            className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden whitespace-pre-wrap break-words"
             dangerouslySetInnerHTML={{ __html: formattedValue }}
           />
         </div>
@@ -106,13 +106,13 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
                   key={kpi.uuid}
                   variant="outline"
                   size="sm"
-                  className="justify-start h-auto py-2 hover:bg-blue-50"
+                  className="justify-start h-auto py-2 hover:bg-blue-50 group"
                   onClick={() => handleKPIClick(kpi.name)}
                 >
                   <div className="text-left">
-                    <div className="font-medium">{kpi.name}</div>
+                    <div className="font-medium group-hover:text-blue-700">{kpi.name}</div>
                     {kpi.unit && (
-                      <div className="text-xs text-muted-foreground">Unit: {kpi.unit}</div>
+                      <div className="text-xs text-muted-foreground">{kpi.unit}</div>
                     )}
                   </div>
                 </Button>
@@ -132,7 +132,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
                   size="sm"
                   onClick={() => handleOperatorClick(op.symbol)}
                   title={op.label}
-                  className="hover:bg-purple-50"
+                  className="hover:bg-purple-50 hover:text-purple-700"
                 >
                   {op.symbol}
                 </Button>
