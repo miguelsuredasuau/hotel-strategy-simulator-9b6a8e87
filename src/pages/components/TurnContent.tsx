@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Option, Turn } from "@/types/game";
-import { Loader2 } from "lucide-react";
+import { Loader2, DollarSign } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface TurnContentProps {
@@ -14,7 +14,7 @@ interface TurnContentProps {
 }
 
 export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentProps) => {
-  const [adrNotes, setAdrNotes] = useState<{ [key: string]: string }>({});
+  const [adrValues, setAdrValues] = useState<{ [key: string]: string }>({});
 
   const { data: options, isLoading: optionsLoading } = useQuery({
     queryKey: ['options', gameId, currentTurn],
@@ -90,29 +90,39 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {options.map((option) => (
               <div key={option.uuid} className="space-y-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm border-2 border-hotel-primary">
+                  <Label 
+                    htmlFor={`adr-${option.uuid}`} 
+                    className="text-lg font-semibold text-hotel-primary flex items-center gap-2 mb-3"
+                  >
+                    <DollarSign className="h-5 w-5" />
+                    Average Daily Rate (ADR)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id={`adr-${option.uuid}`}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Enter ADR value..."
+                      value={adrValues[option.uuid] || ''}
+                      onChange={(e) => setAdrValues(prev => ({
+                        ...prev,
+                        [option.uuid]: e.target.value
+                      }))}
+                      className="text-xl font-medium pl-8"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  </div>
+                </div>
                 <HotelCard
                   id={option.uuid}
                   name={option.title || ''}
                   description={option.description || ''}
                   image={option.image || `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop`}
                   onSelect={onHotelSelect}
-                  isDisabled={!adrNotes[option.uuid]}
+                  isDisabled={!adrValues[option.uuid]}
                 />
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <Label htmlFor={`adr-${option.uuid}`} className="font-medium mb-2 block">
-                    Architectural Decision Record (ADR)
-                  </Label>
-                  <Textarea
-                    id={`adr-${option.uuid}`}
-                    placeholder="Please document your architectural decision record before selecting this option..."
-                    value={adrNotes[option.uuid] || ''}
-                    onChange={(e) => setAdrNotes(prev => ({
-                      ...prev,
-                      [option.uuid]: e.target.value
-                    }))}
-                    className="min-h-[100px]"
-                  />
-                </div>
               </div>
             ))}
           </div>
