@@ -40,54 +40,30 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
-          game: number | null
           game_uuid: string | null
           image: string | null
-          impactkpi1: string | null
-          impactkpi1amount: number | null
-          impactkpi2: string | null
-          impactkpi2amount: number | null
-          impactkpi3: string | null
-          impactkpi3amount: number | null
           optionnumber: number | null
           title: string | null
-          turn: number | null
           turn_uuid: string | null
           uuid: string
         }
         Insert: {
           created_at?: string | null
           description?: string | null
-          game?: number | null
           game_uuid?: string | null
           image?: string | null
-          impactkpi1?: string | null
-          impactkpi1amount?: number | null
-          impactkpi2?: string | null
-          impactkpi2amount?: number | null
-          impactkpi3?: string | null
-          impactkpi3amount?: number | null
           optionnumber?: number | null
           title?: string | null
-          turn?: number | null
           turn_uuid?: string | null
           uuid?: string
         }
         Update: {
           created_at?: string | null
           description?: string | null
-          game?: number | null
           game_uuid?: string | null
           image?: string | null
-          impactkpi1?: string | null
-          impactkpi1amount?: number | null
-          impactkpi2?: string | null
-          impactkpi2amount?: number | null
-          impactkpi3?: string | null
-          impactkpi3amount?: number | null
           optionnumber?: number | null
           title?: string | null
-          turn?: number | null
           turn_uuid?: string | null
           uuid?: string
         }
@@ -212,7 +188,6 @@ export type Database = {
           challenge: string | null
           created_at: string | null
           description: string | null
-          game: number | null
           game_uuid: string | null
           turnnumber: number | null
           uuid: string
@@ -221,7 +196,6 @@ export type Database = {
           challenge?: string | null
           created_at?: string | null
           description?: string | null
-          game?: number | null
           game_uuid?: string | null
           turnnumber?: number | null
           uuid?: string
@@ -230,7 +204,6 @@ export type Database = {
           challenge?: string | null
           created_at?: string | null
           description?: string | null
-          game?: number | null
           game_uuid?: string | null
           turnnumber?: number | null
           uuid?: string
