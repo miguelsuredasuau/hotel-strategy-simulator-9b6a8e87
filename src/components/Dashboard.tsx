@@ -1,20 +1,14 @@
 import { Button } from "@/components/ui/button";
-import TeamsSection from './GameEdition/TeamsManagement/TeamsSection';
-import { StatisticsCards } from "./Dashboard/StatisticsCards";
-import { ChartSection } from "./Dashboard/ChartSection";
 
 interface DashboardProps {
   onNextTurn: () => void;
   gameId: string;
 }
 
-const Dashboard = ({ onNextTurn, gameId }: DashboardProps) => {
+const Dashboard = ({ onNextTurn }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="p-6 space-y-6">
-        <TeamsSection gameId={gameId} />
-        <StatisticsCards />
-        <ChartSection />
+      <div className="p-6">
         <div className="flex justify-end mt-8">
           <Button 
             onClick={onNextTurn}

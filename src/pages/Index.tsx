@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
-import Header from "@/components/Header/Header";
+import GameHeader from "@/components/GameHeader";
 import { useNavigate } from "react-router-dom";
 import { Option, Turn } from "@/types/game";
 
@@ -19,7 +19,6 @@ const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Fetch active game for the user's team
   useEffect(() => {
     const fetchActiveGame = async () => {
       try {
@@ -131,14 +130,6 @@ const Index = () => {
     setSelectedHotel(null);
   };
 
-  const handleTurnSelect = (turn: number) => {
-    if (turn <= currentTurn) {
-      setCurrentTurn(turn);
-      setShowDashboard(false);
-      setSelectedHotel(null);
-    }
-  };
-
   if (!gameId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -152,11 +143,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header 
-        currentTurn={currentTurn} 
-        totalTurns={TOTAL_TURNS}
-        onTurnSelect={handleTurnSelect}
-      />
+      <GameHeader currentTurn={currentTurn} totalTurns={TOTAL_TURNS} />
       
       {!showDashboard ? (
         <div className="p-6">
