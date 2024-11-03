@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,8 @@ import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIEditDialog } from "./KPIEditDialog";
 import { useState } from "react";
 import KPICard from "./KPICard";
+import DeleteConfirmDialog from "../DeleteConfirmDialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FinancialKPIsProps {
   gameId: string;
@@ -14,6 +16,9 @@ interface FinancialKPIsProps {
 
 export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
+  const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId, 'financial'],
@@ -29,6 +34,31 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
       return data as KPI[];
     },
   });
+
+  const handleDeleteKPI = async () => {
+    if (!kpiToDelete) return;
+
+    const { error } = await supabase
+      .from('kpis')
+      .delete()
+      .eq('uuid', kpiToDelete.uuid);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete KPI",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+    setKpiToDelete(null);
+    toast({
+      title: "Success",
+      description: "KPI deleted successfully",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -65,6 +95,7 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
                         kpi={kpi}
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}
+                        onDelete={() => setKpiToDelete(kpi)}
                       />
                     </div>
                   )}
@@ -83,6 +114,11 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
           gameId={gameId}
         />
       )}
+      <DeleteConfirmDialog
+        open={!!kpiToDelete}
+        onOpenChange={(open) => !open && setKpiToDelete(null)}
+        onConfirm={handleDeleteKPI}
+      />
     </Card>
   );
 };
