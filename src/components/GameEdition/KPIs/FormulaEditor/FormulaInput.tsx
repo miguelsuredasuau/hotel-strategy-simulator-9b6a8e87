@@ -93,26 +93,26 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="p-4 bg-white/50 backdrop-blur-sm">
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="col-span-2 p-4 bg-white/50 backdrop-blur-sm">
           <div className="flex items-center gap-2 mb-3">
             <Database className="h-4 w-4" />
             <h3 className="font-medium">Variables</h3>
           </div>
-          <ScrollArea className="h-48">
+          <ScrollArea className="h-[calc(100vh-24rem)]">
             <div className="grid grid-cols-1 gap-2">
               {availableKPIs.map((kpi) => (
                 <Button
                   key={kpi.uuid}
                   variant="outline"
                   size="sm"
-                  className="justify-start h-auto py-2 hover:bg-blue-50 group"
+                  className="justify-start h-auto py-2 px-3 hover:bg-blue-50 group text-left"
                   onClick={() => handleKPIClick(kpi.name)}
                 >
-                  <div className="text-left">
-                    <div className="font-medium group-hover:text-blue-700">{kpi.name}</div>
+                  <div>
+                    <div className="font-medium group-hover:text-blue-700 truncate">{kpi.name}</div>
                     {kpi.unit && (
-                      <div className="text-xs text-muted-foreground">{kpi.unit}</div>
+                      <div className="text-xs text-muted-foreground truncate">{kpi.unit}</div>
                     )}
                   </div>
                 </Button>
@@ -123,8 +123,8 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
 
         <Card className="p-4 bg-white/50 backdrop-blur-sm">
           <h3 className="font-medium mb-3">Operators</h3>
-          <ScrollArea className="h-48">
-            <div className="grid grid-cols-3 gap-2">
+          <ScrollArea className="h-[calc(100vh-24rem)]">
+            <div className="grid grid-cols-2 gap-2">
               {operators.map((op) => (
                 <Button
                   key={op.symbol}
@@ -132,7 +132,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
                   size="sm"
                   onClick={() => handleOperatorClick(op.symbol)}
                   title={op.label}
-                  className="hover:bg-purple-50 hover:text-purple-700"
+                  className="hover:bg-purple-50 hover:text-purple-700 px-2 py-1.5 h-8"
                 >
                   {op.symbol}
                 </Button>
