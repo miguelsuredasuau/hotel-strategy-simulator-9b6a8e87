@@ -65,13 +65,19 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
   return (
     <Card className="mt-8">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center justify-between">
+        <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
+            <CollapsibleTrigger className="hover:opacity-75">
+              {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </CollapsibleTrigger>
             <Target className="h-5 w-5" />
             <CardTitle>KPIs Management</CardTitle>
           </div>
-          <ChevronDown className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`} />
-        </CollapsibleTrigger>
+          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create New KPI
+          </Button>
+        </CardHeader>
         <CollapsibleContent>
           <CardContent>
             {isLoading ? (

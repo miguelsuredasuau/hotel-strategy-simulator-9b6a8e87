@@ -33,17 +33,15 @@ const App = () => {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-          setSession(newSession);
-          if (!newSession) {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          setSession(session);
+          if (!session) {
             queryClient.clear();
             localStorage.clear();
           }
         });
 
         return () => subscription.unsubscribe();
-      } catch (error) {
-        console.error('Session initialization error:', error);
       } finally {
         setIsLoading(false);
       }
