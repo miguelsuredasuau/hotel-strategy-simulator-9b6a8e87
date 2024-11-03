@@ -16,49 +16,26 @@ interface FormulaInputProps {
 
 export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [formattedValue, setFormattedValue] = useState("");
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   
   const operators = [
-    // Basic arithmetic
     { symbol: '+', label: 'Add' },
     { symbol: '-', label: 'Subtract' },
     { symbol: '*', label: 'Multiply' },
     { symbol: '/', label: 'Divide' },
-    // Grouping
     { symbol: '(', label: 'Open Bracket' },
     { symbol: ')', label: 'Close Bracket' },
-    // Comparison
     { symbol: '=', label: 'Equal' },
     { symbol: '!=', label: 'Not Equal' },
     { symbol: '>', label: 'Greater Than' },
     { symbol: '<', label: 'Less Than' },
     { symbol: '>=', label: 'Greater Equal' },
     { symbol: '<=', label: 'Less Equal' },
-    // Logical
     { symbol: '&&', label: 'AND' },
     { symbol: '||', label: 'OR' },
-    // Special
     { symbol: '?', label: 'If' },
     { symbol: ':', label: 'Else' },
   ];
-
-  useEffect(() => {
-    // Format the formula with consistent styling
-    const formatted = value
-      .split(/(\bkpi:[a-zA-Z0-9_]+\b|[-+*/()=<>!&|?:])/g)
-      .map((part, index) => {
-        if (part.startsWith('kpi:')) {
-          return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mx-0.5">${part}</span>`;
-        } else if (['+', '-', '*', '/', '(', ')', '=', '!=', '>', '<', '>=', '<=', '&&', '||', '?', ':'].includes(part)) {
-          return `<span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-purple-100 text-purple-800 mx-0.5">${part}</span>`;
-        }
-        return part;
-      })
-      .join('');
-    
-    setFormattedValue(formatted);
-  }, [value]);
 
   const handleKPIClick = (kpiName: string) => {
     const newValue = value.slice(0, cursorPosition) + `kpi:${kpiName}` + value.slice(cursorPosition);
@@ -83,17 +60,13 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2 text-sm"
-          />
-          <div 
-            className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden whitespace-pre-wrap break-words text-sm"
-            dangerouslySetInnerHTML={{ __html: formattedValue }}
+            className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card className="col-span-2 p-4 bg-white/50 backdrop-blur-sm">
+        <Card className="col-span-2 p-4 bg-white">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Database className="h-4 w-4" />
@@ -130,7 +103,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
           </ScrollArea>
         </Card>
 
-        <Card className="p-4 bg-white/50 backdrop-blur-sm">
+        <Card className="p-4 bg-white">
           <h3 className="font-medium mb-3">Operators</h3>
           <ScrollArea className="h-[280px]">
             <div className="grid grid-cols-2 gap-2">
@@ -141,7 +114,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                   size="sm"
                   onClick={() => handleOperatorClick(op.symbol)}
                   title={op.label}
-                  className="hover:bg-purple-50 hover:text-purple-700 px-2 py-1.5 h-8 text-xs"
+                  className="hover:bg-blue-50 hover:text-blue-700 px-2 py-1.5 h-8 text-xs"
                 >
                   {op.symbol}
                 </Button>
