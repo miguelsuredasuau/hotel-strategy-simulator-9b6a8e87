@@ -72,6 +72,53 @@ export type Database = {
         }
         Relationships: []
       }
+      kpis: {
+        Row: {
+          created_at: string | null
+          current_value: number | null
+          default_value: number | null
+          description: string | null
+          game_uuid: string | null
+          is_percentage: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["kpi_type"]
+          unit: string | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_value?: number | null
+          default_value?: number | null
+          description?: string | null
+          game_uuid?: string | null
+          is_percentage?: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["kpi_type"]
+          unit?: string | null
+          uuid?: string
+        }
+        Update: {
+          created_at?: string | null
+          current_value?: number | null
+          default_value?: number | null
+          description?: string | null
+          game_uuid?: string | null
+          is_percentage?: boolean | null
+          name?: string
+          type?: Database["public"]["Enums"]["kpi_type"]
+          unit?: string | null
+          uuid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpis_game_uuid_fkey"
+            columns: ["game_uuid"]
+            isOneToOne: false
+            referencedRelation: "Games"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
       Options: {
         Row: {
           created_at: string | null
@@ -242,6 +289,7 @@ export type Database = {
         | "variable_costs_percent"
         | "fixed_costs"
         | "investments"
+      kpi_type: "financial" | "operational"
     }
     CompositeTypes: {
       [_ in never]: never
