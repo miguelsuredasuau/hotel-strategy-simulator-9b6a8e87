@@ -14,6 +14,7 @@ const TOTAL_TURNS = 20;
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
+  const [latestTurn, setLatestTurn] = useState(1);
   const [showDashboard, setShowDashboard] = useState(false);
   const [selectedTurnNumber, setSelectedTurnNumber] = useState<number | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
@@ -117,7 +118,7 @@ const Index = () => {
   });
 
   const handleTurnClick = (turnNumber: number) => {
-    if (turnNumber <= currentTurn) {
+    if (turnNumber <= latestTurn) {
       setSelectedTurnNumber(turnNumber);
       setShowDashboard(true);
     }
@@ -129,7 +130,9 @@ const Index = () => {
 
   const handleNextTurn = () => {
     if (currentTurn < TOTAL_TURNS) {
-      setCurrentTurn(prev => prev + 1);
+      const nextTurn = currentTurn + 1;
+      setCurrentTurn(nextTurn);
+      setLatestTurn(prev => Math.max(prev, nextTurn));
       setSelectedTurnNumber(null);
     }
     setShowDashboard(false);
@@ -152,6 +155,7 @@ const Index = () => {
         currentTurn={selectedTurnNumber || currentTurn} 
         totalTurns={TOTAL_TURNS} 
         onTurnClick={handleTurnClick}
+        latestTurn={latestTurn}
       />
       
       {!showDashboard ? (
@@ -195,7 +199,7 @@ const Index = () => {
           onNextTurn={handleNextTurn} 
           gameId={gameId} 
           turnNumber={selectedTurnNumber || currentTurn}
-          isCurrentTurn={!selectedTurnNumber}
+          isCurrentTurn={!selectedTurnNumber || selectedTurnNumber === currentTurn}
         />
       )}
 
