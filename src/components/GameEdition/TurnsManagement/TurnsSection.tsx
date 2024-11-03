@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, ScrollText, ChevronDown, ChevronRight } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
@@ -10,6 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import TurnCard from './TurnCard';
 import TurnEditDialog from '../TurnEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
+import OptionsEditDialog from '../OptionsEditDialog';
 import { Turn } from '@/types/game';
 import { useTurnsQuery } from './useTurnsQuery';
 import { useTurnActions } from './useTurnActions';
@@ -22,11 +23,52 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
   const { turns, isLoading, isError } = useTurnsQuery(gameId);
   const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const handleSaveTurn = async (turn: Turn) => {
+    try {
+      if (isCreateDialogOpen) {
+        const { error } = await supabase
+          .from('Turns')
+          .insert([{
+            ...turn,
+            game_uuid: gameId,
+            turnnumber: turns ? turns.length + 1 : 1
+          }]);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('Turns')
+          .update(turn)
+          .eq('uuid', turn.uuid);
+        
+        if (error) throw error;
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
+      setIsCreateDialogOpen(false);
+      setIsEditDialogOpen(false);
+      setSelectedTurn(null);
+      toast({
+        title: "Success",
+        description: `Turn ${isCreateDialogOpen ? 'created' : 'updated'} successfully`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!gameId || gameId.trim() === '') {
     return (
@@ -65,7 +107,10 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
             <ScrollText className="h-5 w-5" />
             <CardTitle>Turns Management</CardTitle>
           </div>
-          <Button onClick={() => setIsCreateDialogOpen(true)} className="gap-2">
+          <Button onClick={() => {
+            setSelectedTurn(null);
+            setIsCreateDialogOpen(true);
+          }} className="gap-2">
             <Plus className="h-4 w-4" />
             Create New Turn
           </Button>
@@ -100,6 +145,10 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
                             setSelectedTurn(turn);
                             setIsDeleteDialogOpen(true);
                           }}
+                          onEditOptions={(turn) => {
+                            setSelectedTurn(turn);
+                            setIsOptionsDialogOpen(true);
+                          }}
                         />
                       ))
                     ) : (
@@ -126,34 +175,7 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
             setSelectedTurn(null);
           }
         }}
-        onSave={async (updatedTurn) => {
-          try {
-            if (isCreateDialogOpen) {
-              const { error } = await supabase
-                .from('Turns')
-                .insert([{
-                  ...updatedTurn,
-                  game_uuid: gameId,
-                  turnnumber: turns ? turns.length + 1 : 1
-                }]);
-              
-              if (error) throw error;
-            } else {
-              const { error } = await supabase
-                .from('Turns')
-                .update(updatedTurn)
-                .eq('uuid', updatedTurn.uuid);
-              
-              if (error) throw error;
-            }
-            
-            setIsCreateDialogOpen(false);
-            setIsEditDialogOpen(false);
-            setSelectedTurn(null);
-          } catch (error: any) {
-            console.error('Error saving turn:', error);
-          }
-        }}
+        onSave={handleSaveTurn}
       />
 
       <DeleteConfirmDialog
@@ -161,6 +183,15 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={() => selectedTurn && handleDeleteTurn(selectedTurn.uuid)}
       />
+
+      {selectedTurn && (
+        <OptionsEditDialog
+          turnId={selectedTurn.uuid}
+          gameId={gameId}
+          open={isOptionsDialogOpen}
+          onOpenChange={setIsOptionsDialogOpen}
+        />
+      )}
     </Card>
   );
 };
