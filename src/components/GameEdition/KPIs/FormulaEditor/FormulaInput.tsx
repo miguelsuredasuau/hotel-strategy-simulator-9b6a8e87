@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { KPI } from "@/types/kpi";
+import { Database } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface FormulaInputProps {
   value: string;
@@ -12,7 +14,30 @@ interface FormulaInputProps {
 
 export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
-  const operators = ['+', '-', '*', '/', '(', ')'];
+  
+  const operators = [
+    // Basic arithmetic
+    { symbol: '+', label: 'Add' },
+    { symbol: '-', label: 'Subtract' },
+    { symbol: '*', label: 'Multiply' },
+    { symbol: '/', label: 'Divide' },
+    // Grouping
+    { symbol: '(', label: 'Open Bracket' },
+    { symbol: ')', label: 'Close Bracket' },
+    // Comparison
+    { symbol: '=', label: 'Equal' },
+    { symbol: '!=', label: 'Not Equal' },
+    { symbol: '>', label: 'Greater Than' },
+    { symbol: '<', label: 'Less Than' },
+    { symbol: '>=', label: 'Greater Equal' },
+    { symbol: '<=', label: 'Less Equal' },
+    // Logical
+    { symbol: '&&', label: 'AND' },
+    { symbol: '||', label: 'OR' },
+    // Special
+    { symbol: '?', label: 'If' },
+    { symbol: ':', label: 'Else' },
+  ];
 
   const handleKPIClick = (kpiName: string) => {
     const before = value.slice(0, cursorPosition);
@@ -29,20 +54,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
   };
 
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2 flex-wrap">
-        {operators.map((operator) => (
-          <Button
-            key={operator}
-            variant="outline"
-            size="sm"
-            onClick={() => handleOperatorClick(operator)}
-          >
-            {operator}
-          </Button>
-        ))}
-      </div>
-      
+    <div className="space-y-4">
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -51,21 +63,55 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
         className="font-mono"
       />
 
-      <ScrollArea className="h-32 rounded-md border">
-        <div className="p-4 grid grid-cols-2 gap-2">
-          {availableKPIs.map((kpi) => (
-            <Button
-              key={kpi.uuid}
-              variant="ghost"
-              size="sm"
-              className="justify-start"
-              onClick={() => handleKPIClick(kpi.name)}
-            >
-              {kpi.name}
-            </Button>
-          ))}
-        </div>
-      </ScrollArea>
+      <div className="grid grid-cols-2 gap-4">
+        {/* KPIs Section */}
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Database className="h-4 w-4" />
+            <h3 className="font-medium">Variables</h3>
+          </div>
+          <ScrollArea className="h-48">
+            <div className="grid grid-cols-1 gap-2">
+              {availableKPIs.map((kpi) => (
+                <Button
+                  key={kpi.uuid}
+                  variant="outline"
+                  size="sm"
+                  className="justify-start h-auto py-2"
+                  onClick={() => handleKPIClick(kpi.name)}
+                >
+                  <div className="text-left">
+                    <div className="font-medium">{kpi.name}</div>
+                    {kpi.unit && (
+                      <div className="text-xs text-muted-foreground">Unit: {kpi.unit}</div>
+                    )}
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
+        </Card>
+
+        {/* Operators Section */}
+        <Card className="p-4">
+          <h3 className="font-medium mb-3">Operators</h3>
+          <ScrollArea className="h-48">
+            <div className="grid grid-cols-3 gap-2">
+              {operators.map((op) => (
+                <Button
+                  key={op.symbol}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleOperatorClick(op.symbol)}
+                  title={op.label}
+                >
+                  {op.symbol}
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
+        </Card>
+      </div>
     </div>
   );
 };
