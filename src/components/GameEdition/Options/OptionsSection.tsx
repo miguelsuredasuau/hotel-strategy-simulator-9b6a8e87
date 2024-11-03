@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Settings2, ChevronDown, ChevronRight, FileDown } from "lucide-react";
+import { Plus, Settings2, ChevronDown, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
@@ -10,7 +10,6 @@ import { Option } from '@/types/game';
 import OptionCard from './OptionCard';
 import OptionEditDialog from './OptionEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
-import { BulkOptionsDialog } from './BulkOperations/BulkOptionsDialog';
 import { useOptionsActions } from './useOptionsActions';
 
 interface OptionsSectionProps {
@@ -22,7 +21,6 @@ export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -40,23 +38,13 @@ export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
             <Settings2 className="h-5 w-5" />
             <CardTitle>Options Management</CardTitle>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsBulkDialogOpen(true)}
-              className="gap-2"
-            >
-              <FileDown className="h-4 w-4" />
-              Bulk Operations
-            </Button>
-            <Button onClick={() => {
-              setSelectedOption(null);
-              setIsCreateDialogOpen(true);
-            }} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create New Option
-            </Button>
-          </div>
+          <Button onClick={() => {
+            setSelectedOption(null);
+            setIsCreateDialogOpen(true);
+          }} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Create New Option
+          </Button>
         </CardHeader>
         <CollapsibleContent>
           <CardContent>
@@ -105,9 +93,7 @@ export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
       </Collapsible>
 
       <OptionEditDialog
-        option={selectedOption}
-        turnId={turnId}
-        gameId={gameId}
+        option={selectedOption || { uuid: '', optionnumber: options ? options.length + 1 : 1, game_uuid: gameId, turn_uuid: turnId }}
         open={isCreateDialogOpen || isEditDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
@@ -123,13 +109,6 @@ export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={() => selectedOption && handleDeleteOption(selectedOption.uuid)}
-      />
-
-      <BulkOptionsDialog
-        turnId={turnId}
-        gameId={gameId}
-        open={isBulkDialogOpen}
-        onOpenChange={setIsBulkDialogOpen}
       />
     </Card>
   );
@@ -153,3 +132,5 @@ const useOptionsQuery = (turnId: string, gameId: string) => {
 
   return { options, isLoading };
 };
+
+export default OptionsSection;

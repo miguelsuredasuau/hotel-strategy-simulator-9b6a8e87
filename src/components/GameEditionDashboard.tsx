@@ -7,6 +7,7 @@ import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 import { useGameData } from '@/hooks/useGameData';
 import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import TurnsSection from './GameEdition/TurnsManagement/TurnsSection';
+import { GameBulkOperations } from './GameEdition/BulkOperations/GameBulkOperations';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -107,7 +108,10 @@ const GameEditionDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-6 space-y-6">
-        <DashboardHeader onLogout={handleLogout} />
+        <div className="flex justify-between items-center">
+          <DashboardHeader onLogout={handleLogout} />
+          <GameBulkOperations gameId={gameId} />
+        </div>
         
         <Card>
           <CardHeader>
