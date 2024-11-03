@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { StatisticsCards } from "./Dashboard/StatisticsCards";
 import { ChartSection } from "./Dashboard/ChartSection";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 import { Option } from "@/types/game";
 import { Loader2 } from "lucide-react";
 
@@ -27,15 +30,18 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
 
       if (!turn) return null;
 
-      const { data, error } = await supabase
+      // First, try to get the selected option (you might need to add a 'selected' column to the Options table)
+      const { data: options, error } = await supabase
         .from('Options')
         .select('*')
         .eq('game_uuid', gameId)
-        .eq('turn_uuid', turn.uuid)
-        .single();
+        .eq('turn_uuid', turn.uuid);
 
       if (error) throw error;
-      return data as Option;
+      
+      // For now, we'll just return the first option as selected
+      // In a real implementation, you would need to track which option was selected
+      return (options as Option[])[0];
     },
     enabled: !!gameId
   });
