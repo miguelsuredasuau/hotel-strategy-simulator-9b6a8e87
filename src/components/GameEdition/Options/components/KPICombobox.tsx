@@ -73,19 +73,22 @@ export function KPICombobox({
     }
   };
 
+  // Ensure kpis is always an array and filter out any undefined/null items
+  const safeKpis = React.useMemo(() => {
+    return (Array.isArray(kpis) ? kpis : []).filter(kpi => kpi && kpi.name);
+  }, [kpis]);
+
   const filteredKpis = React.useMemo(() => {
-    const kpisArray = Array.isArray(kpis) ? kpis : [];
-    return kpisArray.filter(kpi => 
-      kpi?.name?.toLowerCase().includes(search.toLowerCase())
+    return safeKpis.filter(kpi => 
+      kpi.name.toLowerCase().includes(search.toLowerCase())
     );
-  }, [kpis, search]);
+  }, [safeKpis, search]);
 
   const displayValue = React.useMemo(() => {
     if (!value) return "Select KPI...";
-    const kpiArray = Array.isArray(kpis) ? kpis : [];
-    const kpi = kpiArray.find(k => k?.name === value);
+    const kpi = safeKpis.find(k => k.name === value);
     return kpi ? kpi.name : value;
-  }, [value, kpis]);
+  }, [value, safeKpis]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
