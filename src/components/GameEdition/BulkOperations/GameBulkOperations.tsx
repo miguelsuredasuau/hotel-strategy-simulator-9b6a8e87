@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Upload, Loader2 } from "lucide-react";
 import * as XLSX from 'xlsx';
-import { Option } from "@/types/game";
 
 interface GameBulkOperationsProps {
   gameId: string;
@@ -18,12 +17,13 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
 
   const handleDownload = async () => {
     try {
-      // Fetch all turns first to get turn numbers
-      const { data: turns } = await supabase
+      const { data: turns, error: turnsError } = await supabase
         .from('Turns')
         .select('uuid, turnnumber')
         .eq('game_uuid', gameId)
         .order('turnnumber');
+
+      if (turnsError) throw turnsError;
 
       if (!turns || turns.length === 0) {
         toast({
@@ -34,15 +34,16 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
         return;
       }
 
-      // Fetch all options for each turn
       const allOptions = [];
       for (const turn of turns) {
-        const { data: options } = await supabase
+        const { data: options, error: optionsError } = await supabase
           .from('Options')
           .select('*')
           .eq('turn_uuid', turn.uuid)
           .eq('game_uuid', gameId)
           .order('optionnumber');
+
+        if (optionsError) throw optionsError;
 
         if (options) {
           allOptions.push(...options.map(option => ({
@@ -99,7 +100,7 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
       formData.append('file', file);
       formData.append('gameId', gameId);
 
-      const { data, error } = await supabase.functions.invoke('bulk-upload-options', {
+      const { error } = await supabase.functions.invoke('bulk-upload-options', {
         body: formData,
       });
 

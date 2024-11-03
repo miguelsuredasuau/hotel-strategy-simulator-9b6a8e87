@@ -1,22 +1,34 @@
 import { Button } from "@/components/ui/button";
 import { Download, Upload } from "lucide-react";
 import { useState } from "react";
-import CSVUploadDialog from "./BulkUpload/CSVUploadDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import * as XLSX from 'xlsx';
 
 interface GameEditionHeaderProps {
-  gameId?: number;
-  onLogout: () => void;
+  gameId?: string;
+  onLogout?: () => void;
 }
 
 const GameEditionHeader = ({ gameId, onLogout }: GameEditionHeaderProps) => {
-  const [isTurnsUploadOpen, setIsTurnsUploadOpen] = useState(false);
-  const [isOptionsUploadOpen, setIsOptionsUploadOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      if (onLogout) onLogout();
+    } catch (error: any) {
+      toast({
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: options } = useQuery({
     queryKey: ['all-options', gameId],
@@ -148,7 +160,7 @@ const GameEditionHeader = ({ gameId, onLogout }: GameEditionHeaderProps) => {
             </div>
           </>
         )}
-        <Button variant="outline" onClick={onLogout}>
+        <Button variant="outline" onClick={handleLogout}>
           Logout
         </Button>
       </div>

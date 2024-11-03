@@ -12,7 +12,7 @@ export const useTurnsQuery = (gameId: string) => {
 
       const { data, error } = await supabase
         .from('Turns')
-        .select('*')
+        .select('uuid, turnnumber, challenge, description, game_uuid, created_at')
         .eq('game_uuid', gameId)
         .order('turnnumber');
 
