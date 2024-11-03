@@ -8,6 +8,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -18,7 +19,7 @@ serve(async (req) => {
     const turnId = formData.get('turnId') as string
     const gameId = formData.get('gameId') as string
 
-    console.log('Received request with:', { turnId, gameId, fileName: file?.name });
+    console.log('Received request:', { turnId, gameId, fileName: file?.name })
 
     if (!file || !turnId || !gameId) {
       return new Response(
@@ -26,7 +27,10 @@ serve(async (req) => {
           error: 'Missing required fields',
           received: { file: !!file, turnId, gameId }
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
       )
     }
 
@@ -40,7 +44,7 @@ serve(async (req) => {
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = XLSX.utils.sheet_to_json(worksheet)
 
-    console.log('Processing data:', data);
+    console.log('Processing data:', data)
 
     for (const row of data) {
       const optionNumber = row['Option Number'] || row['optionnumber']
@@ -86,13 +90,24 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error('Error processing request:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }, 
+        status: 500 
+      }
     )
   }
 })

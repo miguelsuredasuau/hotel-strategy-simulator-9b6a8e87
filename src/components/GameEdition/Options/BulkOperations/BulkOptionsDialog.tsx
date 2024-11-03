@@ -32,6 +32,8 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
   const { data: turnData } = useQuery({
     queryKey: ['turn', turnId],
     queryFn: async () => {
+      if (!turnId) throw new Error('No turn ID provided');
+      
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
@@ -114,12 +116,6 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       formData.append('turnId', turnData.uuid);
       formData.append('gameId', gameId);
 
-      console.log('Uploading with data:', { 
-        turnId: turnData.uuid, 
-        gameId, 
-        fileName: file.name 
-      });
-
       const { error } = await supabase.functions.invoke('bulk-upload-options', {
         body: formData,
       });
@@ -174,7 +170,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
               />
               {isUploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <Loader2 className="h-6 w-4 animate-spin" />
                 </div>
               )}
             </div>
