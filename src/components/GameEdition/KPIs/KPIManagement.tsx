@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
 import { KPICalculatorDialog } from "./KPICalculatorDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useKPICalculations } from "./hooks/useKPICalculations";
 
@@ -21,7 +21,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: kpis } = useQuery({
+  const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -31,11 +31,12 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       
       if (error) throw error;
       return data;
-    }
+    },
+    refetchInterval: 5000 // Refetch every 5 seconds
   });
 
-  // Use the new hook to handle KPI calculations
-  useKPICalculations(kpis, gameId);
+  // Use the enhanced KPI calculations hook
+  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -66,14 +67,25 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">KPI Management</h2>
-        <Button 
-          onClick={() => setIsCalculatorOpen(true)} 
-          size="lg"
-          className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          <Plus className="h-5 w-5" />
-          Add New KPI
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => updateCalculatedKPIs()}
+            variant="outline"
+            size="lg"
+            className="gap-2"
+          >
+            <RefreshCw className="h-5 w-5" />
+            Recalculate KPIs
+          </Button>
+          <Button 
+            onClick={() => setIsCalculatorOpen(true)} 
+            size="lg"
+            className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <Plus className="h-5 w-5" />
+            Add New KPI
+          </Button>
+        </div>
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
