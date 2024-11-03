@@ -13,91 +13,102 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
   const findKPI = (pattern: string) => 
     kpis.find(kpi => kpi.name.toLowerCase().includes(pattern.toLowerCase()));
 
+  // Get customizable values
+  const rooms = findKPI('rooms');
+  const occupiedRooms = findKPI('occupied');
+  const adr = findKPI('adr');
+  const extras = findKPI('extras');
+  const variableCostsPercent = findKPI('variable costs percentage');
+  const fixedCosts = findKPI('fixed costs');
+  const investments = findKPI('investments');
+
   // Calculate derived values
-  const rooms = findKPI('rooms')?.default_value || 0;
-  const occupiedRooms = findKPI('occupied')?.default_value || 0;
-  const adr = findKPI('adr')?.default_value || 0;
-  const extras = findKPI('extras')?.default_value || 0;
+  const roomsValue = rooms?.default_value || 0;
+  const occupiedRoomsValue = Math.min(occupiedRooms?.default_value || 0, roomsValue);
+  const adrValue = adr?.default_value || 0;
+  const extrasValue = extras?.default_value || 0;
   
-  const revenue = (occupiedRooms * adr) + extras;
-  const variableCostsPercent = findKPI('variable costs percentage')?.default_value || 0;
-  const variableCosts = revenue * (variableCostsPercent / 100);
-  const fixedCosts = findKPI('fixed costs')?.default_value || 0;
-  const operatingProfit = revenue - variableCosts - fixedCosts;
-  const investments = findKPI('investments')?.default_value || 0;
-  const freeCashFlow = operatingProfit - investments;
+  const roomRevenue = occupiedRoomsValue * adrValue;
+  const totalRevenue = roomRevenue + extrasValue;
+  
+  const variableCostsPercentValue = variableCostsPercent?.default_value || 0;
+  const variableCostsAmount = totalRevenue * (variableCostsPercentValue / 100);
+  const fixedCostsValue = fixedCosts?.default_value || 0;
+  
+  const operatingProfit = totalRevenue - variableCostsAmount - fixedCostsValue;
+  const investmentsValue = investments?.default_value || 0;
+  const freeCashFlow = operatingProfit - investmentsValue;
 
   return (
-    <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
+    <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm">
       <h3 className="font-semibold text-lg text-center border-b pb-2">Financial Statement</h3>
       
-      {/* Operational Metrics */}
-      <div className="space-y-3">
+      <div className="grid gap-3">
+        {/* Customizable Inputs */}
         <FinancialMetric 
           label="Number of Rooms"
-          kpi={findKPI('rooms')}
+          kpi={rooms}
           onEdit={onEdit}
           onDelete={onDelete}
         />
         <FinancialMetric 
           label="Occupied Rooms"
-          kpi={findKPI('occupied')}
+          kpi={occupiedRooms}
           onEdit={onEdit}
           onDelete={onDelete}
         />
         <FinancialMetric 
-          label="Average Daily Rate (ADR)"
-          kpi={findKPI('adr')}
+          label="ADR"
+          kpi={adr}
           onEdit={onEdit}
           onDelete={onDelete}
         />
         <FinancialMetric 
           label="Extras Revenue"
-          kpi={findKPI('extras')}
+          kpi={extras}
           onEdit={onEdit}
           onDelete={onDelete}
         />
-      </div>
 
-      <Separator />
+        <Separator />
 
-      {/* Revenue */}
-      <div className="space-y-3">
+        {/* Revenue Section */}
+        <FinancialMetric 
+          label="Room Revenue"
+          value={roomRevenue}
+          isEditable={false}
+        />
         <FinancialMetric 
           label="Total Revenue"
-          value={revenue}
+          value={totalRevenue}
           isEditable={false}
           className="font-semibold"
         />
-      </div>
 
-      <Separator />
+        <Separator />
 
-      {/* Costs */}
-      <div className="space-y-3">
+        {/* Costs Section */}
         <FinancialMetric 
           label="Variable Costs %"
-          kpi={findKPI('variable costs percentage')}
+          kpi={variableCostsPercent}
           onEdit={onEdit}
           onDelete={onDelete}
         />
         <FinancialMetric 
           label="Variable Costs Amount"
-          value={variableCosts}
+          value={variableCostsAmount}
           isEditable={false}
         />
         <FinancialMetric 
           label="Fixed Costs"
-          kpi={findKPI('fixed costs')}
+          kpi={fixedCosts}
           onEdit={onEdit}
           onDelete={onDelete}
         />
-      </div>
 
-      <Separator />
+        <Separator />
 
-      {/* Profits */}
-      <div className="space-y-3">
+        {/* Bottom Line */}
         <FinancialMetric 
           label="Operating Profit"
           value={operatingProfit}
@@ -106,7 +117,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
         />
         <FinancialMetric 
           label="Investments"
-          kpi={findKPI('investments')}
+          kpi={investments}
           onEdit={onEdit}
           onDelete={onDelete}
         />
