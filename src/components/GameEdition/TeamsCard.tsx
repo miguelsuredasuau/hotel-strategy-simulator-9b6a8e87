@@ -67,8 +67,8 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
       if (userData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ team_uuid: teamData.uuid })
-          .eq('uuid', userData.user.uuid);
+          .update({ team_id: teamData.uuid })
+          .eq('id', userData.user.id);
 
         if (profileError) throw profileError;
       }

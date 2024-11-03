@@ -1,62 +1,37 @@
-import GameDetailsCard from './GameDetailsCard';
-import TeamsCard from './TeamsCard';
-import TurnsCard from './TurnsCard';
-import { Turn } from '@/types/game';
-import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Game } from "@/types/game";
 
-interface DashboardContentProps {
-  gameId: string;
-  gameData: any;
-  turnsData: Turn[] | undefined;
-  onEditOptions: (turn: Turn) => void;
-  onEditTurn: (turn: Turn) => void;
-  onDeleteTurn: (turn: Turn) => void;
-  onAddTurn: () => void;
-  showingOptions: boolean;
-}
+const DashboardContent = () => {
+  const { gameId } = useParams<{ gameId: string }>();
 
-const DashboardContent = ({ 
-  gameId, 
-  gameData, 
-  turnsData,
-  onEditOptions,
-  onEditTurn,
-  onDeleteTurn,
-  onAddTurn,
-  showingOptions
-}: DashboardContentProps) => {
-  const queryClient = useQueryClient();
+  const { data: game } = useQuery({
+    queryKey: ['game', gameId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('games')
+        .select('*')
+        .eq('uuid', gameId)
+        .single();
 
-  if (showingOptions) {
-    return (
-      <TurnsCard 
-        turns={turnsData || []} 
-        onEditOptions={onEditOptions}
-        onEditTurn={onEditTurn}
-        onDeleteTurn={onDeleteTurn}
-        onAddTurn={onAddTurn}
-      />
-    );
-  }
+      if (error) throw error;
+      return data as Game;
+    },
+    enabled: !!gameId,
+  });
 
   return (
-    <div className="space-y-6">
-      <GameDetailsCard
-        gameId={parseInt(gameId)}
-        gameName={gameData?.name || ''}
-        inspirationalImage={gameData?.inspirational_image || ''}
-        setGameName={(name) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-        setInspirationalImage={(image) => queryClient.invalidateQueries({ queryKey: ['game', gameId] })}
-      />
-      <TeamsCard gameId={parseInt(gameId)} />
-      <TurnsCard 
-        turns={turnsData || []} 
-        onEditOptions={onEditOptions}
-        onEditTurn={onEditTurn}
-        onDeleteTurn={onDeleteTurn}
-        onAddTurn={onAddTurn}
-      />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{game?.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p>{game?.description}</p>
+      </CardContent>
+    </Card>
   );
 };
 
