@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
+import { Calculator } from "lucide-react";
 
 interface KPIEditDialogProps {
   kpi: KPI;
@@ -30,18 +31,27 @@ export const KPIEditDialog = ({
   gameId,
 }: KPIEditDialogProps) => {
   const [formData, setFormData] = useState(kpi);
+  const [isCalculated, setIsCalculated] = useState(!!kpi.formula);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   useEffect(() => {
     setFormData(kpi);
+    setIsCalculated(!!kpi.formula);
   }, [kpi]);
 
   const handleSave = async () => {
     try {
+      // If switching from calculated to constant, remove formula and dependencies
+      const updatedData = {
+        ...formData,
+        formula: isCalculated ? formData.formula : null,
+        depends_on: isCalculated ? formData.depends_on : null,
+      };
+
       const { error } = await supabase
         .from('kpis')
-        .update(formData)
+        .update(updatedData)
         .eq('uuid', kpi.uuid);
 
       if (error) throw error;
@@ -82,24 +92,41 @@ export const KPIEditDialog = ({
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Current Value</Label>
-              <Input
-                type="number"
-                value={formData.current_value}
-                onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) })}
-              />
+          
+          <div className="flex items-center justify-between space-x-2 bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-0.5">
+              <Label>Calculated KPI</Label>
+              <p className="text-sm text-gray-500">
+                {isCalculated ? "This KPI is calculated using a formula" : "This KPI has a constant value"}
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label>Default Value</Label>
-              <Input
-                type="number"
-                value={formData.default_value}
-                onChange={(e) => setFormData({ ...formData, default_value: parseFloat(e.target.value) })}
-              />
-            </div>
+            <Switch
+              checked={isCalculated}
+              onCheckedChange={setIsCalculated}
+            />
           </div>
+
+          {!isCalculated && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Current Value</Label>
+                <Input
+                  type="number"
+                  value={formData.current_value}
+                  onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Value</Label>
+                <Input
+                  type="number"
+                  value={formData.default_value}
+                  onChange={(e) => setFormData({ ...formData, default_value: parseFloat(e.target.value) })}
+                />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label>Unit</Label>
             <Input
@@ -108,6 +135,7 @@ export const KPIEditDialog = ({
               placeholder="e.g., $, %, pts"
             />
           </div>
+          
           <div className="flex items-center justify-between">
             <Label>Is Percentage?</Label>
             <Switch
@@ -115,11 +143,15 @@ export const KPIEditDialog = ({
               onCheckedChange={(checked) => setFormData({ ...formData, is_percentage: checked })}
             />
           </div>
-          {formData.formula && (
+
+          {isCalculated && (
             <div className="space-y-2">
-              <Label>Formula</Label>
+              <div className="flex items-center gap-2">
+                <Calculator className="h-4 w-4" />
+                <Label>Formula</Label>
+              </div>
               <Textarea
-                value={formData.formula}
+                value={formData.formula || ''}
                 onChange={(e) => setFormData({ ...formData, formula: e.target.value })}
                 placeholder="e.g., kpi:revenue - kpi:costs"
               />
