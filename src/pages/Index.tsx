@@ -7,6 +7,7 @@ import Dashboard from "@/components/Dashboard";
 import GameHeader from "@/components/GameHeader";
 import { TurnContent } from "./components/TurnContent";
 import { useGameSetup } from "./hooks/useGameSetup";
+import type { Option } from "@/types/game";
 
 const TOTAL_TURNS = 20;
 
