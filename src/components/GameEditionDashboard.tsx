@@ -15,8 +15,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Settings, ChevronDown, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
-import GameEditionHeader from './GameEdition/Layout/GameEditionHeader';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const GameEditionDashboard = () => {
@@ -29,7 +27,7 @@ const GameEditionDashboard = () => {
   const [description, setDescription] = useState(gameData?.description || '');
   const [inspirationalImage, setInspirationalImage] = useState(gameData?.inspirational_image || '');
   const [hasChanges, setHasChanges] = useState(false);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (gameData) {
@@ -153,6 +151,7 @@ const GameEditionDashboard = () => {
 
         <GameTeamsSection gameId={gameId} />
         <TurnsSection gameId={gameId} />
+        <KPIsSection gameId={gameId} />
       </div>
     </div>
   );
