@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import GameEditionHeader from './GameEdition/Layout/GameEditionHeader';
 
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
