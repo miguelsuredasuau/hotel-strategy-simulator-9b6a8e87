@@ -14,7 +14,7 @@ interface OptionCardProps {
 
 const OptionCard = ({ option, index, onEdit, onDelete }: OptionCardProps) => {
   return (
-    <Draggable draggableId={`option-${option.id}`} index={index}>
+    <Draggable draggableId={`option-${option.uuid}`} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
