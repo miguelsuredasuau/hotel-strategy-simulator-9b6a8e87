@@ -39,7 +39,7 @@ export const StatisticsCards = () => {
           <DollarSign className="h-4 w-4 text-hotel-primary" />
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <div>
               <div className="text-3xl font-bold text-hotel-text">€{currentData.total}</div>
               <div className="flex items-center text-sm text-green-500 font-medium">
@@ -52,18 +52,18 @@ export const StatisticsCards = () => {
             </div>
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4">
+            <div className="flex justify-between text-xs text-hotel-muted mb-1">
+              <span>This Turn</span>
+              <span>Year to Date</span>
+            </div>
             <Slider
               value={periodValue}
               onValueChange={setPeriodValue}
               max={100}
               step={100}
-              className="my-4"
+              className="w-32 h-1"
             />
-            <div className="flex justify-between text-xs text-hotel-muted">
-              <span>This Turn</span>
-              <span>Year to Date</span>
-            </div>
           </div>
 
           <div className="space-y-3">
