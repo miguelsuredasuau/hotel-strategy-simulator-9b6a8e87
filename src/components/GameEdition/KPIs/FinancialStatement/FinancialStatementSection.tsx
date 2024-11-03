@@ -40,10 +40,10 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
   const freeCashFlow = operatingProfit - investmentsValue;
 
   return (
-    <div className="space-y-4 bg-white p-6 rounded-lg shadow-sm">
-      <h3 className="font-semibold text-lg text-center border-b pb-2">Financial Statement</h3>
+    <div className="bg-white p-4 rounded-lg shadow-sm max-w-md">
+      <h3 className="font-semibold text-base text-center border-b pb-2 mb-3">Financial Statement</h3>
       
-      <div className="grid gap-3">
+      <div className="space-y-1">
         {/* Customizable Inputs */}
         <FinancialMetric 
           label="Number of Rooms"
@@ -70,22 +70,22 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
           onDelete={onDelete}
         />
 
-        <Separator />
+        <Separator className="my-2" />
 
         {/* Revenue Section */}
         <FinancialMetric 
           label="Room Revenue"
-          value={roomRevenue}
+          value={roomRevenue.toFixed(2)}
           isEditable={false}
         />
         <FinancialMetric 
           label="Total Revenue"
-          value={totalRevenue}
+          value={totalRevenue.toFixed(2)}
           isEditable={false}
           className="font-semibold"
         />
 
-        <Separator />
+        <Separator className="my-2" />
 
         {/* Costs Section */}
         <FinancialMetric 
@@ -96,7 +96,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
         />
         <FinancialMetric 
           label="Variable Costs Amount"
-          value={variableCostsAmount}
+          value={variableCostsAmount.toFixed(2)}
           isEditable={false}
         />
         <FinancialMetric 
@@ -106,12 +106,12 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
           onDelete={onDelete}
         />
 
-        <Separator />
+        <Separator className="my-2" />
 
         {/* Bottom Line */}
         <FinancialMetric 
           label="Operating Profit"
-          value={operatingProfit}
+          value={operatingProfit.toFixed(2)}
           isEditable={false}
           className="font-semibold"
         />
@@ -123,7 +123,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete }: FinancialStatemen
         />
         <FinancialMetric 
           label="Free Cash Flow"
-          value={freeCashFlow}
+          value={freeCashFlow.toFixed(2)}
           isEditable={false}
           className="font-semibold text-hotel-primary"
         />

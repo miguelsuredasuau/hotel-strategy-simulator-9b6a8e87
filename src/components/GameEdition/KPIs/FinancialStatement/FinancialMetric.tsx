@@ -21,28 +21,21 @@ const FinancialMetric = ({
   className = ""
 }: FinancialMetricProps) => {
   return (
-    <div className={`flex justify-between items-center group ${className}`}>
-      <span className="text-gray-600">{label}</span>
+    <div className={`flex justify-between items-center py-1.5 group ${className}`}>
+      <span className="text-sm text-gray-600">{label}</span>
       <div className="flex items-center gap-4">
-        <span className="font-medium">
+        <span className={`font-medium ${isEditable ? 'bg-gray-50 px-3 py-1 rounded shadow-sm' : ''}`}>
           {value !== undefined ? value : kpi?.default_value || 0}
         </span>
         {isEditable && kpi && (
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit?.(kpi)}
+              className="h-7 px-2 text-xs"
             >
               Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={() => onDelete?.(kpi)}
-            >
-              Delete
             </Button>
           </div>
         )}
