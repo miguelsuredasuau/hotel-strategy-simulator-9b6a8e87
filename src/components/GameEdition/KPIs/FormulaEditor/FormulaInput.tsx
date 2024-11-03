@@ -59,6 +59,12 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
     insertAtCursor(operator);
   };
 
+  const handleDeletePart = (index: number) => {
+    const parts = value.split(/(\[[^\]]+\]|[-+*/()=<>!&|?:])/g).filter(Boolean);
+    parts.splice(index, 1);
+    onChange(parts.join('').trim());
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -99,7 +105,11 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             />
           </div>
         ) : (
-          <FormulaVisualizer formula={value} kpis={availableKPIs} />
+          <FormulaVisualizer 
+            formula={value} 
+            kpis={availableKPIs} 
+            onDelete={handleDeletePart}
+          />
         )}
       </div>
 
