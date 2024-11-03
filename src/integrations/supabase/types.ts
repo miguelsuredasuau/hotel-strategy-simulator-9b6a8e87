@@ -172,21 +172,21 @@ export type Database = {
           created_at: string | null
           email: string | null
           teamlogo: string | null
-          teamname: string | null
+          teamname: string
           uuid: string
         }
         Insert: {
           created_at?: string | null
           email?: string | null
           teamlogo?: string | null
-          teamname?: string | null
+          teamname: string
           uuid?: string
         }
         Update: {
           created_at?: string | null
           email?: string | null
           teamlogo?: string | null
-          teamname?: string | null
+          teamname?: string
           uuid?: string
         }
         Relationships: []
