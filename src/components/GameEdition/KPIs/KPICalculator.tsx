@@ -69,7 +69,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
         description: "KPI created successfully",
       });
 
-      // Reset form
       setName("");
       setDescription("");
       setFormula("");
@@ -88,13 +87,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5" />
-          Create New KPI
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Name</Label>
