@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import Dashboard from "@/components/Dashboard";
 import HotelCard from "@/components/HotelCard";
 import GameHeader from "@/components/GameHeader";
-import { useNavigate } from "react-router-dom";
 import { Option, Turn } from "@/types/game";
 import { Loader2 } from "lucide-react";
 import { TurnContent } from "./components/TurnContent";
@@ -63,31 +62,26 @@ const Index = () => {
 
   const handleNextTurn = () => {
     if (currentTurn < TOTAL_TURNS) {
+      setShowDashboard(false);
       const nextTurn = currentTurn + 1;
       setCurrentTurn(nextTurn);
       setLatestTurn(prev => Math.max(prev, nextTurn));
       setSelectedTurnNumber(null);
     }
-    setShowDashboard(false);
   };
 
-  // Add a proper type to the event parameter
   const handleKeyDown = (event: KeyboardEvent) => {
     if (event.key && event.key.toLowerCase() === 'escape') {
-      // Handle escape key press
       setShowDashboard(false);
     }
   };
 
   useEffect(() => {
-    // Add event listener with proper typing
     document.addEventListener('keydown', handleKeyDown);
-    
-    // Cleanup function to remove event listener
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Empty dependency array since handleKeyDown doesn't depend on any state
+  }, []);
 
   if (gameLoading) {
     return (
