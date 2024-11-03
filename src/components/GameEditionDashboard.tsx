@@ -145,6 +145,7 @@ const GameEditionDashboard = () => {
               onClick={handleSaveGame}
               disabled={!hasChanges}
               className={cn(
+                "text-white",
                 hasChanges ? "bg-hotel-primary hover:bg-hotel-primary/90" : "opacity-50 cursor-not-allowed"
               )}
             >
