@@ -97,7 +97,7 @@ const GameEditionDashboard = () => {
           <GameBulkOperations gameId={gameId} />
         </div>
         
-        <Card>
+        <Card className="mt-8">
           <Collapsible open={isOpen} onOpenChange={setIsOpen}>
             <CardHeader className="flex flex-row items-center justify-between">
               <div className="flex items-center gap-2">
@@ -107,6 +107,14 @@ const GameEditionDashboard = () => {
                 <Settings className="h-5 w-5" />
                 <CardTitle>Game Details</CardTitle>
               </div>
+              {hasChanges && (
+                <Button 
+                  onClick={handleSaveGame}
+                  className="bg-hotel-primary hover:bg-hotel-primary/90 text-white"
+                >
+                  Save Changes
+                </Button>
+              )}
             </CardHeader>
             <CollapsibleContent>
               <CardContent className="space-y-4">
@@ -137,16 +145,6 @@ const GameEditionDashboard = () => {
                     placeholder="Enter image URL"
                   />
                 </div>
-                <Button 
-                  onClick={handleSaveGame}
-                  disabled={!hasChanges}
-                  className={cn(
-                    "text-white",
-                    hasChanges ? "bg-hotel-primary hover:bg-hotel-primary/90" : "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  Save Game Details
-                </Button>
               </CardContent>
             </CollapsibleContent>
           </Collapsible>
