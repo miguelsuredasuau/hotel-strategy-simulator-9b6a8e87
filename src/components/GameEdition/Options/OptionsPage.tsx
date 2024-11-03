@@ -5,38 +5,45 @@ import { Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate, useParams } from "react-router-dom";
 import OptionCard from "./OptionCard";
 import OptionEditDialog from "./OptionEditDialog";
 import DeleteConfirmDialog from "../DeleteConfirmDialog";
-import { Option } from "@/types/game";
+import { Option, Turn } from "@/types/game";
 import { Card, CardContent } from "@/components/ui/card";
 
-interface OptionsPageProps {
-  turnId: number;
-  gameId: number;
-  turnNumber: number;
-  turnChallenge?: string;
-  turnDescription?: string;
-  onBack: () => void;
-}
-
-const OptionsPage = ({ 
-  turnId, 
-  gameId, 
-  turnNumber,
-  turnChallenge,
-  turnDescription,
-  onBack 
-}: OptionsPageProps) => {
+const OptionsPage = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { gameId, turnId } = useParams();
 
+  // Fetch turn data
+  const { data: turnData } = useQuery({
+    queryKey: ['turn', turnId],
+    queryFn: async () => {
+      if (!turnId) return null;
+      const { data, error } = await supabase
+        .from('Turns')
+        .select('*')
+        .eq('id', turnId)
+        .single();
+
+      if (error) throw error;
+      return data as Turn;
+    },
+    enabled: !!turnId
+  });
+
+  // Fetch options data
   const { data: options, isLoading } = useQuery({
     queryKey: ['options', turnId, gameId],
     queryFn: async () => {
+      if (!turnId || !gameId) return [];
+      
       const { data, error } = await supabase
         .from('Options')
         .select('*')
@@ -47,6 +54,7 @@ const OptionsPage = ({
       if (error) throw error;
       return data as Option[];
     },
+    enabled: !!turnId && !!gameId
   });
 
   const handleDragEnd = async (result: any) => {
@@ -56,16 +64,11 @@ const OptionsPage = ({
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update option numbers
     const updatedItems = items.map((item, index) => ({
       ...item,
       optionnumber: index + 1
     }));
 
-    // Update UI immediately
-    queryClient.setQueryData(['options', turnId, gameId], updatedItems);
-
-    // Update in database
     try {
       for (const option of updatedItems) {
         const { error } = await supabase
@@ -75,6 +78,12 @@ const OptionsPage = ({
         
         if (error) throw error;
       }
+
+      queryClient.setQueryData(['options', turnId, gameId], updatedItems);
+      toast({
+        title: "Success",
+        description: "Options order updated successfully",
+      });
     } catch (error: any) {
       toast({
         title: "Error updating order",
@@ -112,16 +121,22 @@ const OptionsPage = ({
     <div className="container mx-auto py-8">
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={onBack} className="p-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(`/game-edition/${gameId}`)} 
+            className="p-2"
+          >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold">Turn {turnNumber} Options</h1>
+          <h1 className="text-2xl font-bold">
+            Turn {turnData?.turnnumber} Options
+          </h1>
         </div>
 
         <Card className="bg-gray-50">
           <CardContent className="p-6">
-            <h2 className="font-semibold text-xl mb-2">{turnChallenge}</h2>
-            <p className="text-gray-600">{turnDescription}</p>
+            <h2 className="font-semibold text-xl mb-2">{turnData?.challenge}</h2>
+            <p className="text-gray-600">{turnData?.description}</p>
           </CardContent>
         </Card>
 
@@ -178,8 +193,8 @@ const OptionsPage = ({
 
         <OptionEditDialog
           option={selectedOption}
-          turnId={turnId}
-          gameId={gameId}
+          turnId={Number(turnId)}
+          gameId={Number(gameId)}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
         />
