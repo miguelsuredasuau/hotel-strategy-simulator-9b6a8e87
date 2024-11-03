@@ -158,7 +158,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
           <Button 
             onClick={handleCreateKPI} 
-            className="w-full bg-hotel-primary hover:bg-hotel-primary/90 text-white"
+            className="w-full bg-hotel-primary text-white hover:bg-hotel-primary/90"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create KPI
