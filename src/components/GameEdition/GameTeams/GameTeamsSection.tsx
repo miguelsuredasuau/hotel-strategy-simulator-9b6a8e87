@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users, ChevronDown, ChevronRight, trash } from "lucide-react"; // Updated import
+import { Plus, Users, ChevronDown, ChevronRight, Trash } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -129,7 +129,7 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
                         setIsDeleteDialogOpen(true);
                       }}
                     >
-                      <trash className="h-4 w-4" /> {/* Updated icon */}
+                      <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
