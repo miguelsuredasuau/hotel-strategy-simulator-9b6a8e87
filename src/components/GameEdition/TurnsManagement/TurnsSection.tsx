@@ -5,6 +5,8 @@ import { Plus, ScrollText, ChevronDown, ChevronRight, Download, Upload } from "l
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import * as XLSX from 'xlsx';
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import TurnCard from './TurnCard';
 import TurnEditDialog from '../TurnEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
@@ -25,6 +27,7 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  const queryClient = useQueryClient();
   const { turns, isLoading, isError } = useTurnsQuery(gameId);
   const { handleDeleteTurn } = useTurnActions(gameId);
   const { handleDragEnd } = useTurnDragAndDrop(gameId);
