@@ -54,22 +54,25 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
-        {selectedOption && (
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <h2 className="text-xl font-semibold mb-2">Selected Option: {selectedOption.title}</h2>
-            <p className="text-gray-600">{selectedOption.description}</p>
-            {isCurrentTurn && (
-              <div className="flex justify-end mt-4">
-                <Button 
-                  onClick={onNextTurn}
-                  className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
-                >
-                  Next Turn
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+        <div className="flex gap-6">
+          {selectedOption && (
+            <div className="flex-grow bg-white p-6 rounded-lg shadow-sm">
+              <h2 className="text-xl font-semibold mb-2">Selected Option: {selectedOption.title}</h2>
+              <p className="text-gray-600">{selectedOption.description}</p>
+            </div>
+          )}
+          
+          {isCurrentTurn && (
+            <div className="w-[10%] bg-white p-4 rounded-lg shadow-sm flex items-center justify-center">
+              <Button 
+                onClick={onNextTurn}
+                className="bg-hotel-primary text-white hover:bg-hotel-primary/90 w-full"
+              >
+                Next Turn
+              </Button>
+            </div>
+          )}
+        </div>
 
         <StatisticsCards />
         <ChartSection />
