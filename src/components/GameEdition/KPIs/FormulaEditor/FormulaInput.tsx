@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +17,7 @@ interface FormulaInputProps {
 export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   const operators = [
     { symbol: '+', label: 'Add' },
@@ -37,14 +38,31 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
     { symbol: ':', label: 'Else' },
   ];
 
-  const handleKPIClick = (kpiName: string) => {
-    const newValue = value.slice(0, cursorPosition) + `kpi:${kpiName}` + value.slice(cursorPosition);
+  const insertAtCursor = (textToInsert: string) => {
+    const newValue = value.slice(0, cursorPosition) + textToInsert + value.slice(cursorPosition);
     onChange(newValue);
+    
+    // Calculate new cursor position after insertion
+    const newPosition = cursorPosition + textToInsert.length;
+    
+    // Update cursor position state
+    setCursorPosition(newPosition);
+    
+    // Use setTimeout to ensure the DOM has updated
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+        inputRef.current.setSelectionRange(newPosition, newPosition);
+      }
+    }, 0);
+  };
+
+  const handleKPIClick = (kpiName: string) => {
+    insertAtCursor(`kpi:${kpiName}`);
   };
 
   const handleOperatorClick = (operator: string) => {
-    const newValue = value.slice(0, cursorPosition) + operator + value.slice(cursorPosition);
-    onChange(newValue);
+    insertAtCursor(operator);
   };
 
   return (
@@ -56,6 +74,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
         </div>
         <div className="relative">
           <Input
+            ref={inputRef}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
