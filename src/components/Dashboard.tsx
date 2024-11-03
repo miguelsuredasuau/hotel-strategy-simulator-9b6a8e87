@@ -58,7 +58,7 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
           {selectedOption && (
             <div className="flex-grow bg-white p-6 rounded-lg shadow-sm">
               <div className="flex gap-6">
-                <div className="w-48 h-32 rounded-lg overflow-hidden bg-gray-100">
+                <div className="w-32 h-24 rounded-lg overflow-hidden bg-gray-100">
                   {selectedOption.image ? (
                     <img
                       src={selectedOption.image}
