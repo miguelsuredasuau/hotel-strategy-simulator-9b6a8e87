@@ -74,7 +74,7 @@ export function KPICombobox({
   };
 
   const filteredKpis = React.useMemo(() => {
-    if (!kpis) return [];
+    if (!kpis?.length) return [];
     return kpis.filter(kpi => 
       kpi.name.toLowerCase().includes(search.toLowerCase())
     );
@@ -99,49 +99,47 @@ export function KPICombobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-[200px] p-0">
         <Command>
           <CommandInput 
             placeholder="Search KPI..." 
             value={search}
             onValueChange={setSearch}
           />
-          <CommandEmpty className="py-2 px-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">No KPI found</span>
+          <CommandEmpty>
+            <div className="p-2">
+              <p className="text-sm text-muted-foreground mb-2">No KPI found</p>
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={handleCreateNewKPI}
-                className="h-8"
+                className="w-full"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Create "{search}"
               </Button>
             </div>
           </CommandEmpty>
-          {filteredKpis.length > 0 && (
-            <CommandGroup>
-              {filteredKpis.map((kpi) => (
-                <CommandItem
-                  key={kpi.uuid}
-                  value={kpi.name}
-                  onSelect={() => {
-                    onChange(kpi.name);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === kpi.name ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {kpi.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
+          <CommandGroup>
+            {filteredKpis.map((kpi) => (
+              <CommandItem
+                key={kpi.uuid}
+                value={kpi.name}
+                onSelect={() => {
+                  onChange(kpi.name);
+                  setOpen(false);
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === kpi.name ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {kpi.name}
+              </CommandItem>
+            ))}
+          </CommandGroup>
         </Command>
       </PopoverContent>
     </Popover>
