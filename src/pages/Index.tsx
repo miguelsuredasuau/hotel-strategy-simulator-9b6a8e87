@@ -8,12 +8,14 @@ import HotelCard from "@/components/HotelCard";
 import GameHeader from "@/components/GameHeader";
 import { useNavigate } from "react-router-dom";
 import { Option, Turn } from "@/types/game";
+import { Loader2 } from "lucide-react";
 
 const TOTAL_TURNS = 20;
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [selectedTurnNumber, setSelectedTurnNumber] = useState<number | null>(null);
   const [gameId, setGameId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -97,7 +99,7 @@ const Index = () => {
   });
 
   const { data: turnData } = useQuery({
-    queryKey: ['turn', gameId, currentTurn],
+    queryKey: ['turn', gameId, selectedTurnNumber || currentTurn],
     queryFn: async () => {
       if (!gameId) return null;
 
@@ -105,7 +107,7 @@ const Index = () => {
         .from('Turns')
         .select('*')
         .eq('game_uuid', gameId)
-        .eq('turnnumber', currentTurn)
+        .eq('turnnumber', selectedTurnNumber || currentTurn)
         .single();
 
       if (error) throw error;
@@ -114,6 +116,13 @@ const Index = () => {
     enabled: !!gameId
   });
 
+  const handleTurnClick = (turnNumber: number) => {
+    if (turnNumber <= currentTurn) {
+      setSelectedTurnNumber(turnNumber);
+      setShowDashboard(true);
+    }
+  };
+
   const handleHotelSelect = () => {
     setShowDashboard(true);
   };
@@ -121,6 +130,7 @@ const Index = () => {
   const handleNextTurn = () => {
     if (currentTurn < TOTAL_TURNS) {
       setCurrentTurn(prev => prev + 1);
+      setSelectedTurnNumber(null);
     }
     setShowDashboard(false);
   };
@@ -138,7 +148,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GameHeader currentTurn={currentTurn} totalTurns={TOTAL_TURNS} />
+      <GameHeader 
+        currentTurn={selectedTurnNumber || currentTurn} 
+        totalTurns={TOTAL_TURNS} 
+        onTurnClick={handleTurnClick}
+      />
       
       {!showDashboard ? (
         <div className="p-6">
@@ -180,6 +194,8 @@ const Index = () => {
         <Dashboard 
           onNextTurn={handleNextTurn} 
           gameId={gameId} 
+          turnNumber={selectedTurnNumber || currentTurn}
+          isCurrentTurn={!selectedTurnNumber}
         />
       )}
 

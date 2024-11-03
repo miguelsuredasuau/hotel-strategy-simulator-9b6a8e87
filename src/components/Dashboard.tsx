@@ -10,25 +10,34 @@ import { Loader2 } from "lucide-react";
 interface DashboardProps {
   onNextTurn: () => void;
   gameId: string;
-  selectedOptionId?: string;
+  turnNumber: number;
+  isCurrentTurn: boolean;
 }
 
-const Dashboard = ({ onNextTurn, gameId, selectedOptionId }: DashboardProps) => {
+const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardProps) => {
   const { data: selectedOption, isLoading } = useQuery({
-    queryKey: ['option', selectedOptionId],
+    queryKey: ['selected-option', gameId, turnNumber],
     queryFn: async () => {
-      if (!selectedOptionId) return null;
-      
+      const { data: turn } = await supabase
+        .from('Turns')
+        .select('uuid')
+        .eq('game_uuid', gameId)
+        .eq('turnnumber', turnNumber)
+        .single();
+
+      if (!turn) return null;
+
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('uuid', selectedOptionId)
+        .eq('game_uuid', gameId)
+        .eq('turn_uuid', turn.uuid)
         .single();
 
       if (error) throw error;
       return data as Option;
     },
-    enabled: !!selectedOptionId
+    enabled: !!gameId
   });
 
   if (isLoading) {
@@ -52,14 +61,16 @@ const Dashboard = ({ onNextTurn, gameId, selectedOptionId }: DashboardProps) => 
         <StatisticsCards />
         <ChartSection />
 
-        <div className="flex justify-end mt-8">
-          <Button 
-            onClick={onNextTurn}
-            className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
-          >
-            Next Turn
-          </Button>
-        </div>
+        {isCurrentTurn && (
+          <div className="flex justify-end mt-8">
+            <Button 
+              onClick={onNextTurn}
+              className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
+            >
+              Next Turn
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
