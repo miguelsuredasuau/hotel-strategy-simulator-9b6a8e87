@@ -175,3 +175,4 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       </CardContent>
     </Card>
   );
+};
