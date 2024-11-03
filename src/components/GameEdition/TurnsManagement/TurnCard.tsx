@@ -21,15 +21,23 @@ const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`group transition-shadow ${snapshot.isDragging ? 'shadow-lg' : ''}`}
+          style={{
+            ...provided.draggableProps.style,
+            transform: snapshot.isDragging
+              ? provided.draggableProps.style?.transform
+              : "none",
+          }}
+          className="mb-4"
         >
-          <Card className="mb-4 hover:shadow-md transition-shadow">
+          <Card className={`transition-shadow duration-200 ${
+            snapshot.isDragging ? 'shadow-lg ring-2 ring-primary/20' : 'hover:shadow-md'
+          }`}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div
                     {...provided.dragHandleProps}
-                    className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded"
+                    className="cursor-grab active:cursor-grabbing p-1.5 hover:bg-gray-100 rounded-md transition-colors"
                   >
                     <GripVertical className="h-5 w-5 text-gray-400" />
                   </div>

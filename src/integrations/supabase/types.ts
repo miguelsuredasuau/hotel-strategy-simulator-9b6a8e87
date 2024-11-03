@@ -284,7 +284,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_turn_numbers: {
+        Args: {
+          turn_updates: Json[]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       financial_kpi_type:
