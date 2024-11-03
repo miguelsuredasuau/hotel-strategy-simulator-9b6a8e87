@@ -46,14 +46,19 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
 
       if (error) throw error;
       
-      // Ensure we're returning an array of Team objects with all required properties
-      return (data?.map(item => ({
-        uuid: item.teams.uuid,
-        teamname: item.teams.teamname,
-        teamlogo: item.teams.teamlogo,
-        email: item.teams.email,
-        created_at: item.teams.created_at
-      })) || []) as Team[];
+      if (!data) return [];
+
+      // Map the nested team data to our Team interface
+      return data.map(item => {
+        if (!item.teams) return null;
+        return {
+          uuid: item.teams.uuid,
+          teamname: item.teams.teamname,
+          teamlogo: item.teams.teamlogo,
+          email: item.teams.email,
+          created_at: item.teams.created_at
+        };
+      }).filter((team): team is Team => team !== null);
     },
   });
 
