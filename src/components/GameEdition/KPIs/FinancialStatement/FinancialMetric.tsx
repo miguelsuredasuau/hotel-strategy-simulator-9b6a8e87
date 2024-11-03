@@ -1,15 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { KPI } from "@/types/kpi";
 import { useState } from "react";
 
 interface FinancialMetricProps {
   label: string;
-  kpi?: KPI;
+  kpi?: {
+    uuid: string;
+    name: string;
+  };
   value?: string | number;
   isEditable?: boolean;
-  onEdit?: (kpi: KPI) => void;
-  onDelete?: (kpi: KPI) => void;
+  onEdit?: (kpi: any) => void;
+  onDelete?: (kpi: any) => void;
   onChange?: (value: number) => void;
   className?: string;
 }
@@ -17,7 +19,7 @@ interface FinancialMetricProps {
 const FinancialMetric = ({ 
   label, 
   kpi, 
-  value, 
+  value = 0, 
   isEditable = true,
   onEdit,
   onDelete,
@@ -25,15 +27,32 @@ const FinancialMetric = ({
   className = ""
 }: FinancialMetricProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [localValue, setLocalValue] = useState(value.toString());
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseFloat(e.target.value.replace(/,/g, ''));
-    if (!isNaN(newValue) && onChange) {
-      onChange(newValue);
+    const newValue = e.target.value.replace(/,/g, '');
+    setLocalValue(newValue);
+  };
+
+  const handleBlur = () => {
+    const numericValue = parseFloat(localValue.replace(/,/g, ''));
+    if (!isNaN(numericValue) && onChange) {
+      onChange(numericValue);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    }
+    if (e.key === 'Escape') {
+      setIsEditing(false);
+      setLocalValue(value.toString());
     }
   };
 
@@ -44,9 +63,10 @@ const FinancialMetric = ({
         {isEditing ? (
           <Input
             type="text"
-            value={value?.toString()}
+            value={localValue}
             onChange={handleChange}
-            onBlur={() => setIsEditing(false)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
             className="w-32 text-right"
             autoFocus
           />
@@ -55,7 +75,7 @@ const FinancialMetric = ({
             className={`font-medium text-right w-32 ${isEditable ? 'cursor-pointer hover:bg-gray-50' : ''}`}
             onClick={() => isEditable && setIsEditing(true)}
           >
-            {formatNumber(Number(value || 0))}
+            {formatNumber(Number(value))}
           </span>
         )}
         {isEditable && kpi && onEdit && (

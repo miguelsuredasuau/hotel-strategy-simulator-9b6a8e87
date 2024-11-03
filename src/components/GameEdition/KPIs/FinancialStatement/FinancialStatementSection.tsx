@@ -4,6 +4,8 @@ import FinancialMetric from "./FinancialMetric";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { useFinancialCalculations } from "./hooks/useFinancialCalculations";
+import { useKPIValueUpdates } from "./hooks/useKPIValueUpdates";
 
 interface FinancialStatementSectionProps {
   kpis: KPI[];
@@ -13,130 +15,78 @@ interface FinancialStatementSectionProps {
   turnId?: string;
 }
 
-const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: FinancialStatementSectionProps) => {
-  const queryClient = useQueryClient();
+const FinancialStatementSection = ({ 
+  kpis, 
+  onEdit, 
+  onDelete, 
+  gameId, 
+  turnId 
+}: FinancialStatementSectionProps) => {
   const { toast } = useToast();
+  const { handleKPIValueChange } = useKPIValueUpdates(gameId, turnId);
+  const { 
+    kpiValues,
+    findKPI,
+    getKPIValue,
+    calculatedValues
+  } = useFinancialCalculations(kpis, gameId, turnId);
 
-  const { data: kpiValues } = useQuery({
-    queryKey: ['kpi-values', gameId, turnId],
-    queryFn: async () => {
-      const query = supabase
-        .from('kpi_values')
-        .select('*')
-        .eq('game_uuid', gameId);
-      
-      if (turnId) {
-        query.eq('turn_uuid', turnId);
-      } else {
-        query.is('turn_uuid', null);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!gameId
-  });
-
-  const findKPI = (type: string) => 
-    kpis.find(kpi => kpi.financial_type === type);
-
-  const getKPIValue = (kpiUuid: string) => {
-    const kpiValue = kpiValues?.find(v => v.kpi_uuid === kpiUuid);
-    return kpiValue?.value ?? findKPI(kpiUuid)?.default_value ?? 0;
-  };
-
-  const handleValueChange = async (kpiUuid: string, newValue: number) => {
-    try {
-      const { error } = await supabase
-        .from('kpi_values')
-        .upsert({
-          kpi_uuid: kpiUuid,
-          game_uuid: gameId,
-          turn_uuid: turnId,
-          value: newValue
-        });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['kpi-values', gameId, turnId] });
-      
-      toast({
-        title: "Success",
-        description: "Value updated successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const rooms = findKPI('rooms');
-  const occupiedRooms = findKPI('occupied_rooms');
-  const adr = findKPI('adr');
-  const extras = findKPI('extras_revenue');
-  const variableCostsPercent = findKPI('variable_costs_percent');
-  const fixedCosts = findKPI('fixed_costs');
-  const investments = findKPI('investments');
-
-  const roomsValue = getKPIValue(rooms?.uuid || '');
-  const occupiedRoomsValue = Math.min(getKPIValue(occupiedRooms?.uuid || ''), roomsValue);
-  const adrValue = getKPIValue(adr?.uuid || '');
-  const extrasValue = getKPIValue(extras?.uuid || '');
-  
-  const roomRevenue = occupiedRoomsValue * adrValue;
-  const totalRevenue = roomRevenue + extrasValue;
-  
-  const variableCostsPercentValue = getKPIValue(variableCostsPercent?.uuid || '');
-  const variableCostsAmount = totalRevenue * (variableCostsPercentValue / 100);
-  const fixedCostsValue = getKPIValue(fixedCosts?.uuid || '');
-  
-  const operatingProfit = totalRevenue - variableCostsAmount - fixedCostsValue;
-  const investmentsValue = getKPIValue(investments?.uuid || '');
-  const freeCashFlow = operatingProfit - investmentsValue;
+  const {
+    roomsValue,
+    occupiedRoomsValue,
+    adrValue,
+    extrasValue,
+    roomRevenue,
+    totalRevenue,
+    variableCostsPercentValue,
+    variableCostsAmount,
+    fixedCostsValue,
+    operatingProfit,
+    investmentsValue,
+    freeCashFlow
+  } = calculatedValues;
 
   return (
     <div className="bg-white p-3 rounded-lg shadow-sm max-w-md">
-      <h3 className="font-semibold text-base text-center border-b pb-2 mb-2">Financial Statement</h3>
+      <h3 className="font-semibold text-base text-center border-b pb-2 mb-2">
+        Financial Statement
+      </h3>
       
       <div className="space-y-0.5">
         <FinancialMetric 
           label="Number of Rooms"
-          kpi={rooms}
+          kpi={findKPI('rooms')}
           value={roomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => rooms && handleValueChange(rooms.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('rooms')?.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
           label="Occupied Rooms"
-          kpi={occupiedRooms}
+          kpi={findKPI('occupied_rooms')}
           value={occupiedRoomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => occupiedRooms && handleValueChange(occupiedRooms.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('occupied_rooms')?.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
           label="ADR"
-          kpi={adr}
+          kpi={findKPI('adr')}
           value={adrValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => adr && handleValueChange(adr.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('adr')?.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
           label="Extras Revenue"
-          kpi={extras}
+          kpi={findKPI('extras_revenue')}
           value={extrasValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => extras && handleValueChange(extras.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('extras_revenue')?.uuid, value)}
           isEditable={true}
         />
 
@@ -158,11 +108,11 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
 
         <FinancialMetric 
           label="Variable Costs %"
-          kpi={variableCostsPercent}
+          kpi={findKPI('variable_costs_percent')}
           value={variableCostsPercentValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => variableCostsPercent && handleValueChange(variableCostsPercent.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('variable_costs_percent')?.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
@@ -172,11 +122,11 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
         />
         <FinancialMetric 
           label="Fixed Costs"
-          kpi={fixedCosts}
+          kpi={findKPI('fixed_costs')}
           value={fixedCostsValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => fixedCosts && handleValueChange(fixedCosts.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('fixed_costs')?.uuid, value)}
           isEditable={true}
         />
 
@@ -190,11 +140,11 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
         />
         <FinancialMetric 
           label="Investments"
-          kpi={investments}
+          kpi={findKPI('investments')}
           value={investmentsValue}
           onEdit={onEdit}
           onDelete={onDelete}
-          onChange={(value) => investments && handleValueChange(investments.uuid, value)}
+          onChange={(value) => handleKPIValueChange(findKPI('investments')?.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
