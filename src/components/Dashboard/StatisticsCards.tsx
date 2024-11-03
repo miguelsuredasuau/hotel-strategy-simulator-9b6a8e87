@@ -4,6 +4,7 @@ import { Check, TrendingUp, Users, Hotel, Star, DollarSign, Banknote } from "luc
 import { mockHotels } from "./dashboardData";
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
+import StarRating from "../StarRating";
 
 export const StatisticsCards = () => {
   const [periodValue, setPeriodValue] = useState([0]); // 0 for this turn, 100 for year to date
@@ -133,12 +134,9 @@ export const StatisticsCards = () => {
             {mockHotels.map((hotel) => (
               <div key={hotel.name} className="flex items-center justify-between">
                 <span className="text-sm text-hotel-text">{hotel.name}</span>
-                <div className="flex items-center">
-                  <span className="text-sm font-medium text-hotel-primary mr-2">{hotel.rating}</span>
-                  <Progress 
-                    value={hotel.rating * 20} 
-                    className="w-20 bg-gray-100" 
-                  />
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-hotel-primary">{hotel.rating}</span>
+                  <StarRating rating={hotel.rating} />
                 </div>
               </div>
             ))}
@@ -154,29 +152,31 @@ export const StatisticsCards = () => {
         <CardContent>
           <div className="flex items-center justify-center">
             <div className="relative w-40 h-40">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl font-bold text-hotel-primary">70%</span>
-              </div>
               <svg className="w-full h-full transform -rotate-90">
                 <circle
                   cx="80"
                   cy="80"
-                  r="60"
+                  r="70"
                   fill="none"
                   stroke="#E0F2FE"
-                  strokeWidth="12"
+                  strokeWidth="8"
                 />
                 <circle
                   cx="80"
                   cy="80"
-                  r="60"
+                  r="70"
                   fill="none"
                   stroke="#60A5FA"
-                  strokeWidth="12"
-                  strokeDasharray={`${2 * Math.PI * 60 * 0.7} ${2 * Math.PI * 60 * 0.3}`}
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 70 * 0.7} ${2 * Math.PI * 70 * 0.3}`}
                   strokeLinecap="round"
+                  className="transition-all duration-500 ease-out"
                 />
               </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-bold text-hotel-primary">70%</span>
+                <span className="text-sm text-hotel-muted mt-1">Staff Morale</span>
+              </div>
             </div>
           </div>
         </CardContent>
