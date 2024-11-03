@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FinancialMetricProps {
   label: string;
@@ -28,6 +28,11 @@ const FinancialMetric = ({
 }: FinancialMetricProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value.toString());
+
+  // Update local value when prop changes
+  useEffect(() => {
+    setLocalValue(value.toString());
+  }, [value]);
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);
