@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, ScrollText, ChevronDown, ChevronRight, Download, Upload } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import * as XLSX from 'xlsx';
@@ -14,6 +11,8 @@ import DeleteConfirmDialog from '../DeleteConfirmDialog';
 import { Turn } from '@/types/game';
 import { useTurnsQuery } from './useTurnsQuery';
 import { useTurnActions } from './useTurnActions';
+import { useTurnDragAndDrop } from './useTurnDragAndDrop';
+import { useToast } from "@/components/ui/use-toast";
 
 interface TurnsSectionProps {
   gameId: string;
@@ -27,8 +26,8 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const { turns, isLoading, isError } = useTurnsQuery(gameId);
-  const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
-  const queryClient = useQueryClient();
+  const { handleDeleteTurn } = useTurnActions(gameId);
+  const { handleDragEnd } = useTurnDragAndDrop(gameId);
   const { toast } = useToast();
 
   const handleDownloadExcel = () => {
