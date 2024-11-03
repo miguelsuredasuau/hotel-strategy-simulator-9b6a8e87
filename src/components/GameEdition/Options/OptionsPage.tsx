@@ -14,7 +14,7 @@ const OptionsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <GameEditionHeader title="Options Management" />
-      <div className="max-w-5xl mx-auto p-6">
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <OptionsSection gameId={gameId} turnId={turnId} />
       </div>
     </div>
