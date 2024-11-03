@@ -146,36 +146,37 @@ export const StatisticsCards = () => {
 
       <Card className="hover:shadow-lg transition-shadow">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-hotel-muted">Staff Morale</CardTitle>
-          <Users className="h-4 w-4 text-hotel-primary" />
+          <CardTitle className="text-lg font-medium text-gray-600">Staff Morale</CardTitle>
+          <Users className="h-5 w-5 text-blue-600" />
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center">
-            <div className="relative w-40 h-40">
+          <div className="flex items-center justify-center p-6">
+            <div className="relative w-48 h-48">
+              {/* Background circle */}
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
+                  cx="96"
+                  cy="96"
+                  r="88"
                   fill="none"
-                  stroke="#E0F2FE"
-                  strokeWidth="8"
+                  stroke="#EEF2FF"
+                  strokeWidth="12"
                 />
                 <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
+                  cx="96"
+                  cy="96"
+                  r="88"
                   fill="none"
-                  stroke="#60A5FA"
-                  strokeWidth="8"
-                  strokeDasharray={`${2 * Math.PI * 70 * 0.7} ${2 * Math.PI * 70 * 0.3}`}
+                  stroke="#4F46E5"
+                  strokeWidth="12"
+                  strokeDasharray={`${2 * Math.PI * 88 * 0.7} ${2 * Math.PI * 88 * 0.3}`}
                   strokeLinecap="round"
                   className="transition-all duration-500 ease-out"
                 />
               </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-4xl font-bold text-hotel-primary">70%</span>
-                <span className="text-sm text-hotel-muted mt-1">Staff Morale</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-5xl font-bold text-blue-600">70%</span>
+                <span className="text-base text-gray-500 mt-2">Staff Morale</span>
               </div>
             </div>
           </div>
