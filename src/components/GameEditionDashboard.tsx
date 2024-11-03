@@ -1,91 +1,38 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 import TurnEditDialog from './GameEdition/TurnEditDialog';
 import OptionsEditDialog from './GameEdition/OptionsEditDialog';
 import DeleteConfirmDialog from './GameEdition/DeleteConfirmDialog';
-import GameEditionHeader from './GameEdition/GameEditionHeader';
 import DashboardContent from './GameEdition/DashboardContent';
 import { useGameData } from '@/hooks/useGameData';
-import { Turn } from '@/types/game';
+import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
+import { useTurnManagement } from './GameEdition/Dashboard/useTurnManagement';
+import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 
 const GameEditionDashboard = () => {
   const { gameId } = useParams();
-  const [isGamemaster, setIsGamemaster] = useState(false);
-  const [isNewTurnOpen, setIsNewTurnOpen] = useState(false);
-  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
-  const [showingOptions, setShowingOptions] = useState(false);
+  const isGamemaster = useGameMasterCheck();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
-
   const { gameData, turnsData } = useGameData(gameId);
-
-  useEffect(() => {
-    const checkRole = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate('/login');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile || profile.role !== 'gamemaster') {
-        toast({
-          title: "Access Denied",
-          description: "Only gamemasters can access this page",
-          variant: "destructive",
-        });
-        navigate('/login');
-        return;
-      }
-
-      setIsGamemaster(true);
-    };
-
-    checkRole();
-  }, [navigate, toast]);
-
-  const handleCreateTurn = async (turn: any) => {
-    try {
-      const newTurnNumber = turnsData ? turnsData.length + 1 : 1;
-      const { data, error } = await supabase
-        .from('Turns')
-        .insert({
-          challenge: turn.challenge,
-          description: turn.description,
-          turnnumber: newTurnNumber,
-          game: parseInt(gameId!)
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-      setIsNewTurnOpen(false);
-      toast({
-        title: "Success",
-        description: "Turn created successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error creating turn",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+  
+  const {
+    isNewTurnOpen,
+    setIsNewTurnOpen,
+    isOptionsOpen,
+    setIsOptionsOpen,
+    isEditOpen,
+    setIsEditOpen,
+    isDeleteOpen,
+    setIsDeleteOpen,
+    selectedTurn,
+    setSelectedTurn,
+    showingOptions,
+    setShowingOptions,
+    handleCreateTurn,
+  } = useTurnManagement(gameId!);
 
   const handleLogout = async () => {
     try {
@@ -110,7 +57,7 @@ const GameEditionDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-5xl mx-auto p-6">
-        <GameEditionHeader onLogout={handleLogout} />
+        <DashboardHeader onLogout={handleLogout} />
         
         <DashboardContent
           gameId={gameId!}

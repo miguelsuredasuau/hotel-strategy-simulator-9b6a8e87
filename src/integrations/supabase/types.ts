@@ -16,6 +16,7 @@ export type Database = {
           inspirational_image: string | null
           name: string | null
           status: string | null
+          uuid: string
         }
         Insert: {
           created_at?: string | null
@@ -23,6 +24,7 @@ export type Database = {
           inspirational_image?: string | null
           name?: string | null
           status?: string | null
+          uuid?: string
         }
         Update: {
           created_at?: string | null
@@ -30,6 +32,7 @@ export type Database = {
           inspirational_image?: string | null
           name?: string | null
           status?: string | null
+          uuid?: string
         }
         Relationships: []
       }
@@ -38,6 +41,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           game: number | null
+          game_uuid: string | null
           id: number
           image: string | null
           impactkpi1: string | null
@@ -49,11 +53,14 @@ export type Database = {
           optionnumber: number | null
           title: string | null
           turn: number | null
+          turn_uuid: string | null
+          uuid: string
         }
         Insert: {
           created_at?: string | null
           description?: string | null
           game?: number | null
+          game_uuid?: string | null
           id?: never
           image?: string | null
           impactkpi1?: string | null
@@ -65,11 +72,14 @@ export type Database = {
           optionnumber?: number | null
           title?: string | null
           turn?: number | null
+          turn_uuid?: string | null
+          uuid?: string
         }
         Update: {
           created_at?: string | null
           description?: string | null
           game?: number | null
+          game_uuid?: string | null
           id?: never
           image?: string | null
           impactkpi1?: string | null
@@ -81,21 +91,23 @@ export type Database = {
           optionnumber?: number | null
           title?: string | null
           turn?: number | null
+          turn_uuid?: string | null
+          uuid?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Options_game_fkey"
-            columns: ["game"]
+            foreignKeyName: "Options_game_uuid_fkey"
+            columns: ["game_uuid"]
             isOneToOne: false
             referencedRelation: "Games"
-            referencedColumns: ["id"]
+            referencedColumns: ["uuid"]
           },
           {
-            foreignKeyName: "Options_turn_fkey"
-            columns: ["turn"]
+            foreignKeyName: "Options_turn_uuid_fkey"
+            columns: ["turn_uuid"]
             isOneToOne: false
             referencedRelation: "Turns"
-            referencedColumns: ["id"]
+            referencedColumns: ["uuid"]
           },
         ]
       }
@@ -118,15 +130,7 @@ export type Database = {
           role?: string | null
           team_id?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       teams: {
         Row: {
@@ -135,6 +139,7 @@ export type Database = {
           id: number
           teamlogo: string | null
           teamname: string | null
+          uuid: string
         }
         Insert: {
           created_at?: string | null
@@ -142,6 +147,7 @@ export type Database = {
           id?: never
           teamlogo?: string | null
           teamname?: string | null
+          uuid?: string
         }
         Update: {
           created_at?: string | null
@@ -149,6 +155,7 @@ export type Database = {
           id?: never
           teamlogo?: string | null
           teamname?: string | null
+          uuid?: string
         }
         Relationships: []
       }
@@ -158,32 +165,38 @@ export type Database = {
           created_at: string | null
           description: string | null
           game: number | null
+          game_uuid: string | null
           id: number
           turnnumber: number | null
+          uuid: string
         }
         Insert: {
           challenge?: string | null
           created_at?: string | null
           description?: string | null
           game?: number | null
+          game_uuid?: string | null
           id?: never
           turnnumber?: number | null
+          uuid?: string
         }
         Update: {
           challenge?: string | null
           created_at?: string | null
           description?: string | null
           game?: number | null
+          game_uuid?: string | null
           id?: never
           turnnumber?: number | null
+          uuid?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Turns_game_fkey"
-            columns: ["game"]
+            foreignKeyName: "Turns_game_uuid_fkey"
+            columns: ["game_uuid"]
             isOneToOne: false
             referencedRelation: "Games"
-            referencedColumns: ["id"]
+            referencedColumns: ["uuid"]
           },
         ]
       }
