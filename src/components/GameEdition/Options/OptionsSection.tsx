@@ -17,7 +17,7 @@ interface OptionsSectionProps {
   gameId: string;
 }
 
-const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
+export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -247,5 +247,3 @@ const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
     </Card>
   );
 };
-
-export default OptionsSection;

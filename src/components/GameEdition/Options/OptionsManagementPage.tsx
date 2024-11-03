@@ -40,6 +40,7 @@ const OptionsManagementPage = () => {
       <OptionsHeader 
         turnData={turnData}
         onBack={() => navigate(`/game-edition/${gameId}`)}
+        onAddOption={() => {/* This will be handled by OptionsSection */}}
       />
       <OptionsSection 
         turnId={turnId}
