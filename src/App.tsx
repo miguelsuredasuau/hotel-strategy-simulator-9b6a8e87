@@ -33,6 +33,10 @@ const App = () => {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session);
+        if (!session) {
+          queryClient.clear();
+          localStorage.clear();
+        }
       });
 
       return () => subscription.unsubscribe();

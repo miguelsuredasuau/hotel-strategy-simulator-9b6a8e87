@@ -21,10 +21,14 @@ const GameEditionHeader = ({
 
   const handleLogout = async () => {
     try {
+      // Clear all queries first
       queryClient.clear();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate('/login');
+      // Sign out from Supabase
+      await supabase.auth.signOut();
+      // Clear any local storage items if needed
+      localStorage.clear();
+      // Navigate to login page
+      navigate('/login', { replace: true });
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({

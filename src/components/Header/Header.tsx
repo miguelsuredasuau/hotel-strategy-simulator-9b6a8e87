@@ -19,9 +19,14 @@ const Header = ({ children, currentTurn, totalTurns, onTurnSelect }: HeaderProps
 
   const handleLogout = async () => {
     try {
+      // Clear all queries first
       queryClient.clear();
+      // Sign out from Supabase
       await supabase.auth.signOut();
-      navigate('/login');
+      // Clear any local storage items if needed
+      localStorage.clear();
+      // Navigate to login page
+      navigate('/login', { replace: true });
     } catch (error: any) {
       console.error('Logout error:', error);
       toast({
