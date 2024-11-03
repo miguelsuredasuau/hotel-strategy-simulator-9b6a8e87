@@ -12,8 +12,8 @@ interface HotelCardProps {
 
 const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) => {
   return (
-    <Card className="overflow-hidden">
-      <div className="aspect-video relative overflow-hidden bg-gray-100">
+    <Card className="overflow-hidden h-full flex flex-col">
+      <div className="aspect-[16/10] relative overflow-hidden bg-gray-100">
         {image ? (
           <img
             src={image}
@@ -26,7 +26,7 @@ const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) =
           </div>
         )}
       </div>
-      <CardContent className="p-4">
+      <CardContent className="p-4 flex-1">
         <h3 className="text-lg font-semibold mb-2">{name}</h3>
         <p className="text-gray-600 text-sm line-clamp-3">{description}</p>
       </CardContent>

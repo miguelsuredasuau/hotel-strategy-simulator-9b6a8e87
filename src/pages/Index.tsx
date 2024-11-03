@@ -159,7 +159,7 @@ const Index = () => {
       />
       
       {!showDashboard ? (
-        <div className="p-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-hotel-text mb-2">
               Turn {currentTurn}{turnData?.challenge ? `: ${turnData.challenge}` : ''}
@@ -170,13 +170,13 @@ const Index = () => {
           </div>
 
           {optionsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-lg"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="h-[400px] bg-gray-100 animate-pulse rounded-lg"></div>
               ))}
             </div>
           ) : options && options.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
               {options.map((option) => (
                 <HotelCard
                   key={option.uuid}
