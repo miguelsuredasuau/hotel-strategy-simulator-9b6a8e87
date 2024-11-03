@@ -35,12 +35,12 @@ const TeamsSection = () => {
     },
   });
 
-  const handleDeleteTeam = async (teamId: number) => {
+  const handleDeleteTeam = async (teamUuid: string) => {
     try {
       const { error } = await supabase
         .from('teams')
         .delete()
-        .eq('id', teamId);
+        .eq('uuid', teamUuid);
 
       if (error) throw error;
 
@@ -66,7 +66,6 @@ const TeamsSection = () => {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update the UI immediately
     queryClient.setQueryData(['teams'], items);
   };
 
@@ -105,7 +104,7 @@ const TeamsSection = () => {
                     ) : teams?.length ? (
                       teams.map((team, index) => (
                         <TeamCard
-                          key={team.id}
+                          key={team.uuid}
                           team={team}
                           index={index}
                           onEditTeam={(team) => {
@@ -146,7 +145,7 @@ const TeamsSection = () => {
       <DeleteConfirmDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        onConfirm={() => selectedTeam && handleDeleteTeam(selectedTeam.id)}
+        onConfirm={() => selectedTeam && handleDeleteTeam(selectedTeam.uuid)}
       />
     </Card>
   );

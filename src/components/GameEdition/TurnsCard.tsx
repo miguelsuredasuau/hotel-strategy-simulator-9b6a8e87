@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -38,7 +37,7 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
         const { error } = await supabase
           .from('Turns')
           .update({ turnnumber: turn.turnnumber })
-          .eq('id', turn.id);
+          .eq('uuid', turn.uuid);
         
         if (error) throw error;
       }
@@ -77,7 +76,7 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
               >
                 {turns.map((turn, index) => (
                   <TurnCard
-                    key={turn.id}
+                    key={turn.uuid}
                     turn={turn}
                     index={index}
                     onEditOptions={onEditOptions}

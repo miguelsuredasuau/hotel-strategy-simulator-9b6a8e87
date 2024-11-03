@@ -12,7 +12,7 @@ import { useTurnManagement } from './GameEdition/Dashboard/useTurnManagement';
 import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 
 const GameEditionDashboard = () => {
-  const { gameId } = useParams();
+  const { gameId = '' } = useParams();
   const isGamemaster = useGameMasterCheck();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ const GameEditionDashboard = () => {
     showingOptions,
     setShowingOptions,
     handleCreateTurn,
-  } = useTurnManagement(gameId!);
+  } = useTurnManagement(gameId);
 
   const handleLogout = async () => {
     try {
@@ -60,7 +60,7 @@ const GameEditionDashboard = () => {
         <DashboardHeader onLogout={handleLogout} />
         
         <DashboardContent
-          gameId={gameId!}
+          gameId={gameId}
           gameData={gameData}
           turnsData={turnsData}
           showingOptions={showingOptions}
@@ -106,7 +106,7 @@ const GameEditionDashboard = () => {
             />
             <OptionsEditDialog
               turnId={selectedTurn.uuid}
-              gameId={gameId!}
+              gameId={gameId}
               open={isOptionsOpen}
               onOpenChange={(open) => {
                 setIsOptionsOpen(open);

@@ -14,24 +14,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Trash } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Option {
-  id: number;
-  title?: string;
-  description?: string;
-  image?: string;
-  optionnumber: number;
-  impactkpi1?: string;
-  impactkpi1amount?: number;
-  impactkpi2?: string;
-  impactkpi2amount?: number;
-  impactkpi3?: string;
-  impactkpi3amount?: number;
-}
+import { Option } from "@/types/game";
 
 interface OptionsEditDialogProps {
-  turnId: number;
-  gameId: number;
+  turnId: string;
+  gameId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -47,12 +34,12 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('turn', turnId)
-        .eq('game', gameId)
+        .eq('turn_uuid', turnId)
+        .eq('game_uuid', gameId)
         .order('optionnumber');
 
       if (error) throw error;
-      return data;
+      return data as Option[];
     },
   });
 
@@ -63,10 +50,10 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
         .from('Options')
         .insert({
           ...newOption,
-          turn: turnId,
-          game: gameId,
+          turn_uuid: turnId,
+          game_uuid: gameId,
           optionnumber: optionNumber,
-        } as any);
+        });
 
       if (error) throw error;
 
@@ -99,8 +86,8 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
           impactkpi2amount: option.impactkpi2amount,
           impactkpi3: option.impactkpi3,
           impactkpi3amount: option.impactkpi3amount,
-        } as any)
-        .eq('id', option.id);
+        })
+        .eq('uuid', option.uuid);
 
       if (error) throw error;
 
@@ -118,12 +105,12 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
     }
   };
 
-  const handleDeleteOption = async (optionId: number) => {
+  const handleDeleteOption = async (optionUuid: string) => {
     try {
       const { error } = await supabase
         .from('Options')
         .delete()
-        .eq('id', optionId);
+        .eq('uuid', optionUuid);
 
       if (error) throw error;
 
@@ -155,7 +142,7 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
           ) : (
             <div className="space-y-6">
               {options?.map((option) => (
-                <div key={option.id} className="space-y-4 p-4 border rounded-lg">
+                <div key={option.uuid} className="space-y-4 p-4 border rounded-lg">
                   <div className="flex justify-between items-start">
                     <div className="flex-1 space-y-4">
                       <div>
@@ -179,28 +166,11 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
                           onChange={(e) => handleUpdateOption({ ...option, image: e.target.value })}
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>KPI 1</Label>
-                          <Input
-                            value={option.impactkpi1 || ''}
-                            onChange={(e) => handleUpdateOption({ ...option, impactkpi1: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <Label>Amount</Label>
-                          <Input
-                            type="number"
-                            value={option.impactkpi1amount || ''}
-                            onChange={(e) => handleUpdateOption({ ...option, impactkpi1amount: parseFloat(e.target.value) })}
-                          />
-                        </div>
-                      </div>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDeleteOption(option.id)}
+                      onClick={() => handleDeleteOption(option.uuid)}
                       className="text-red-500 hover:text-red-700"
                     >
                       <Trash className="h-4 w-4" />

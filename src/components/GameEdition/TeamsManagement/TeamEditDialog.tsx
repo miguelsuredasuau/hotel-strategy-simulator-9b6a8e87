@@ -49,7 +49,7 @@ const TeamEditDialog = ({ team, open, onOpenChange }: TeamEditDialogProps) => {
           teamlogo: teamLogo,
           email: email
         })
-        .eq('id', team.id);
+        .eq('uuid', team.uuid);
 
       if (error) throw error;
 
