@@ -38,32 +38,88 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
     }
   };
 
-  // Split by KPI references and operators while preserving the complete references
-  const splitFormula = (formula: string) => {
-    // First, temporarily replace KPI references with a unique marker
-    let tempFormula = formula;
-    const kpiRefs: string[] = [];
+  // Split formula into tokens while preserving KPI references and operators
+  const tokenizeFormula = (formula: string) => {
+    const tokens: { type: 'kpi' | 'operator' | 'text'; value: string; originalValue?: string }[] = [];
+    let currentToken = '';
+    let insideKPI = false;
     
-    tempFormula = tempFormula.replace(/\[([^\]]+)\]/g, (match) => {
-      kpiRefs.push(match);
-      return `###KPI${kpiRefs.length - 1}###`;
-    });
-
-    // Split by operators while preserving the KPI reference markers
-    const parts = tempFormula.split(/([+\-*/()=<>!&|?:])/g).filter(Boolean);
-
-    // Restore KPI references
-    return parts.map(part => {
-      if (part.startsWith('###KPI') && part.endsWith('###')) {
-        const index = parseInt(part.replace('###KPI', '').replace('###', ''));
-        return kpiRefs[index];
+    const formattedFormula = formatFormula(formula);
+    
+    for (let i = 0; i < formattedFormula.length; i++) {
+      const char = formattedFormula[i];
+      
+      if (char === '[') {
+        if (currentToken) {
+          tokens.push({ type: 'text', value: currentToken });
+          currentToken = '';
+        }
+        insideKPI = true;
+        currentToken = char;
+      } else if (char === ']' && insideKPI) {
+        currentToken += char;
+        // Find the original KPI reference
+        const kpiName = currentToken.slice(1, -1);
+        const kpi = kpis.find(k => {
+          const displayName = kpis.filter(k2 => k2.name === k.name).length > 1 
+            ? `${k.name} (${k.uuid.slice(0, 4)})`
+            : k.name;
+          return displayName === kpiName;
+        });
+        tokens.push({ 
+          type: 'kpi', 
+          value: currentToken,
+          originalValue: kpi ? `kpi:${kpi.uuid}` : undefined
+        });
+        currentToken = '';
+        insideKPI = false;
+      } else if (insideKPI) {
+        currentToken += char;
+      } else if (/[-+*/()=<>!&|?:]/.test(char)) {
+        if (currentToken) {
+          tokens.push({ type: 'text', value: currentToken });
+          currentToken = '';
+        }
+        tokens.push({ type: 'operator', value: char });
+      } else {
+        currentToken += char;
       }
-      return part;
-    });
+    }
+    
+    if (currentToken) {
+      tokens.push({ type: 'text', value: currentToken });
+    }
+    
+    return tokens;
   };
 
-  const formattedFormula = formatFormula(formula);
-  const parts = splitFormula(formattedFormula);
+  const handleDelete = (index: number, token: { type: string; value: string; originalValue?: string }) => {
+    if (!onDelete) return;
+    
+    // If it's a KPI token, we need to find its position in the original formula
+    if (token.type === 'kpi' && token.originalValue) {
+      const tokens = tokenizeFormula(formula);
+      let originalFormulaIndex = 0;
+      let count = 0;
+      
+      for (let i = 0; i < tokens.length; i++) {
+        if (i === index) {
+          onDelete(originalFormulaIndex);
+          break;
+        }
+        if (tokens[i].type === 'kpi') {
+          originalFormulaIndex += tokens[i].originalValue?.length || 0;
+        } else {
+          originalFormulaIndex += tokens[i].value.length;
+        }
+        count++;
+      }
+    } else {
+      onDelete(index);
+    }
+  };
+
+  const tokens = tokenizeFormula(formula);
   const hasInvalidParts = formula.includes('kpi:') && !formula.match(/kpi:[a-fA-F0-9-]{36}/g);
 
   if (hasInvalidParts) {
@@ -78,18 +134,15 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
   return (
     <div className="p-4 bg-white rounded-lg border">
       <div className="flex flex-wrap gap-2 items-center">
-        {parts.map((part, index) => {
-          const isKPI = part.startsWith('[') && part.endsWith(']');
-          const isOperator = /^[-+*/()=<>!&|?:]$/.test(part);
-          
-          if (isKPI) {
-            const kpiName = part.slice(1, -1);
+        {tokens.map((token, index) => {
+          if (token.type === 'kpi') {
+            const kpiName = token.value.slice(1, -1);
             return (
               <Badge
                 key={index}
                 variant="secondary"
                 className="bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer group relative"
-                onClick={() => onDelete?.(index)}
+                onClick={() => handleDelete(index, token)}
               >
                 {kpiName}
                 {onDelete && (
@@ -101,7 +154,7 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
             );
           }
           
-          if (isOperator) {
+          if (token.type === 'operator') {
             return (
               <span
                 key={index}
@@ -110,9 +163,9 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
                   "font-mono text-sm group relative",
                   "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 )}
-                onClick={() => onDelete?.(index)}
+                onClick={() => handleDelete(index, token)}
               >
-                {part}
+                {token.value}
                 {onDelete && (
                   <span className="absolute inset-0 flex items-center justify-center bg-gray-200/0 opacity-0 group-hover:opacity-100 transition-opacity">
                     ×
@@ -126,9 +179,9 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
             <span 
               key={index} 
               className="text-gray-600 cursor-pointer hover:text-gray-900"
-              onClick={() => onDelete?.(index)}
+              onClick={() => handleDelete(index, token)}
             >
-              {part.trim()}
+              {token.value.trim()}
             </span>
           );
         })}
