@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 import CreateGameDialog from "./CreateGameDialog";
 import DeleteGameDialog from "./DeleteGameDialog";
 import GameDetailsCard from "./GameDetailsCard";
@@ -13,6 +14,7 @@ const GameSelectionPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const { data: games = [], refetch } = useQuery({
     queryKey: ["games"],
@@ -32,9 +34,55 @@ const GameSelectionPage = () => {
     setIsCreateDialogOpen(false);
   };
 
-  const handleGameDeleted = () => {
-    refetch();
-    setSelectedGameId(null);
+  const handleDeleteGame = async () => {
+    if (!selectedGameId) return;
+
+    try {
+      // First delete all options associated with the game's turns
+      const { error: optionsError } = await supabase
+        .from('Options')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      if (optionsError) throw optionsError;
+
+      // Delete all turns associated with the game
+      const { error: turnsError } = await supabase
+        .from('Turns')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      if (turnsError) throw turnsError;
+
+      // Delete all game_teams associations
+      const { error: gameTeamsError } = await supabase
+        .from('game_teams')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      if (gameTeamsError) throw gameTeamsError;
+
+      // Finally delete the game itself
+      const { error: gameError } = await supabase
+        .from('Games')
+        .delete()
+        .eq('uuid', selectedGameId);
+
+      if (gameError) throw gameError;
+
+      await refetch();
+      toast({
+        title: "Success",
+        description: "Game deleted successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
   };
 
   return (
@@ -68,8 +116,8 @@ const GameSelectionPage = () => {
 
         <DeleteGameDialog
           open={!!selectedGameId}
-          onOpenChange={() => setSelectedGameId(null)}
-          onConfirm={() => handleGameDeleted()}
+          onOpenChange={(open) => !open && setSelectedGameId(null)}
+          onConfirm={handleDeleteGame}
         />
       </div>
     </div>
