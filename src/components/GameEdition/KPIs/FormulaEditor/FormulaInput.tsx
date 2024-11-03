@@ -82,7 +82,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             <Database className="h-4 w-4" />
             <h3 className="font-medium">Variables</h3>
           </div>
-          <ScrollArea className="h-[200px]">
+          <ScrollArea className="h-[120px]">
             <div className="grid grid-cols-3 gap-2">
               {availableKPIs.map((kpi) => (
                 <Button
@@ -96,11 +96,6 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                     <div className="font-medium group-hover:text-blue-700 truncate text-xs">
                       {kpi.name}
                     </div>
-                    {kpi.unit && (
-                      <div className="text-[10px] text-muted-foreground truncate">
-                        {kpi.unit}
-                      </div>
-                    )}
                   </div>
                 </Button>
               ))}
@@ -110,7 +105,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
 
         <Card className="p-4 bg-white">
           <h3 className="font-medium mb-3">Operators</h3>
-          <ScrollArea className="h-[200px]">
+          <ScrollArea className="h-[120px]">
             <div className="grid grid-cols-4 gap-1.5">
               {operators.map((op) => (
                 <Button
