@@ -23,7 +23,8 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       const { data, error } = await supabase
         .from('round_teams')
         .select(`
-          teams: team_uuid (
+          team_uuid,
+          teams:team_uuid (
             uuid,
             teamname,
             teamlogo,
@@ -35,8 +36,8 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
 
       if (error) throw error;
       
-      // Transform the data to match the Team type
-      return (data?.map(item => item.teams) || []) as Team[];
+      // Transform the data to match the Team type by extracting the teams object
+      return data?.map(item => item.teams) as Team[];
     },
   });
 
