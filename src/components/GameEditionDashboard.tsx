@@ -2,49 +2,17 @@ import { useParams } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
-import TurnEditDialog from './GameEdition/TurnEditDialog';
-import OptionsEditDialog from './GameEdition/OptionsEditDialog';
-import DeleteConfirmDialog from './GameEdition/DeleteConfirmDialog';
-import DashboardContent from './GameEdition/DashboardContent';
+import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 import { useGameData } from '@/hooks/useGameData';
 import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
-import { useTurnManagement } from './GameEdition/Dashboard/useTurnManagement';
-import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
-import { Game, Turn } from '@/types/game';
-
-interface DashboardContentProps {
-  gameId: string;
-  gameData: Game;
-  turnsData: Turn[];
-  showingOptions: boolean;
-  onEditOptions: (turn: Turn) => void;
-  onEditTurn: (turn: Turn) => void;
-  onDeleteTurn: (turn: Turn) => void;
-  onAddTurn: () => void;
-}
+import TurnsSection from './GameEdition/TurnsManagement/TurnsSection';
 
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
   const isGamemaster = useGameMasterCheck();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { gameData, turnsData } = useGameData(gameId);
-  
-  const {
-    isNewTurnOpen,
-    setIsNewTurnOpen,
-    isOptionsOpen,
-    setIsOptionsOpen,
-    isEditOpen,
-    setIsEditOpen,
-    isDeleteOpen,
-    setIsDeleteOpen,
-    selectedTurn,
-    setSelectedTurn,
-    showingOptions,
-    setShowingOptions,
-    handleCreateTurn,
-  } = useTurnManagement(gameId);
+  const { gameData } = useGameData(gameId);
 
   const handleLogout = async () => {
     try {
@@ -72,89 +40,16 @@ const GameEditionDashboard = () => {
         <DashboardHeader onLogout={handleLogout} />
         
         {gameData && (
-          <DashboardContent
-            gameId={gameId}
-            gameData={gameData}
-            turnsData={turnsData || []}
-            showingOptions={showingOptions}
-            onEditOptions={(turn) => {
-              setSelectedTurn(turn);
-              setShowingOptions(true);
-              setIsOptionsOpen(true);
-            }}
-            onEditTurn={(turn) => {
-              setSelectedTurn(turn);
-              setIsEditOpen(true);
-            }}
-            onDeleteTurn={(turn) => {
-              setSelectedTurn(turn);
-              setIsDeleteOpen(true);
-            }}
-            onAddTurn={() => setIsNewTurnOpen(true)}
-          />
-        )}
-
-        {isNewTurnOpen && (
-          <TurnEditDialog
-            turn={{ uuid: '', turnnumber: turnsData ? turnsData.length + 1 : 1, game_uuid: gameId }}
-            open={isNewTurnOpen}
-            onOpenChange={setIsNewTurnOpen}
-            onSave={handleCreateTurn}
-          />
-        )}
-
-        {selectedTurn && (
-          <>
-            <TurnEditDialog
-              turn={selectedTurn}
-              open={isEditOpen}
-              onOpenChange={setIsEditOpen}
-              onSave={(updatedTurn) => {
-                queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-                setIsEditOpen(false);
-                toast({
-                  title: "Turn updated",
-                  description: "The turn has been successfully updated.",
-                });
-              }}
-            />
-            <OptionsEditDialog
-              turnId={selectedTurn.uuid}
-              gameId={gameId}
-              open={isOptionsOpen}
-              onOpenChange={(open) => {
-                setIsOptionsOpen(open);
-                if (!open) setShowingOptions(false);
-              }}
-            />
-            <DeleteConfirmDialog
-              open={isDeleteOpen}
-              onOpenChange={setIsDeleteOpen}
-              onConfirm={async () => {
-                try {
-                  const { error } = await supabase
-                    .from('Turns')
-                    .delete()
-                    .eq('uuid', selectedTurn.uuid);
-                  
-                  if (error) throw error;
-                  
-                  queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-                  setIsDeleteOpen(false);
-                  toast({
-                    title: "Turn deleted",
-                    description: "The turn has been successfully deleted.",
-                  });
-                } catch (error: any) {
-                  toast({
-                    title: "Error deleting turn",
-                    description: error.message,
-                    variant: "destructive",
-                  });
-                }
-              }}
-            />
-          </>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h1 className="text-2xl font-bold mb-2">{gameData.name}</h1>
+              {gameData.description && (
+                <p className="text-gray-600">{gameData.description}</p>
+              )}
+            </div>
+            
+            <TurnsSection gameId={gameId} />
+          </div>
         )}
       </div>
     </div>
