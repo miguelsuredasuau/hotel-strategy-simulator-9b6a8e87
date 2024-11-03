@@ -1,9 +1,36 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Check, TrendingUp, Users, Hotel, Star, DollarSign } from "lucide-react";
+import { Check, TrendingUp, Users, Hotel, Star, DollarSign, Banknote } from "lucide-react";
 import { mockHotels } from "./dashboardData";
+import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 
 export const StatisticsCards = () => {
+  const [periodValue, setPeriodValue] = useState([0]); // 0 for this turn, 100 for year to date
+
+  const isPeriodYTD = periodValue[0] > 50;
+
+  const revenueData = {
+    thisMonth: {
+      total: "43,280",
+      change: "+12%",
+      income: { amount: "+450,000", percentage: "+10%" },
+      expenses: { amount: "-235,000", percentage: "+7%" },
+      profit: { amount: "+215,000", percentage: "+15%" },
+      investments: { amount: "+180,000", percentage: "+5%" }
+    },
+    ytd: {
+      total: "521,450",
+      change: "+25%",
+      income: { amount: "+2,450,000", percentage: "+22%" },
+      expenses: { amount: "-1,235,000", percentage: "+12%" },
+      profit: { amount: "+1,215,000", percentage: "+28%" },
+      investments: { amount: "+850,000", percentage: "+15%" }
+    }
+  };
+
+  const currentData = isPeriodYTD ? revenueData.ytd : revenueData.thisMonth;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
       <Card className="hover:shadow-lg transition-shadow">
@@ -12,23 +39,53 @@ export const StatisticsCards = () => {
           <DollarSign className="h-4 w-4 text-hotel-primary" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-hotel-text">€43,280</div>
-          <div className="flex items-center text-sm text-green-500 font-medium mb-4">
-            <TrendingUp className="w-4 h-4 mr-1" />
-            +12% vs last month
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-3xl font-bold text-hotel-text">€{currentData.total}</div>
+              <div className="flex items-center text-sm text-green-500 font-medium">
+                <TrendingUp className="w-4 h-4 mr-1" />
+                {currentData.change} vs last period
+              </div>
+            </div>
+            <div className="text-xs text-hotel-muted">
+              {isPeriodYTD ? "Year to Date" : "This Turn"}
+            </div>
           </div>
-          <div className="space-y-2">
+
+          <div className="mb-6">
+            <Slider
+              value={periodValue}
+              onValueChange={setPeriodValue}
+              max={100}
+              step={100}
+              className="my-4"
+            />
+            <div className="flex justify-between text-xs text-hotel-muted">
+              <span>This Turn</span>
+              <span>Year to Date</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
             <div className="flex items-center text-sm">
               <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text">Income +450,000 <span className="text-green-500">(+10%)</span></span>
+              <span className="text-hotel-text flex-1">Income {currentData.income.amount}</span>
+              <span className="text-green-500">{currentData.income.percentage}</span>
             </div>
             <div className="flex items-center text-sm">
               <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text">Expenses -235,000 <span className="text-red-500">(+7%)</span></span>
+              <span className="text-hotel-text flex-1">Expenses {currentData.expenses.amount}</span>
+              <span className="text-red-500">{currentData.expenses.percentage}</span>
             </div>
             <div className="flex items-center text-sm">
               <Check className="w-4 h-4 mr-2 text-hotel-primary" />
-              <span className="text-hotel-text">Profit +215,000 <span className="text-green-500">(+15%)</span></span>
+              <span className="text-hotel-text flex-1">Profit {currentData.profit.amount}</span>
+              <span className="text-green-500">{currentData.profit.percentage}</span>
+            </div>
+            <div className="flex items-center text-sm border-t pt-2">
+              <Banknote className="w-4 h-4 mr-2 text-hotel-primary" />
+              <span className="text-hotel-text flex-1">Investments {currentData.investments.amount}</span>
+              <span className="text-blue-500">{currentData.investments.percentage}</span>
             </div>
           </div>
         </CardContent>
