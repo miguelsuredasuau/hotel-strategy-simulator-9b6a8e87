@@ -1,21 +1,13 @@
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface KPI {
   uuid: string;
@@ -37,9 +29,8 @@ export function KPIAutocomplete({
   onChange,
   onKPICreate 
 }: KPIAutocompleteProps) {
-  const [open, setOpen] = React.useState(false);
-  const [inputValue, setInputValue] = React.useState(value);
   const { toast } = useToast();
+  const [inputValue, setInputValue] = React.useState(value);
 
   React.useEffect(() => {
     setInputValue(value);
@@ -53,13 +44,6 @@ export function KPIAutocomplete({
       typeof kpi.uuid === 'string'
     ) ?? [];
   }, [kpis]);
-
-  const filteredKpis = React.useMemo(() => {
-    if (!inputValue) return safeKpis;
-    return safeKpis.filter(kpi => 
-      kpi.name.toLowerCase().includes(inputValue.toLowerCase())
-    );
-  }, [safeKpis, inputValue]);
 
   const handleCreateKPI = async (name: string) => {
     try {
@@ -85,7 +69,6 @@ export function KPIAutocomplete({
       });
 
       onChange(name);
-      setOpen(false);
       onKPICreate?.();
     } catch (error: any) {
       toast({
@@ -96,62 +79,29 @@ export function KPIAutocomplete({
     }
   };
 
-  const handleSelect = async (selectedValue: string) => {
-    const existingKPI = safeKpis.find(k => k.name === selectedValue);
+  const handleValueChange = async (newValue: string) => {
+    const existingKPI = safeKpis.find(k => k.name === newValue);
     
-    if (existingKPI) {
-      onChange(selectedValue);
-      setOpen(false);
-    } else if (selectedValue.trim()) {
-      await handleCreateKPI(selectedValue.trim());
+    if (!existingKPI && newValue.trim()) {
+      await handleCreateKPI(newValue.trim());
     }
+    
+    onChange(newValue);
+    setInputValue(newValue);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          {inputValue || "Select or create KPI..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command>
-          <CommandInput 
-            placeholder="Search or create KPI..." 
-            value={inputValue}
-            onValueChange={(value) => {
-              setInputValue(value);
-              onChange(value);
-            }}
-          />
-          <CommandEmpty>
-            Press enter to create "{inputValue}"
-          </CommandEmpty>
-          <CommandGroup>
-            {filteredKpis.map((kpi) => (
-              <CommandItem
-                key={kpi.uuid}
-                value={kpi.name}
-                onSelect={handleSelect}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === kpi.name ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {kpi.name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <Select value={inputValue} onValueChange={handleValueChange}>
+      <SelectTrigger>
+        <SelectValue placeholder="Select or create KPI..." />
+      </SelectTrigger>
+      <SelectContent>
+        {safeKpis.map((kpi) => (
+          <SelectItem key={kpi.uuid} value={kpi.name}>
+            {kpi.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
