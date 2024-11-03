@@ -10,7 +10,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import TurnCard from './TurnCard';
 import TurnEditDialog from '../TurnEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
-import OptionsEditDialog from '../OptionsEditDialog';
 import { Turn } from '@/types/game';
 import { useTurnsQuery } from './useTurnsQuery';
 import { useTurnActions } from './useTurnActions';
@@ -23,7 +22,6 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isOptionsDialogOpen, setIsOptionsDialogOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
   const [isOpen, setIsOpen] = useState(true);
 
@@ -151,10 +149,6 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
                             setSelectedTurn(turn);
                             setIsDeleteDialogOpen(true);
                           }}
-                          onEditOptions={(turn) => {
-                            setSelectedTurn(turn);
-                            setIsOptionsDialogOpen(true);
-                          }}
                         />
                       ))
                     ) : (
@@ -189,15 +183,6 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
         onOpenChange={setIsDeleteDialogOpen}
         onConfirm={() => selectedTurn && handleDeleteTurn(selectedTurn.uuid)}
       />
-
-      {selectedTurn && (
-        <OptionsEditDialog
-          turnId={selectedTurn.uuid}
-          gameId={gameId}
-          open={isOptionsDialogOpen}
-          onOpenChange={setIsOptionsDialogOpen}
-        />
-      )}
     </Card>
   );
 };

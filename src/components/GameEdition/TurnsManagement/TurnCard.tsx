@@ -15,10 +15,6 @@ interface TurnCardProps {
 const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
   const navigate = useNavigate();
 
-  const handleOptionsClick = () => {
-    navigate(`/game-edition/${turn.game_uuid}/turn/${turn.uuid}/options`);
-  };
-
   return (
     <Draggable draggableId={`turn-${turn.uuid}`} index={index}>
       {(provided) => (
@@ -46,7 +42,7 @@ const TurnCard = ({ turn, index, onEditTurn, onDeleteTurn }: TurnCardProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={handleOptionsClick}
+                    onClick={() => navigate(`/game-edition/${turn.game_uuid}/turn/${turn.uuid}/options`)}
                   >
                     <Settings2 className="h-4 w-4" />
                   </Button>
