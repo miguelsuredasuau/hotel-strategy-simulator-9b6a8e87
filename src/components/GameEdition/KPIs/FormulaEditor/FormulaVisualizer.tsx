@@ -19,16 +19,21 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
         const uuid = ref.replace('kpi:', '');
         const kpi = kpis.find((k) => k.uuid === uuid);
         if (kpi) {
+          // Add UUID to display name to differentiate between KPIs with same name
+          const displayName = kpis.filter(k => k.name === kpi.name).length > 1 
+            ? `${kpi.name} (${kpi.uuid.slice(0, 4)})`
+            : kpi.name;
+          
           displayFormula = displayFormula.replace(
             ref,
-            `[${kpi.name}]`
+            `[${displayName}]`
           );
         }
       });
 
       return displayFormula;
     } catch (error) {
-      return formula; // Return original formula if parsing fails
+      return formula;
     }
   };
 

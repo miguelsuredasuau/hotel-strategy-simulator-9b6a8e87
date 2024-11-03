@@ -15,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FormulaInput } from "./FormulaEditor/FormulaInput";
+import { useQuery } from "@tanstack/react-query";
 
 interface KPICreateDialogProps {
   gameId: string;
@@ -34,8 +35,32 @@ export const KPICreateDialog = ({ gameId, open, onOpenChange }: KPICreateDialogP
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Query existing KPIs to check for duplicates
+  const { data: existingKpis } = useQuery({
+    queryKey: ['kpis', gameId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('kpis')
+        .select('name')
+        .eq('game_uuid', gameId);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const handleCreate = async () => {
     try {
+      // Check for duplicate names
+      if (existingKpis?.some(kpi => kpi.name.toLowerCase() === name.toLowerCase())) {
+        toast({
+          title: "Error",
+          description: "A KPI with this name already exists. Please choose a different name.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const dependsOn = isCalculated 
         ? formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || []
         : null;
