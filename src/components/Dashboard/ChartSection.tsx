@@ -1,7 +1,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, ScatterChart, CartesianGrid, XAxis, YAxis, Scatter, ResponsiveContainer, Tooltip } from "recharts";
-import { Quote } from "lucide-react";
+import { Quote, Hotel } from "lucide-react";
 import { mockRevenueData, mockCompetitiveData, mockHotels } from "./dashboardData";
+
+// Custom scatter dot component using Hotel icon
+const CustomHotelDot = (props: any) => {
+  const { cx, cy, fill } = props;
+  
+  return (
+    <Hotel
+      x={cx - 12}
+      y={cy - 12}
+      className="w-6 h-6"
+      style={{ 
+        fill: fill,
+        stroke: '#fff',
+        strokeWidth: 1
+      }}
+    />
+  );
+};
 
 export const ChartSection = () => {
   return (
@@ -71,11 +89,13 @@ export const ChartSection = () => {
                   data={mockCompetitiveData} 
                   fill="#60A5FA" 
                   fillOpacity={0.6}
+                  shape={<CustomHotelDot />}
                 />
                 <Scatter 
                   data={mockHotels} 
                   fill="#EF4444" 
                   fillOpacity={0.8}
+                  shape={<CustomHotelDot />}
                 />
               </ScatterChart>
             </ResponsiveContainer>
