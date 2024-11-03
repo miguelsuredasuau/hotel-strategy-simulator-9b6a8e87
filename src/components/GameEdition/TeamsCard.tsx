@@ -16,15 +16,10 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
-interface Team {
-  id: number;
-  teamname: string;
-  teamlogo?: string;
-}
+import { Team } from "@/types/game";
 
 interface TeamsCardProps {
-  gameId: number;
+  gameId: string;
 }
 
 const TeamsCard = ({ gameId }: TeamsCardProps) => {
@@ -43,7 +38,7 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
         .select('*');
 
       if (error) throw error;
-      return data;
+      return data as Team[];
     },
   });
 
@@ -72,8 +67,8 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
       if (userData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ team_id: teamData.id })
-          .eq('id', userData.user.id);
+          .update({ team_uuid: teamData.uuid })
+          .eq('uuid', userData.user.uuid);
 
         if (profileError) throw profileError;
       }
@@ -156,15 +151,15 @@ const TeamsCard = ({ gameId }: TeamsCardProps) => {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {teams?.map((team) => (
-            <div key={team.id} className="flex items-center space-x-2">
-              <Checkbox id={`team-${team.id}`} />
+            <div key={team.uuid} className="flex items-center space-x-2">
+              <Checkbox id={`team-${team.uuid}`} />
               <Avatar className="h-8 w-8">
                 <AvatarImage src={team.teamlogo} alt={team.teamname} />
                 <AvatarFallback>
                   <UserCircle className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-              <Label htmlFor={`team-${team.id}`}>{team.teamname}</Label>
+              <Label htmlFor={`team-${team.uuid}`}>{team.teamname}</Label>
             </div>
           ))}
         </div>

@@ -50,8 +50,8 @@ const CreateTeamDialog = ({ open, onOpenChange }: CreateTeamDialogProps) => {
       if (userData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .update({ team_id: teamData.id })
-          .eq('id', userData.user.id);
+          .update({ team_uuid: teamData.uuid })
+          .eq('uuid', userData.user.uuid);
 
         if (profileError) throw profileError;
       }
