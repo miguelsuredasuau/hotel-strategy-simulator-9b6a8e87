@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import TeamAssignDialog from './TeamAssignDialog';
 import { Team } from '@/types/game';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface GameTeamsSectionProps {
   gameId: string;
@@ -19,14 +20,20 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
   const [selectedTeamUuid, setSelectedTeamUuid] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: assignedTeams = [], isLoading } = useQuery({
     queryKey: ['game-teams', gameId],
     queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate('/login');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('game_teams')
         .select(`
-          team_uuid,
           teams:team_uuid (
             uuid,
             teamname,
@@ -38,7 +45,15 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
         .eq('game_uuid', gameId);
 
       if (error) throw error;
-      return data.map(item => item.teams) as Team[];
+      
+      // Ensure we're returning an array of Team objects with all required properties
+      return (data?.map(item => ({
+        uuid: item.teams.uuid,
+        teamname: item.teams.teamname,
+        teamlogo: item.teams.teamlogo,
+        email: item.teams.email,
+        created_at: item.teams.created_at
+      })) || []) as Team[];
     },
   });
 
