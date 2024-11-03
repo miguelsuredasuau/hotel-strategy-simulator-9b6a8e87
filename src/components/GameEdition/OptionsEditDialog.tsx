@@ -142,7 +142,6 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
                         index={1}
                         kpiName={option.impactkpi1}
                         kpiAmount={option.impactkpi1amount}
-                        availableKPIs={[]} // Pass available KPIs here
                         gameId={gameId}
                         onChange={(field, value) => setNewOption({ ...option, [field]: value })}
                       />
