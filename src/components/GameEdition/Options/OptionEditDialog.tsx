@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Option } from "@/types/game";
-import OptionForm from "./OptionForm";
 import { useToast } from "@/components/ui/use-toast";
+import OptionForm from "./components/OptionForm";
 
 interface OptionEditDialogProps {
   option: Partial<Option>;
@@ -28,8 +27,8 @@ const OptionEditDialog = ({
   turnId,
   gameId,
 }: OptionEditDialogProps) => {
-  const [formData, setFormData] = useState<Partial<Option>>(option);
   const { toast } = useToast();
+  const [formData, setFormData] = useState<Partial<Option>>(option);
 
   useEffect(() => {
     setFormData(option);
@@ -74,6 +73,7 @@ const OptionEditDialog = ({
         <div className="py-4">
           <OptionForm
             option={formData}
+            gameId={gameId || ''}
             onChange={handleChange}
           />
         </div>
