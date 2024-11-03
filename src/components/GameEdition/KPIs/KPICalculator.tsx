@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,11 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [formula, setFormula] = useState("");
+  const [isCalculated, setIsCalculated] = useState(false);
+  const [currentValue, setCurrentValue] = useState<number>(0);
+  const [defaultValue, setDefaultValue] = useState<number>(0);
+  const [unit, setUnit] = useState("");
+  const [isPercentage, setIsPercentage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -36,9 +42,11 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
     }
   });
 
-  const handleCreateCalculatedKPI = async () => {
+  const handleCreateKPI = async () => {
     try {
-      const dependsOn = formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || [];
+      const dependsOn = isCalculated 
+        ? formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || []
+        : null;
 
       const { error } = await supabase
         .from('kpis')
@@ -47,8 +55,12 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
           name,
           type: 'financial',
           description,
-          formula,
-          depends_on: dependsOn
+          formula: isCalculated ? formula : null,
+          depends_on: dependsOn,
+          current_value: isCalculated ? null : currentValue,
+          default_value: isCalculated ? null : defaultValue,
+          unit,
+          is_percentage: isPercentage
         });
 
       if (error) throw error;
@@ -56,12 +68,18 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
       toast({
         title: "Success",
-        description: "Calculated KPI created successfully",
+        description: "KPI created successfully",
       });
 
+      // Reset form
       setName("");
       setDescription("");
       setFormula("");
+      setCurrentValue(0);
+      setDefaultValue(0);
+      setUnit("");
+      setIsPercentage(false);
+      setIsCalculated(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -76,7 +94,7 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-5 w-5" />
-          Create Calculated KPI
+          Create New KPI
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -97,17 +115,70 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
               placeholder="Describe how this KPI is calculated"
             />
           </div>
-          <div className="space-y-2">
-            <Label>Formula</Label>
-            <FormulaInput
-              value={formula}
-              onChange={setFormula}
-              availableKPIs={kpis || []}
+
+          <div className="flex items-center justify-between space-x-2 bg-gray-50 p-4 rounded-lg">
+            <div className="space-y-0.5">
+              <Label>Calculated KPI</Label>
+              <p className="text-sm text-gray-500">
+                {isCalculated ? "This KPI will be calculated using a formula" : "This KPI will have a constant value"}
+              </p>
+            </div>
+            <Switch
+              checked={isCalculated}
+              onCheckedChange={setIsCalculated}
             />
           </div>
-          <Button onClick={handleCreateCalculatedKPI} className="w-full">
+
+          {isCalculated ? (
+            <div className="space-y-2">
+              <Label>Formula</Label>
+              <FormulaInput
+                value={formula}
+                onChange={setFormula}
+                availableKPIs={kpis || []}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Current Value</Label>
+                <Input
+                  type="number"
+                  value={currentValue}
+                  onChange={(e) => setCurrentValue(parseFloat(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Default Value</Label>
+                <Input
+                  type="number"
+                  value={defaultValue}
+                  onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label>Unit</Label>
+            <Input
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              placeholder="e.g., $, %, pts"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label>Is Percentage?</Label>
+            <Switch
+              checked={isPercentage}
+              onCheckedChange={setIsPercentage}
+            />
+          </div>
+
+          <Button onClick={handleCreateKPI} className="w-full">
             <Plus className="h-4 w-4 mr-2" />
-            Create Calculated KPI
+            Create KPI
           </Button>
         </div>
       </CardContent>
