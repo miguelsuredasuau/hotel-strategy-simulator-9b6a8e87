@@ -20,33 +20,16 @@ export const useKPIValueUpdates = (gameId: string, turnId?: string) => {
         value: newValue
       };
 
-      // First check if a value already exists
-      const { data: existingValue, error: fetchError } = await supabase
+      console.log('Saving KPI value:', kpiValue); // Debug log
+
+      // Upsert the value
+      const { error } = await supabase
         .from('kpi_values')
-        .select('uuid')
-        .eq('kpi_uuid', kpiUuid)
-        .eq('game_uuid', gameId)
-        .eq('turn_uuid', turnId)
-        .maybeSingle();
+        .upsert(kpiValue, {
+          onConflict: 'kpi_uuid,game_uuid,turn_uuid'
+        });
 
-      if (fetchError) throw fetchError;
-
-      let result;
-      
-      if (existingValue) {
-        // Update existing value
-        result = await supabase
-          .from('kpi_values')
-          .update({ value: newValue })
-          .eq('uuid', existingValue.uuid);
-      } else {
-        // Insert new value
-        result = await supabase
-          .from('kpi_values')
-          .insert([kpiValue]);
-      }
-
-      if (result.error) throw result.error;
+      if (error) throw error;
 
       // Invalidate queries to refetch the latest data
       await queryClient.invalidateQueries({ 
@@ -57,6 +40,8 @@ export const useKPIValueUpdates = (gameId: string, turnId?: string) => {
         title: "Success",
         description: "Value updated successfully",
       });
+
+      console.log('KPI value saved successfully'); // Debug log
     } catch (error: any) {
       console.error('Error updating KPI value:', error);
       toast({

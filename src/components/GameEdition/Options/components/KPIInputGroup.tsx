@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KPIAutocomplete } from "./KPIAutocomplete";
+import { useKPIValueUpdates } from "../../KPIs/FinancialStatement/hooks/useKPIValueUpdates";
 
 interface KPIInputGroupProps {
   index: number;
@@ -21,6 +22,20 @@ const KPIInputGroup = ({
   onChange,
   onKPICreate
 }: KPIInputGroupProps) => {
+  const { handleKPIValueChange } = useKPIValueUpdates(gameId);
+
+  const handleAmountChange = async (value: number) => {
+    // Update the local state
+    onChange(`impactkpi${index}amount`, value);
+    
+    // Find the KPI UUID based on the name
+    const kpi = availableKPIs.find(k => k.name === kpiName);
+    if (kpi) {
+      // Save to Supabase
+      await handleKPIValueChange(kpi.uuid, value);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -38,7 +53,7 @@ const KPIInputGroup = ({
         <Input
           type="number"
           value={kpiAmount || ''}
-          onChange={(e) => onChange(`impactkpi${index}amount`, parseFloat(e.target.value))}
+          onChange={(e) => handleAmountChange(parseFloat(e.target.value))}
           placeholder="Impact amount"
         />
       </div>
