@@ -94,6 +94,7 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      className="transform-none"
                       style={{
                         ...provided.draggableProps.style,
                         transform: snapshot.isDragging

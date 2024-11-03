@@ -94,6 +94,7 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      className="transform-none"
                       style={{
                         ...provided.draggableProps.style,
                         transform: snapshot.isDragging

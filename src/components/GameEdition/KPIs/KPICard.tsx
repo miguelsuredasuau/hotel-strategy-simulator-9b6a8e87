@@ -14,7 +14,7 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = !!kpi.formula;
 
   return (
-    <div className="relative">
+    <div className="relative transform-none">
       <Card 
         {...dragHandleProps}
         className="group bg-white hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing"
