@@ -18,13 +18,10 @@ export const downloadOptionsAsExcel = (
   }
 
   const excelData = options.map(option => ({
-    'Turn UUID': turnUuid,
-    'Game UUID': gameUuid,
-    'Turn Number': turnNumber,
-    'Option Number': option.optionnumber || '',
     'Title': option.title || '',
     'Description': option.description || '',
     'Image URL': option.image || '',
+    'Option Number': option.optionnumber || '',
     'KPI 1': option.impactkpi1 || '',
     'KPI 1 Amount': option.impactkpi1amount || '',
     'KPI 2': option.impactkpi2 || '',
