@@ -8,7 +8,6 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandSeparator,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -27,7 +26,7 @@ interface KPIComboboxProps {
 }
 
 export function KPICombobox({ 
-  value, 
+  value = '', 
   gameId, 
   kpis = [], 
   onChange, 
@@ -75,10 +74,17 @@ export function KPICombobox({
   };
 
   const filteredKpis = React.useMemo(() => {
+    if (!kpis) return [];
     return kpis.filter(kpi => 
       kpi.name.toLowerCase().includes(search.toLowerCase())
     );
   }, [kpis, search]);
+
+  const displayValue = React.useMemo(() => {
+    if (!value) return "Select KPI...";
+    const kpi = kpis?.find(k => k.name === value);
+    return kpi ? kpi.name : value;
+  }, [value, kpis]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -89,7 +95,7 @@ export function KPICombobox({
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value || "Select KPI..."}
+          {displayValue}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
