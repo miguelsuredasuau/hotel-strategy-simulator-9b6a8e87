@@ -45,6 +45,8 @@ const App = () => {
       } catch (error) {
         console.error('Session initialization error:', error);
         setSession(null);
+        // Redirect to login page on session error
+        window.location.href = '/login';
       } finally {
         setIsLoading(false);
       }
