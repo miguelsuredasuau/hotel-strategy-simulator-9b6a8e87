@@ -9,6 +9,7 @@ import CreateGameDialog from "./CreateGameDialog";
 import DeleteGameDialog from "./DeleteGameDialog";
 import GameDetailsCard from "./GameDetailsCard";
 import GameEditionHeader from "./Layout/GameEditionHeader";
+import TeamsSection from "./TeamsManagement/TeamsSection";
 
 const GameSelectionPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -88,25 +89,29 @@ const GameSelectionPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <GameEditionHeader showBackButton={false} />
-      <div className="max-w-5xl mx-auto p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Your Games</h2>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create New Game
-          </Button>
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        <div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">Your Games</h2>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Game
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {games.map((game) => (
+              <GameDetailsCard
+                key={game.uuid}
+                game={game}
+                onGameClick={() => navigate(`/game-edition/${game.uuid}`)}
+                onDeleteClick={() => setSelectedGameId(game.uuid)}
+              />
+            ))}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {games.map((game) => (
-            <GameDetailsCard
-              key={game.uuid}
-              game={game}
-              onGameClick={() => navigate(`/game-edition/${game.uuid}`)}
-              onDeleteClick={() => setSelectedGameId(game.uuid)}
-            />
-          ))}
-        </div>
+        <TeamsSection />
 
         <CreateGameDialog
           open={isCreateDialogOpen}

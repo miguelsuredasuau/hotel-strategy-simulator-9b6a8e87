@@ -1,42 +1,40 @@
+import { Button } from "@/components/ui/button";
 import TeamMenu from "./TeamMenu";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-interface HeaderProps {
-  children?: React.ReactNode;
-  currentTurn?: number;
-  totalTurns?: number;
-  onTurnSelect?: (turn: number) => void;
-}
+const Header = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-const Header = ({ children, currentTurn, totalTurns, onTurnSelect }: HeaderProps) => {
+  const handleLogout = async () => {
+    try {
+      queryClient.clear();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/login');
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast({
+        title: "Error signing out",
+        description: error.message || "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <header className="w-full bg-white shadow-sm py-4 px-6 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        {children}
-      </div>
-      <div className="flex items-center gap-6">
-        {currentTurn && totalTurns && (
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1 items-center">
-              {Array.from({ length: totalTurns }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => onTurnSelect?.(i + 1)}
-                  disabled={i + 1 > currentTurn}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    i + 1 === currentTurn
-                      ? "bg-hotel-primary text-white"
-                      : i + 1 < currentTurn
-                      ? "bg-hotel-accent text-hotel-primary hover:bg-hotel-accent/80 cursor-pointer"
-                      : "bg-gray-100 text-hotel-muted cursor-not-allowed"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+    <header className="w-full bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center">
+            <h1 className="text-2xl font-bold text-gray-900">Hotel Game</h1>
           </div>
-        )}
-        <TeamMenu />
+          <TeamMenu onLogout={handleLogout} />
+        </div>
       </div>
     </header>
   );
