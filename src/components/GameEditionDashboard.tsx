@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Settings, ChevronDown, ChevronRight } from "lucide-react";
+import { Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const GameEditionDashboard = () => {
@@ -84,14 +84,14 @@ const GameEditionDashboard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GameEditionHeader />
+      <GameEditionHeader gameId={gameId} />
       <div className="max-w-5xl mx-auto p-6 space-y-6">
         <div className="flex justify-end">
           <GameBulkOperations gameId={gameId} />
