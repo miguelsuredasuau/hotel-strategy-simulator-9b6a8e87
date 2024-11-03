@@ -30,7 +30,7 @@ export const StatisticsCards = () => {
               </div>
             </div>
 
-            <div className="space-y-3 mt-6">
+            <div className="space-y-2 mt-4">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center">
                   <Check className="w-4 h-4 mr-2 text-hotel-primary" />
@@ -55,7 +55,7 @@ export const StatisticsCards = () => {
                 <span className="text-green-500 font-medium">{revenueData.profit.percentage}</span>
               </div>
               
-              <div className="flex items-center justify-between text-sm pt-3 border-t">
+              <div className="flex items-center justify-between text-sm pt-2 border-t">
                 <div className="flex items-center">
                   <Banknote className="w-4 h-4 mr-2 text-hotel-primary" />
                   <span className="text-hotel-text">Investments {revenueData.investments.amount}</span>
@@ -73,7 +73,7 @@ export const StatisticsCards = () => {
           <Hotel className="h-4 w-4 text-hotel-primary" />
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="flex justify-between mb-6">
+          <div className="flex justify-between mb-4">
             <div>
               <div className="text-2xl font-bold text-hotel-text">€120</div>
               <div className="text-xs text-hotel-muted">ADR</div>
@@ -83,7 +83,7 @@ export const StatisticsCards = () => {
               <div className="text-xs text-hotel-muted">Occupancy</div>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {mockHotels.map((hotel) => (
               <div key={hotel.name} className="flex items-center justify-between">
                 <span className="text-sm text-hotel-text">{hotel.name}</span>
@@ -101,11 +101,11 @@ export const StatisticsCards = () => {
         </CardHeader>
         <CardContent className="pt-4">
           <div className="text-2xl font-bold text-hotel-text">4.3</div>
-          <div className="flex items-center text-xs text-green-500 font-medium mb-4">
+          <div className="flex items-center text-xs text-green-500 font-medium mb-3">
             <TrendingUp className="w-4 h-4 mr-1" />
             +0.7 vs last month
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {mockHotels.map((hotel) => (
               <div key={hotel.name} className="flex items-center justify-between">
                 <span className="text-sm text-hotel-text">{hotel.name}</span>
@@ -125,7 +125,7 @@ export const StatisticsCards = () => {
           <Users className="h-4 w-4 text-hotel-primary" />
         </CardHeader>
         <CardContent className="pt-4">
-          <div className="flex items-center justify-center p-6">
+          <div className="flex items-center justify-center p-4">
             <div className="relative w-48 h-48">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
