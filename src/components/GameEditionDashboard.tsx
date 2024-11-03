@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, Settings, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GameEditionHeader from './GameEdition/Layout/GameEditionHeader';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
@@ -27,6 +28,7 @@ const GameEditionDashboard = () => {
   const [description, setDescription] = useState(gameData?.description || '');
   const [inspirationalImage, setInspirationalImage] = useState(gameData?.inspirational_image || '');
   const [hasChanges, setHasChanges] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   useEffect(() => {
     if (gameData) {
@@ -96,51 +98,60 @@ const GameEditionDashboard = () => {
         </div>
         
         <Card>
-          <CardHeader>
-            <CardTitle>Game Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Game Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter game name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter game description"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="image">Inspirational Image URL</Label>
-              <Input
-                id="image"
-                value={inspirationalImage}
-                onChange={(e) => setInspirationalImage(e.target.value)}
-                placeholder="Enter image URL"
-              />
-            </div>
-            <Button 
-              onClick={handleSaveGame}
-              disabled={!hasChanges}
-              className={cn(
-                "text-white",
-                hasChanges ? "bg-hotel-primary hover:bg-hotel-primary/90" : "opacity-50 cursor-not-allowed"
-              )}
-            >
-              Save Game Details
-            </Button>
-          </CardContent>
+          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CollapsibleTrigger className="hover:opacity-75">
+                  {isOpen ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                </CollapsibleTrigger>
+                <Settings className="h-5 w-5" />
+                <CardTitle>Game Details</CardTitle>
+              </div>
+            </CardHeader>
+            <CollapsibleContent>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Game Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter game name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter game description"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image">Inspirational Image URL</Label>
+                  <Input
+                    id="image"
+                    value={inspirationalImage}
+                    onChange={(e) => setInspirationalImage(e.target.value)}
+                    placeholder="Enter image URL"
+                  />
+                </div>
+                <Button 
+                  onClick={handleSaveGame}
+                  disabled={!hasChanges}
+                  className={cn(
+                    "text-white",
+                    hasChanges ? "bg-hotel-primary hover:bg-hotel-primary/90" : "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  Save Game Details
+                </Button>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
         </Card>
 
-        {/* TeamsSection removed */}
         <GameTeamsSection gameId={gameId} />
         <TurnsSection gameId={gameId} />
       </div>
