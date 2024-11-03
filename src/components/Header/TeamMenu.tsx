@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionContext } from "@supabase/auth-helpers-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface TeamMenuProps {
   onLogout: () => void;
@@ -23,6 +24,7 @@ const TeamMenu = ({ onLogout }: TeamMenuProps) => {
   const [teamName, setTeamName] = useState<string | null>(null);
   const navigate = useNavigate();
   const { session } = useSessionContext();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
@@ -59,13 +61,18 @@ const TeamMenu = ({ onLogout }: TeamMenuProps) => {
         }
       } catch (error) {
         console.error('Error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load team information",
+          variant: "destructive",
+        });
       }
     };
 
     if (session) {
       fetchTeamInfo();
     }
-  }, [session]);
+  }, [session, toast]);
 
   const handleEditProfile = () => {
     navigate("/profile");

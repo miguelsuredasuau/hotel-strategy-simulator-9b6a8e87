@@ -25,25 +25,38 @@ const queryClient = new QueryClient({
 
 const App = () => {
   const [session, setSession] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session);
-        if (!session) {
-          queryClient.clear();
-          localStorage.clear();
-        }
-      });
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          setSession(session);
+          if (!session) {
+            queryClient.clear();
+            localStorage.clear();
+          }
+        });
 
-      return () => subscription.unsubscribe();
+        return () => subscription.unsubscribe();
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     initSession();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

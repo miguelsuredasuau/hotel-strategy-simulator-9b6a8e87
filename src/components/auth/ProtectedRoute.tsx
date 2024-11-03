@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@supabase/auth-helpers-react";
+import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,38 +12,47 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const session = useSession();
 
   useEffect(() => {
     const checkAuth = async () => {
-      if (!session) {
-        setIsAuthenticated(false);
-        return;
-      }
-
       try {
-        const { data: profile } = await supabase
+        if (!session) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', session.user.id)
           .single();
         
-        setIsAuthenticated(true);
-        setUserRole(profile?.role || null);
+        if (error) {
+          console.error('Error fetching profile:', error);
+          setIsAuthenticated(false);
+        } else {
+          setIsAuthenticated(true);
+          setUserRole(profile?.role || null);
+        }
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error checking auth:', error);
         setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAuth();
   }, [session]);
 
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
