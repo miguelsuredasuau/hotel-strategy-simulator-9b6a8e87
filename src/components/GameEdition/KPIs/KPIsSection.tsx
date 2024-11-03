@@ -10,7 +10,7 @@ import { KPI } from "@/types/kpi";
 import KPICard from './KPICard';
 import KPIEditDialog from './KPIEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
-import { Separator } from "@/components/ui/separator";
+import FinancialStatementSection from './FinancialStatement/FinancialStatementSection';
 
 interface KPIsSectionProps {
   gameId: string;
@@ -68,136 +68,6 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
   const operationalKPIs = kpis.filter(kpi => kpi.category === 'operational');
   const financialKPIs = kpis.filter(kpi => kpi.category === 'financial');
 
-  const renderFinancialKPIs = () => {
-    if (financialKPIs.length === 0) return null;
-
-    const revenueKPIs = financialKPIs.filter(kpi => kpi.name.toLowerCase().includes('revenue') || kpi.name.toLowerCase().includes('income'));
-    const expenseKPIs = financialKPIs.filter(kpi => kpi.name.toLowerCase().includes('expense') || kpi.name.toLowerCase().includes('cost'));
-    const otherFinancialKPIs = financialKPIs.filter(kpi => 
-      !kpi.name.toLowerCase().includes('revenue') && 
-      !kpi.name.toLowerCase().includes('income') && 
-      !kpi.name.toLowerCase().includes('expense') && 
-      !kpi.name.toLowerCase().includes('cost')
-    );
-
-    return (
-      <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="font-semibold text-lg text-center border-b pb-2">Financial Statement</h3>
-        
-        {/* Revenue Section */}
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-700">Revenue</h4>
-          <div className="pl-4 space-y-2">
-            {revenueKPIs.map((kpi) => (
-              <div key={kpi.uuid} className="flex justify-between items-center group">
-                <span>{kpi.name}</span>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedKPI(kpi);
-                      setIsCreateDialogOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => {
-                      setSelectedKPI(kpi);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Expenses Section */}
-        <div className="space-y-2">
-          <h4 className="font-medium text-gray-700">Expenses</h4>
-          <div className="pl-4 space-y-2">
-            {expenseKPIs.map((kpi) => (
-              <div key={kpi.uuid} className="flex justify-between items-center group">
-                <span>{kpi.name}</span>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedKPI(kpi);
-                      setIsCreateDialogOpen(true);
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => {
-                      setSelectedKPI(kpi);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Other Financial Metrics */}
-        {otherFinancialKPIs.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium text-gray-700">Other Financial Metrics</h4>
-            <div className="pl-4 space-y-2">
-              {otherFinancialKPIs.map((kpi) => (
-                <div key={kpi.uuid} className="flex justify-between items-center group">
-                  <span>{kpi.name}</span>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedKPI(kpi);
-                        setIsCreateDialogOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => {
-                        setSelectedKPI(kpi);
-                        setIsDeleteDialogOpen(true);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <Card className="mt-8">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -224,8 +94,20 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Financial KPIs */}
-                {renderFinancialKPIs()}
+                {/* Financial Statement */}
+                {financialKPIs.length > 0 && (
+                  <FinancialStatementSection
+                    kpis={financialKPIs}
+                    onEdit={(kpi) => {
+                      setSelectedKPI(kpi);
+                      setIsCreateDialogOpen(true);
+                    }}
+                    onDelete={(kpi) => {
+                      setSelectedKPI(kpi);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  />
+                )}
 
                 {/* Operational KPIs */}
                 {operationalKPIs.length > 0 && (
