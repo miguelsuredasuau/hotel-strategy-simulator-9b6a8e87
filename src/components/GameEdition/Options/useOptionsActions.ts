@@ -7,6 +7,48 @@ export const useOptionsActions = (turnId: string, gameId: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const handleSaveOption = async (option: Option) => {
+    try {
+      if (!option.uuid) {
+        const { error } = await supabase
+          .from('Options')
+          .insert([{
+            ...option,
+            game_uuid: gameId,
+            turn_uuid: turnId,
+            optionnumber: (await supabase
+              .from('Options')
+              .select('optionnumber')
+              .eq('turn_uuid', turnId)
+              .order('optionnumber', { ascending: false })
+              .limit(1)
+              .single()).data?.optionnumber + 1 || 1
+          }]);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('Options')
+          .update(option)
+          .eq('uuid', option.uuid);
+        
+        if (error) throw error;
+      }
+      
+      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
+      toast({
+        title: "Success",
+        description: `Option ${option.uuid ? 'updated' : 'created'} successfully`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteOption = async (optionUuid: string) => {
     try {
       const { error } = await supabase
@@ -69,5 +111,5 @@ export const useOptionsActions = (turnId: string, gameId: string) => {
     }
   };
 
-  return { handleDeleteOption, handleDragEnd };
+  return { handleDeleteOption, handleDragEnd, handleSaveOption };
 };

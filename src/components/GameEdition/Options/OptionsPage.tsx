@@ -16,22 +16,12 @@ const OptionsPage = () => {
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const navigate = useNavigate();
   const { gameId = '', turnId = '' } = useParams();
-  const { handleDragEnd, handleDeleteOption } = useOptionsActions(turnId, gameId);
-
-  // Validate UUID parameters
-  const isValidUUID = (uuid: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  };
+  const { handleDragEnd, handleDeleteOption, handleSaveOption } = useOptionsActions(turnId, gameId);
 
   // Fetch turn data
-  const { data: turnData, isLoading: turnLoading, error: turnError } = useQuery({
+  const { data: turnData, isLoading: turnLoading } = useQuery({
     queryKey: ['turn', turnId],
     queryFn: async () => {
-      if (!isValidUUID(turnId)) {
-        throw new Error('Invalid turn ID');
-      }
-
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
@@ -41,17 +31,13 @@ const OptionsPage = () => {
       if (error) throw error;
       return data as Turn;
     },
-    enabled: !!turnId && isValidUUID(turnId),
+    enabled: !!turnId
   });
 
   // Fetch options data
-  const { data: options, isLoading: optionsLoading, error: optionsError } = useQuery({
+  const { data: options, isLoading: optionsLoading } = useQuery({
     queryKey: ['options', turnId, gameId],
     queryFn: async () => {
-      if (!isValidUUID(turnId) || !isValidUUID(gameId)) {
-        throw new Error('Invalid turn or game ID');
-      }
-
       const { data, error } = await supabase
         .from('Options')
         .select('*')
@@ -62,48 +48,13 @@ const OptionsPage = () => {
       if (error) throw error;
       return data as Option[];
     },
-    enabled: !!turnId && !!gameId && isValidUUID(turnId) && isValidUUID(gameId),
+    enabled: !!turnId && !!gameId
   });
 
-  // Handle invalid IDs
-  if (!isValidUUID(gameId) || !isValidUUID(turnId)) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">
-          <p className="text-red-500">Invalid game or turn ID. Please check the URL.</p>
-          <button
-            onClick={() => navigate('/game-edition')}
-            className="mt-4 text-blue-500 hover:underline"
-          >
-            Return to Game Selection
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle loading state
   if (turnLoading || optionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  // Handle errors
-  if (turnError || optionsError) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">
-          <p className="text-red-500">Error loading data. Please try again later.</p>
-          <button
-            onClick={() => navigate('/game-edition')}
-            className="mt-4 text-blue-500 hover:underline"
-          >
-            Return to Game Selection
-          </button>
-        </div>
       </div>
     );
   }
@@ -139,6 +90,7 @@ const OptionsPage = () => {
         gameId={gameId}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
+        onSave={handleSaveOption}
       />
 
       <DeleteConfirmDialog
