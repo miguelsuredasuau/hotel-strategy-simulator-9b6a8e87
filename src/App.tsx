@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import GameEditionDashboard from "./components/GameEditionDashboard";
 import GameSelectionPage from "./components/GameEdition/GameSelectionPage";
-import OptionsPage from "./components/GameEdition/Options/OptionsPage";
+import OptionsManagementPage from "./components/GameEdition/Options/OptionsManagementPage";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -44,7 +44,7 @@ const App = () => (
               path="/game-edition/:gameId/turn/:turnId/options"
               element={
                 <ProtectedRoute requiredRole="gamemaster">
-                  <OptionsPage />
+                  <OptionsManagementPage />
                 </ProtectedRoute>
               }
             />
