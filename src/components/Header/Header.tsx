@@ -2,9 +2,17 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { useNavigate } from "react-router-dom";
 import MainNav from "./MainNav";
 import TeamMenu from "./TeamMenu";
+import { supabase } from "@/integrations/supabase/client";
 
-const Header = () => {
-  const { data: session } = useSessionContext();
+interface HeaderProps {
+  currentTurn?: number;
+  totalTurns?: number;
+  onTurnSelect?: (turn: number) => void;
+  children?: React.ReactNode;
+}
+
+const Header = ({ currentTurn, totalTurns, onTurnSelect, children }: HeaderProps) => {
+  const { session } = useSessionContext();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -21,6 +29,7 @@ const Header = () => {
             <TeamMenu onLogout={handleLogout} />
           )}
         </div>
+        {children}
       </div>
     </header>
   );

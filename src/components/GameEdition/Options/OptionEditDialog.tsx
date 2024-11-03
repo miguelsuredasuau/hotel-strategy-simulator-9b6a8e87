@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,12 +9,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Option } from "@/types/game";
 import OptionForm from "./OptionForm";
+import { useToast } from "@/components/ui/use-toast";
 
 interface OptionEditDialogProps {
   option: Partial<Option>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (option: Option) => Promise<void>;
+  turnId?: string;
+  gameId?: string;
 }
 
 const OptionEditDialog = ({
@@ -21,8 +25,11 @@ const OptionEditDialog = ({
   open,
   onOpenChange,
   onSave,
+  turnId,
+  gameId,
 }: OptionEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<Option>>(option);
+  const { toast } = useToast();
 
   useEffect(() => {
     setFormData(option);
@@ -45,7 +52,13 @@ const OptionEditDialog = ({
       return;
     }
 
-    await onSave(formData as Option);
+    const optionToSave = {
+      ...formData,
+      turn_uuid: turnId,
+      game_uuid: gameId,
+    } as Option;
+
+    await onSave(optionToSave);
     onOpenChange(false);
   };
 
