@@ -68,6 +68,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
         description: "Options exported successfully",
       });
     } catch (error: any) {
+      console.error('Export error:', error);
       toast({
         title: "Error exporting options",
         description: error.message,
@@ -86,6 +87,8 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       formData.append('file', file);
       formData.append('turnId', turnId);
       formData.append('gameId', gameId);
+
+      console.log('Uploading with data:', { turnId, gameId, fileName: file.name });
 
       const { error } = await supabase.functions.invoke('bulk-upload-options', {
         body: formData,
