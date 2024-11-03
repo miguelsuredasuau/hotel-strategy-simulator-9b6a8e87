@@ -9,7 +9,7 @@ export interface Turn {
 
 export interface Option {
   uuid: string;
-  created_at?: string;
+  title?: string;
   description?: string;
   game_uuid?: string;
   image?: string;
@@ -20,8 +20,8 @@ export interface Option {
   impactkpi3?: string;
   impactkpi3amount?: number;
   optionnumber?: number;
-  title?: string;
   turn_uuid?: string;
+  created_at?: string;
 }
 
 export interface Team {

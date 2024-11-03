@@ -162,12 +162,12 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {options.map((option) => (
                 <HotelCard
-                  key={option.id}
-                  id={String(option.id)}
+                  key={option.uuid}
+                  id={option.uuid}
                   name={option.title || ''}
                   description={option.description || ''}
-                  image={option.image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.id}`}
-                  onSelect={() => handleHotelSelect(String(option.id))}
+                  image={option.image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.uuid}`}
+                  onSelect={() => handleHotelSelect(option.uuid)}
                 />
               ))}
             </div>

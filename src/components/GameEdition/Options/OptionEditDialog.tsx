@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,16 +7,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
-import OptionForm from "./OptionForm";
 
 interface OptionEditDialogProps {
   option: Option | null;
-  turnId: number;
-  gameId: number;
+  turnId: string;
+  gameId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -27,12 +29,6 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (open) {
-      setFormData(option || {});
-    }
-  }, [option, open]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -40,29 +36,15 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
     try {
       const dataToSend = {
         ...formData,
-        turn: turnId,
-        game: gameId,
+        turn_uuid: turnId,
+        game_uuid: gameId,
       };
 
-      if (!dataToSend.optionnumber) {
-        const { data: existingOptions } = await supabase
-          .from('Options')
-          .select('optionnumber')
-          .eq('turn', turnId)
-          .eq('game', gameId)
-          .order('optionnumber', { ascending: false })
-          .limit(1);
-
-        dataToSend.optionnumber = existingOptions && existingOptions.length > 0 
-          ? (existingOptions[0].optionnumber || 0) + 1 
-          : 1;
-      }
-
-      if (option?.id) {
+      if (option?.uuid) {
         const { error } = await supabase
           .from('Options')
           .update(dataToSend)
-          .eq('id', option.id);
+          .eq('uuid', option.uuid);
 
         if (error) throw error;
       } else {
@@ -73,11 +55,7 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
         if (error) throw error;
       }
 
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] }),
-        queryClient.invalidateQueries({ queryKey: ['turn', turnId] })
-      ]);
-      
+      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
       onOpenChange(false);
       setFormData({});
       toast({
@@ -97,12 +75,34 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{option ? 'Edit' : 'Create'} Option</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <OptionForm formData={formData} onChange={setFormData} />
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input
+                value={formData.title || ''}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Image URL</Label>
+              <Input
+                value={formData.image || ''}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              />
+            </div>
+          </div>
           <DialogFooter className="mt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel

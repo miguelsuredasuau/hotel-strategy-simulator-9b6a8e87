@@ -13,7 +13,7 @@ interface TeamCardProps {
 
 const TeamCard = ({ team, index, onEditTeam, onDeleteTeam }: TeamCardProps) => {
   return (
-    <Draggable draggableId={`team-${team.id}`} index={index}>
+    <Draggable draggableId={`team-${team.uuid}`} index={index}>
       {(provided) => (
         <div
           ref={provided.innerRef}
