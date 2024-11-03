@@ -3,12 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, Loader2 } from "lucide-react";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { KPIEditDialog } from "./KPIEditDialog";
+import { useState } from "react";
 
 interface OperationalKPIsProps {
   gameId: string;
 }
 
 export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
+  const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
+
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId, 'operational'],
     queryFn: async () => {
@@ -41,33 +46,55 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {kpis?.map((kpi) => (
-            <div key={kpi.uuid} className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <div>
-                <h4 className="font-medium">{kpi.name}</h4>
-                {kpi.description && (
-                  <p className="text-sm text-muted-foreground">{kpi.description}</p>
-                )}
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-semibold">
-                  {kpi.current_value}
-                  {kpi.unit && <span className="text-sm ml-1">{kpi.unit}</span>}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Default: {kpi.default_value}
-                </div>
-              </div>
+        <Droppable droppableId="operational">
+          {(provided) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className="space-y-4"
+            >
+              {kpis?.map((kpi, index) => (
+                <Draggable key={kpi.uuid} draggableId={kpi.uuid} index={index}>
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className="flex justify-between items-center p-3 bg-muted rounded-lg cursor-move hover:bg-muted/80 transition-colors"
+                      onClick={() => setSelectedKPI(kpi)}
+                    >
+                      <div>
+                        <h4 className="font-medium">{kpi.name}</h4>
+                        {kpi.description && (
+                          <p className="text-sm text-muted-foreground">{kpi.description}</p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold">
+                          {kpi.current_value}
+                          {kpi.unit && <span className="text-sm ml-1">{kpi.unit}</span>}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Default: {kpi.default_value}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
-          ))}
-          {(!kpis || kpis.length === 0) && (
-            <p className="text-center text-muted-foreground py-4">
-              No operational KPIs defined yet
-            </p>
           )}
-        </div>
+        </Droppable>
       </CardContent>
+      {selectedKPI && (
+        <KPIEditDialog
+          kpi={selectedKPI}
+          open={!!selectedKPI}
+          onOpenChange={(open) => !open && setSelectedKPI(null)}
+          gameId={gameId}
+        />
+      )}
     </Card>
   );
 };

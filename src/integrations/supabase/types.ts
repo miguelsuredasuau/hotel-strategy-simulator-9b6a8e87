@@ -77,7 +77,9 @@ export type Database = {
           created_at: string | null
           current_value: number | null
           default_value: number | null
+          depends_on: string[] | null
           description: string | null
+          formula: string | null
           game_uuid: string | null
           is_percentage: boolean | null
           name: string
@@ -89,7 +91,9 @@ export type Database = {
           created_at?: string | null
           current_value?: number | null
           default_value?: number | null
+          depends_on?: string[] | null
           description?: string | null
+          formula?: string | null
           game_uuid?: string | null
           is_percentage?: boolean | null
           name: string
@@ -101,7 +105,9 @@ export type Database = {
           created_at?: string | null
           current_value?: number | null
           default_value?: number | null
+          depends_on?: string[] | null
           description?: string | null
+          formula?: string | null
           game_uuid?: string | null
           is_percentage?: boolean | null
           name?: string
