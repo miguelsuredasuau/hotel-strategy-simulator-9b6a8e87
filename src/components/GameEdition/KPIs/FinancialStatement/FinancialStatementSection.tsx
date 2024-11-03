@@ -80,6 +80,14 @@ const FinancialStatementSection = ({
           onChange={(value) => handleKPIValueChange(findKPI('adr')?.uuid, value)}
           isEditable={true}
         />
+
+        <Separator className="my-1" />
+
+        <FinancialMetric 
+          label="Room Revenue"
+          value={roomRevenue}
+          isEditable={false}
+        />
         <FinancialMetric 
           label="Extras Revenue"
           kpi={findKPI('extras_revenue')}
@@ -88,14 +96,6 @@ const FinancialStatementSection = ({
           onDelete={onDelete}
           onChange={(value) => handleKPIValueChange(findKPI('extras_revenue')?.uuid, value)}
           isEditable={true}
-        />
-
-        <Separator className="my-1" />
-
-        <FinancialMetric 
-          label="Room Revenue"
-          value={roomRevenue}
-          isEditable={false}
         />
         <FinancialMetric 
           label="Total Revenue"

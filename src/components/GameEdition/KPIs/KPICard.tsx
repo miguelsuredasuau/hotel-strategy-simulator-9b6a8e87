@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Edit, Trash2 } from "lucide-react";
 import { KPI } from "@/types/kpi";
 
 interface KPICardProps {
@@ -12,46 +11,32 @@ interface KPICardProps {
 
 const KPICard = ({ kpi, onEdit, onDelete }: KPICardProps) => {
   return (
-    <Card className="group">
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg">{kpi.name}</h3>
-            <div className="space-y-1">
-              <div className="flex gap-2">
-                <Badge variant="outline" className="capitalize">
-                  {kpi.category}
-                </Badge>
-                <Badge variant="outline" className="capitalize">
-                  Axis {kpi.axis}
-                </Badge>
-              </div>
-              <p className="text-sm text-gray-500">
-                Weight: {kpi.weight}
-              </p>
-              <p className="text-sm text-gray-500">
-                Default: {kpi.default_value}
-              </p>
-              {kpi.is_customizable && (
-                <Badge variant="secondary">
-                  Customizable
-                </Badge>
-              )}
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="font-semibold">{kpi.name}</h3>
+            <p className="text-sm text-gray-500">
+              {kpi.category} KPI on {kpi.axis} axis
+            </p>
+            <div className="mt-2 space-y-1 text-sm">
+              <p>Weight: {kpi.weight}</p>
+              <p>Default Value: {kpi.default_value}</p>
             </div>
           </div>
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onEdit(kpi)}
             >
-              <Pencil className="h-4 w-4" />
+              <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
               onClick={() => onDelete(kpi)}
+              className="text-red-500 hover:text-red-600"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

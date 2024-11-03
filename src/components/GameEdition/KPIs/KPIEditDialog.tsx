@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,117 +7,51 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { KPI } from "@/types/kpi";
 import KPIFormFields from "./KPIFormFields";
 
 interface KPIEditDialogProps {
-  kpi: Partial<KPI> | null;
+  kpi: KPI | null;
   gameId: string;
-  turnId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const KPIEditDialog = ({ kpi, gameId, turnId, open, onOpenChange }: KPIEditDialogProps) => {
-  const [formData, setFormData] = useState<Partial<KPI>>({
-    name: '',
-    impact_type: 'value',
-    weight: 1,
-    default_value: 0,
-    axis: 'Y',
-    category: 'operational',
-    is_customizable: false,
-  });
-  const queryClient = useQueryClient();
+const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) => {
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (kpi) {
-      setFormData(kpi);
-    } else {
-      setFormData({
-        name: '',
-        impact_type: 'value',
-        weight: 1,
-        default_value: 0,
-        axis: 'Y',
-        category: 'operational',
-        is_customizable: false,
-      });
-    }
-  }, [kpi]);
-
-  const handleChange = (field: keyof KPI, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<Partial<KPI>>({
+    name: kpi?.name || '',
+    impact_type: kpi?.impact_type || 'value',
+    weight: kpi?.weight || 1,
+    default_value: kpi?.default_value || 0,
+    axis: kpi?.axis || 'Y',
+    category: kpi?.category || 'operational',
+    game_uuid: gameId,
+  });
 
   const handleSave = async () => {
-    if (!formData.name) {
-      toast({
-        title: "Error",
-        description: "KPI name is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      const kpiData = {
-        name: formData.name,
-        impact_type: 'value',
-        weight: formData.weight || 1,
-        default_value: formData.default_value || 0,
-        axis: formData.axis || 'Y',
-        category: formData.category || 'operational',
-        is_customizable: formData.is_customizable || false,
-        game_uuid: gameId,
-        financial_type: formData.financial_type,
-      };
-
-      let kpiUuid: string;
-
-      if (kpi?.uuid) {
-        const { error } = await supabase
-          .from('kpis')
-          .update(kpiData)
-          .eq('uuid', kpi.uuid);
-
-        if (error) throw error;
-        kpiUuid = kpi.uuid;
-      } else {
-        const { data, error } = await supabase
-          .from('kpis')
-          .insert([kpiData])
-          .select()
-          .single();
-
-        if (error) throw error;
-        kpiUuid = data.uuid;
+      if (!formData.name) {
+        throw new Error('Name is required');
       }
 
-      // Update or create KPI value if we're editing in the context of a turn
-      if (turnId) {
-        const { error: valueError } = await supabase
-          .from('kpi_values')
-          .upsert({
-            kpi_uuid: kpiUuid,
-            game_uuid: gameId,
-            turn_uuid: turnId,
-            value: formData.default_value || 0,
-          });
+      const { data, error } = await supabase
+        .from('kpis')
+        .upsert({
+          ...formData,
+          uuid: kpi?.uuid,
+          game_uuid: gameId,
+        })
+        .select()
+        .single();
 
-        if (valueError) throw valueError;
-      }
+      if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-      queryClient.invalidateQueries({ queryKey: ['kpi-values', gameId, turnId] });
-      
       toast({
         title: "Success",
         description: `KPI ${kpi ? 'updated' : 'created'} successfully`,
@@ -136,15 +70,20 @@ const KPIEditDialog = ({ kpi, gameId, turnId, open, onOpenChange }: KPIEditDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{kpi?.uuid ? 'Edit' : 'Create'} KPI</DialogTitle>
+          <DialogTitle>{kpi ? 'Edit' : 'Create'} KPI</DialogTitle>
         </DialogHeader>
-        <KPIFormFields kpi={formData} onChange={handleChange} />
+        <div className="py-4">
+          <KPIFormFields
+            kpi={formData}
+            onChange={(field, value) => setFormData(prev => ({ ...prev, [field]: value }))}
+          />
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            {kpi?.uuid ? 'Update' : 'Create'} KPI
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>
