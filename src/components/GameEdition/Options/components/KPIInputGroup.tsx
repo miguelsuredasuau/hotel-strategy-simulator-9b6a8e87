@@ -1,35 +1,37 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { KPICombobox } from "./KPICombobox";
 
 interface KPIInputGroupProps {
   index: number;
   kpiName: string | undefined;
   kpiAmount: number | undefined;
   availableKPIs: { uuid: string; name: string }[];
+  gameId: string;
   onChange: (field: string, value: any) => void;
+  onKPICreate?: () => void;
 }
 
-const KPIInputGroup = ({ index, kpiName, kpiAmount, availableKPIs, onChange }: KPIInputGroupProps) => {
+const KPIInputGroup = ({ 
+  index, 
+  kpiName, 
+  kpiAmount, 
+  availableKPIs,
+  gameId,
+  onChange,
+  onKPICreate
+}: KPIInputGroupProps) => {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label>{`KPI ${index}`}</Label>
-        <Select
+        <KPICombobox
           value={kpiName || ''}
-          onValueChange={(value) => onChange(`impactkpi${index}`, value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select KPI" />
-          </SelectTrigger>
-          <SelectContent>
-            {availableKPIs.map((kpi) => (
-              <SelectItem key={kpi.uuid} value={kpi.name}>
-                {kpi.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          gameId={gameId}
+          kpis={availableKPIs}
+          onChange={(value) => onChange(`impactkpi${index}`, value)}
+          onCreateNew={() => onKPICreate?.()}
+        />
       </div>
       <div className="space-y-2">
         <Label>Amount</Label>
