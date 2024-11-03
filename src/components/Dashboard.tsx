@@ -8,6 +8,7 @@ import TeamsSection from './GameEdition/TeamsManagement/TeamsSection'; // Import
 
 interface DashboardProps {
   onNextTurn: () => void;
+  gameId?: string;
 }
 
 const mockRevenueData = [
@@ -32,12 +33,11 @@ const mockHotels = [
   { name: "Near Trust", adr: 75, rating: 1.7, occupancy: 45, x: 1.2, y: 32 },
 ];
 
-const Dashboard = ({ onNextTurn }: DashboardProps) => {
+const Dashboard = ({ onNextTurn, gameId }: DashboardProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 space-y-6">
-        {/* Add TeamsSection here */}
-        <TeamsSection gameId="your-game-id" /> {/* Replace with actual gameId */}
+        {gameId && <TeamsSection gameId={gameId} />} {/* Pass gameId prop to TeamsSection */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
