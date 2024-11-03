@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Game, Turn } from "@/types/game";
+import GameTeamsSection from "./GameTeams/GameTeamsSection";
 
 interface DashboardContentProps {
   gameId: string;
@@ -23,15 +24,18 @@ const DashboardContent = ({
   onAddTurn
 }: DashboardContentProps) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{gameData?.name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>{gameData?.description}</p>
-        {/* Add your turns list rendering here */}
-      </CardContent>
-    </Card>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>{gameData?.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{gameData?.description}</p>
+        </CardContent>
+      </Card>
+
+      <GameTeamsSection gameId={gameId} />
+    </div>
   );
 };
 
