@@ -107,7 +107,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
                 step={1}
                 value={[adr]}
                 onValueChange={(value) => setAdr(value[0])}
-                className="w-full [&>.relative>div:first-child]:bg-blue-100 [&>.relative>div:nth-child(2)]:bg-blue-600 [&>span]:border-blue-600 [&>span]:bg-blue-600"
+                className="w-full [&>.relative>div:first-child]:bg-blue-100 [&>.relative>div:nth-child(2)]:bg-blue-600 [&>span]:border-none [&>span]:bg-blue-600 [&>span]:shadow-none"
               />
             </div>
           </div>
