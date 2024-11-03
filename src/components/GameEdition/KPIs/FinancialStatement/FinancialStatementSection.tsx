@@ -1,7 +1,5 @@
 import { Separator } from "@/components/ui/separator";
 import FinancialMetric from "./FinancialMetric";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 interface FinancialStatementSectionProps {
   gameId: string;
@@ -9,37 +7,21 @@ interface FinancialStatementSectionProps {
 }
 
 const FinancialStatementSection = ({ gameId, turnId }: FinancialStatementSectionProps) => {
-  const { data: options = [] } = useQuery({
-    queryKey: ['options', turnId, gameId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Options')
-        .select('*')
-        .eq('turn_uuid', turnId)
-        .eq('game_uuid', gameId)
-        .order('optionnumber');
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!turnId && !!gameId
-  });
-
-  // Calculate financial metrics from options
-  const roomsValue = 100; // Default value
-  const occupiedRoomsValue = 80; // Default value
-  const adrValue = 150; // Default value
-  const extrasValue = 50; // Default value
+  // Static financial metrics
+  const roomsValue = 100;
+  const occupiedRoomsValue = 80;
+  const adrValue = 150;
+  const extrasValue = 50;
   
   const roomRevenue = occupiedRoomsValue * adrValue;
   const totalRevenue = roomRevenue + extrasValue;
   
-  const variableCostsPercentValue = 30; // Default percentage
+  const variableCostsPercentValue = 30;
   const variableCostsAmount = totalRevenue * (variableCostsPercentValue / 100);
-  const fixedCostsValue = 5000; // Default value
+  const fixedCostsValue = 5000;
   
   const operatingProfit = totalRevenue - variableCostsAmount - fixedCostsValue;
-  const investmentsValue = 1000; // Default value
+  const investmentsValue = 1000;
   const freeCashFlow = operatingProfit - investmentsValue;
 
   return (
