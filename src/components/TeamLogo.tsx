@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +20,7 @@ const TeamLogo = () => {
   const [teamName, setTeamName] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { session } = useSessionContext();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
@@ -58,6 +60,11 @@ const TeamLogo = () => {
 
   const handleLogout = async () => {
     try {
+      if (!session) {
+        navigate('/login');
+        return;
+      }
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate('/login');

@@ -5,6 +5,7 @@ import TeamMenu from "@/components/Header/TeamMenu";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 export interface GameEditionHeaderProps {
   title?: string;
@@ -18,13 +19,21 @@ const GameEditionHeader = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { session } = useSessionContext();
 
   const handleLogout = async () => {
     try {
+      if (!session) {
+        navigate('/login', { replace: true });
+        return;
+      }
+      
       // Clear all queries first
       queryClient.clear();
       // Sign out from Supabase
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
       // Clear any local storage items if needed
       localStorage.clear();
       // Navigate to login page

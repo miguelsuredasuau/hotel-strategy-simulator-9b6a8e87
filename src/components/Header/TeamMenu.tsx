@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 interface TeamMenuProps {
   onLogout: () => void;
@@ -21,17 +22,17 @@ const TeamMenu = ({ onLogout }: TeamMenuProps) => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
   const [teamName, setTeamName] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { session } = useSessionContext();
 
   useEffect(() => {
     const fetchTeamInfo = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!session?.user) return;
 
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('team_uuid')
-          .eq('id', user.id)
+          .eq('id', session.user.id)
           .maybeSingle();
 
         if (profileError) {
@@ -61,8 +62,10 @@ const TeamMenu = ({ onLogout }: TeamMenuProps) => {
       }
     };
 
-    fetchTeamInfo();
-  }, []);
+    if (session) {
+      fetchTeamInfo();
+    }
+  }, [session]);
 
   const handleEditProfile = () => {
     navigate("/profile");
