@@ -96,6 +96,7 @@ export function KPIAutocomplete({
         <SelectValue placeholder="Select or create KPI..." />
       </SelectTrigger>
       <SelectContent className="bg-white">
+        <SelectItem value="">None</SelectItem> {/* Empty option */}
         {safeKpis.map((kpi) => (
           <SelectItem key={kpi.uuid} value={kpi.name}>
             {kpi.name}
