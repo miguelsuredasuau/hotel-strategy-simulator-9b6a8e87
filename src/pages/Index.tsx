@@ -44,15 +44,10 @@ const Index = () => {
     enabled: !!gameId
   });
 
-  useEffect(() => {
-    if (!optionLoading) {
-      setShowDashboard(!!selectedOption);
-    }
-  }, [selectedOption, optionLoading]);
-
   const handleTurnClick = (turnNumber: number) => {
     if (turnNumber <= latestTurn) {
       setSelectedTurnNumber(turnNumber);
+      setShowDashboard(true);
     }
   };
 
