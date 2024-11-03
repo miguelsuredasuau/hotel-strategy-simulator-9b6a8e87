@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Option, Turn } from "@/types/game";
 import { OptionsHeader } from "./OptionsHeader";
 import { OptionsSection } from "./OptionsSection";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
 const OptionsManagementPage = () => {
@@ -37,11 +39,20 @@ const OptionsManagementPage = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <OptionsHeader 
-        turnData={turnData}
-        onBack={() => navigate(`/game-edition/${gameId}`)}
-        onAddOption={() => {/* This will be handled by OptionsSection */}}
-      />
+      <div className="flex items-center gap-4 mb-8">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(`/game-edition/${gameId}`)}
+          className="gap-2"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back to Game
+        </Button>
+        <h1 className="text-2xl font-bold">
+          Options for Turn {turnData?.turnnumber}
+        </h1>
+      </div>
+      
       <OptionsSection 
         turnId={turnId}
         gameId={gameId}
