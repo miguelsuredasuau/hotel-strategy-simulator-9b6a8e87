@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KPIAutocomplete } from "./KPIAutocomplete";
-import { useKPIValueUpdates } from "../../KPIs/FinancialStatement/hooks/useKPIValueUpdates";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface KPIInputGroupProps {
   index: number;
@@ -9,6 +11,7 @@ interface KPIInputGroupProps {
   kpiAmount: number | undefined;
   availableKPIs: { uuid: string; name: string }[];
   gameId: string;
+  turnId?: string;
   onChange: (field: string, value: any) => void;
   onKPICreate?: () => void;
 }
@@ -19,10 +22,12 @@ const KPIInputGroup = ({
   kpiAmount, 
   availableKPIs,
   gameId,
+  turnId,
   onChange,
   onKPICreate
 }: KPIInputGroupProps) => {
-  const { handleKPIValueChange } = useKPIValueUpdates(gameId);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const handleAmountChange = async (value: number) => {
     // Update the local state
@@ -30,9 +35,41 @@ const KPIInputGroup = ({
     
     // Find the KPI UUID based on the name
     const kpi = availableKPIs.find(k => k.name === kpiName);
-    if (kpi) {
-      // Save to Supabase
-      await handleKPIValueChange(kpi.uuid, value);
+    if (!kpi) return;
+
+    try {
+      const kpiValue = {
+        kpi_uuid: kpi.uuid,
+        game_uuid: gameId,
+        turn_uuid: turnId,
+        value: value
+      };
+
+      console.log('Saving KPI value:', kpiValue);
+
+      const { error } = await supabase
+        .from('kpi_values')
+        .upsert(kpiValue, {
+          onConflict: 'kpi_uuid,game_uuid,turn_uuid'
+        });
+
+      if (error) throw error;
+
+      await queryClient.invalidateQueries({ 
+        queryKey: ['kpi-values', gameId, turnId] 
+      });
+
+      toast({
+        title: "Success",
+        description: "Value updated successfully",
+      });
+    } catch (error: any) {
+      console.error('Error saving KPI value:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 

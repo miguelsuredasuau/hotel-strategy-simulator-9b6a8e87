@@ -2,17 +2,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Option } from "@/types/game";
-import KPIInputGroup from "./KPIInputGroup";
+import { useQueryClient } from "@tanstack/react-query";
+import KPIInputGroup from "./components/KPIInputGroup";
+import { useGameKPIs } from "./hooks/useGameKPIs";
 
 interface OptionFormProps {
   option: Partial<Option>;
-  availableKPIs: { uuid: string; name: string }[];
+  gameId: string;
+  turnId?: string;
   onChange: (field: string, value: any) => void;
 }
 
-const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) => {
-  const handleChange = (field: string, value: any) => {
-    onChange(field, value);
+const OptionForm = ({ option, gameId, turnId, onChange }: OptionFormProps) => {
+  const queryClient = useQueryClient();
+  const { data: kpis = [] } = useGameKPIs(gameId);
+
+  const handleKPICreate = () => {
+    queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
   };
 
   return (
@@ -22,7 +28,7 @@ const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) =
           <Label>Title</Label>
           <Input
             value={option.title || ''}
-            onChange={(e) => handleChange('title', e.target.value)}
+            onChange={(e) => onChange('title', e.target.value)}
             placeholder="Enter title"
           />
         </div>
@@ -30,7 +36,7 @@ const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) =
           <Label>Image URL</Label>
           <Input
             value={option.image || ''}
-            onChange={(e) => handleChange('image', e.target.value)}
+            onChange={(e) => onChange('image', e.target.value)}
             placeholder="Enter image URL"
           />
         </div>
@@ -40,7 +46,7 @@ const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) =
         <Label>Description</Label>
         <Textarea
           value={option.description || ''}
-          onChange={(e) => handleChange('description', e.target.value)}
+          onChange={(e) => onChange('description', e.target.value)}
           placeholder="Enter description"
         />
       </div>
@@ -52,8 +58,11 @@ const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) =
             index={index}
             kpiName={option[`impactkpi${index}` as keyof Option] as string}
             kpiAmount={option[`impactkpi${index}amount` as keyof Option] as number}
-            availableKPIs={availableKPIs}
-            onChange={handleChange}
+            availableKPIs={kpis}
+            gameId={gameId}
+            turnId={turnId}
+            onChange={onChange}
+            onKPICreate={handleKPICreate}
           />
         ))}
       </div>
