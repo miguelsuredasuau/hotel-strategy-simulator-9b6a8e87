@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import { Team } from "@/types/game";
 import TeamAssignDialog from './TeamAssignDialog';
+import { Team } from '@/types/game';
+import DeleteConfirmDialog from '../DeleteConfirmDialog';
 
 interface GameTeamsSectionProps {
   gameId: string;
@@ -14,6 +15,8 @@ interface GameTeamsSectionProps {
 
 const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedTeamUuid, setSelectedTeamUuid] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -23,6 +26,7 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       const { data, error } = await supabase
         .from('game_teams')
         .select(`
+          team_uuid,
           teams:team_uuid (
             uuid,
             teamname,
@@ -34,22 +38,39 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
         .eq('game_uuid', gameId);
 
       if (error) throw error;
-      
-      // Transform the data to match the Team type
       return data.map(item => item.teams) as Team[];
     },
   });
 
-  const handleTeamAssigned = () => {
-    queryClient.invalidateQueries({ queryKey: ['game-teams', gameId] });
-    toast({
-      title: "Success",
-      description: "Team assignments updated successfully",
-    });
+  const handleDeleteTeam = async () => {
+    if (!selectedTeamUuid) return;
+
+    try {
+      const { error } = await supabase
+        .from('game_teams')
+        .delete()
+        .eq('game_uuid', gameId)
+        .eq('team_uuid', selectedTeamUuid);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['game-teams', gameId] });
+      toast({
+        title: "Success",
+        description: "Team removed from game successfully",
+      });
+      setIsDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
-    <Card className="mt-8">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className="h-5 w-5" />
@@ -72,23 +93,36 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
             {assignedTeams.map((team) => (
               <div
                 key={team.uuid}
-                className="flex items-center gap-4 p-4 border rounded-lg"
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
               >
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-                  {team.teamlogo ? (
-                    <img
-                      src={team.teamlogo}
-                      alt={team.teamname}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Users className="w-full h-full p-2 text-gray-400" />
-                  )}
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                    {team.teamlogo ? (
+                      <img
+                        src={team.teamlogo}
+                        alt={team.teamname}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Users className="w-full h-full p-2 text-gray-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-medium">{team.teamname}</h3>
+                    <p className="text-sm text-gray-500">{team.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-medium">{team.teamname}</h3>
-                  <p className="text-sm text-gray-500">{team.email}</p>
-                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => {
+                    setSelectedTeamUuid(team.uuid);
+                    setIsDeleteDialogOpen(true);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
             ))}
           </div>
@@ -104,7 +138,15 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
         onOpenChange={setIsAssignDialogOpen}
         gameId={gameId}
         assignedTeams={assignedTeams}
-        onTeamsAssigned={handleTeamAssigned}
+        onTeamsAssigned={() => {
+          queryClient.invalidateQueries({ queryKey: ['game-teams', gameId] });
+        }}
+      />
+
+      <DeleteConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteTeam}
       />
     </Card>
   );
