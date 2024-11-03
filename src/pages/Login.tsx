@@ -17,13 +17,11 @@ const Login = () => {
 
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
-          navigate("/");
-        }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate("/");
       }
-    );
+    });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
