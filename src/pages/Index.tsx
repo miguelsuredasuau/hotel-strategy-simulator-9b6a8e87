@@ -66,12 +66,14 @@ const Index = () => {
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key && event.key.toLowerCase() === 'escape') {
+    // Check if event and event.key exist before accessing toLowerCase
+    if (event?.key && event.key.toLowerCase() === 'escape') {
       setShowDashboard(false);
     }
   };
 
   useEffect(() => {
+    // Add type safety to the event listener
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
