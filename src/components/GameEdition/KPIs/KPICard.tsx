@@ -2,17 +2,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { KPI } from "@/types/kpi";
 
 interface KPICardProps {
-  kpi: {
-    uuid: string;
-    name: string;
-    impact_type: string;
-    weight: number;
-    default_value: number;
-  };
-  onEdit: (kpi: any) => void;
-  onDelete: (kpi: any) => void;
+  kpi: KPI;
+  onEdit: (kpi: KPI) => void;
+  onDelete: (kpi: KPI) => void;
 }
 
 const KPICard = ({ kpi, onEdit, onDelete }: KPICardProps) => {
@@ -23,15 +18,25 @@ const KPICard = ({ kpi, onEdit, onDelete }: KPICardProps) => {
           <div className="space-y-2">
             <h3 className="font-semibold text-lg">{kpi.name}</h3>
             <div className="space-y-1">
-              <Badge variant="outline" className="capitalize">
-                {kpi.impact_type || 'value'}
-              </Badge>
+              <div className="flex gap-2">
+                <Badge variant="outline" className="capitalize">
+                  {kpi.category}
+                </Badge>
+                <Badge variant="outline" className="capitalize">
+                  Axis {kpi.axis}
+                </Badge>
+              </div>
               <p className="text-sm text-gray-500">
-                Weight: {kpi.weight || 1}
+                Weight: {kpi.weight}
               </p>
               <p className="text-sm text-gray-500">
-                Default: {kpi.default_value || 0}
+                Default: {kpi.default_value}
               </p>
+              {kpi.is_customizable && (
+                <Badge variant="secondary">
+                  Customizable
+                </Badge>
+              )}
             </div>
           </div>
           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

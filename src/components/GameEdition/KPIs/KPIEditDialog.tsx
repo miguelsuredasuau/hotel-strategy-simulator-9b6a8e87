@@ -7,59 +7,62 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { KPI } from "@/types/kpi";
+import KPIFormFields from "./KPIFormFields";
 
 interface KPIEditDialogProps {
-  kpi: any;
+  kpi: Partial<KPI> | null;
   gameId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) => {
-  const [name, setName] = useState('');
-  const [impactType, setImpactType] = useState('value');
-  const [weight, setWeight] = useState('1');
-  const [defaultValue, setDefaultValue] = useState('0');
+  const [formData, setFormData] = useState<Partial<KPI>>({
+    impact_type: 'value',
+    weight: 1,
+    default_value: 0,
+    axis: 'Y',
+    category: 'operational',
+    is_customizable: false,
+  });
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (kpi) {
-      setName(kpi.name || '');
-      setImpactType(kpi.impact_type || 'value');
-      setWeight(kpi.weight?.toString() || '1');
-      setDefaultValue(kpi.default_value?.toString() || '0');
+      setFormData(kpi);
     } else {
-      setName('');
-      setImpactType('value');
-      setWeight('1');
-      setDefaultValue('0');
+      setFormData({
+        impact_type: 'value',
+        weight: 1,
+        default_value: 0,
+        axis: 'Y',
+        category: 'operational',
+        is_customizable: false,
+      });
     }
   }, [kpi]);
+
+  const handleChange = (field: keyof KPI, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleSave = async () => {
     try {
       const kpiData = {
-        name,
-        impact_type: impactType,
-        weight: parseFloat(weight),
-        default_value: parseFloat(defaultValue),
+        ...formData,
         game_uuid: gameId,
+        impact_type: 'value',
       };
 
-      if (kpi) {
+      if (kpi?.uuid) {
         const { error } = await supabase
           .from('kpis')
           .update(kpiData)
@@ -93,57 +96,15 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{kpi ? 'Edit' : 'Create'} KPI</DialogTitle>
+          <DialogTitle>{kpi?.uuid ? 'Edit' : 'Create'} KPI</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter KPI name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="type">Impact Type</Label>
-            <Select value={impactType} onValueChange={setImpactType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select impact type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="value">Value</SelectItem>
-                <SelectItem value="quality">Quality</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="weight">Weight</Label>
-            <Input
-              id="weight"
-              type="number"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              placeholder="Enter weight"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="default">Default Value</Label>
-            <Input
-              id="default"
-              type="number"
-              value={defaultValue}
-              onChange={(e) => setDefaultValue(e.target.value)}
-              placeholder="Enter default value"
-            />
-          </div>
-        </div>
+        <KPIFormFields kpi={formData} onChange={handleChange} />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            {kpi ? 'Update' : 'Create'} KPI
+            {kpi?.uuid ? 'Update' : 'Create'} KPI
           </Button>
         </DialogFooter>
       </DialogContent>

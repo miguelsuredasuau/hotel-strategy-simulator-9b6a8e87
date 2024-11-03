@@ -74,28 +74,37 @@ export type Database = {
       }
       kpis: {
         Row: {
+          axis: string
+          category: string | null
           created_at: string | null
           default_value: number | null
           game_uuid: string | null
           impact_type: string | null
+          is_customizable: boolean | null
           name: string
           uuid: string
           weight: number | null
         }
         Insert: {
+          axis?: string
+          category?: string | null
           created_at?: string | null
           default_value?: number | null
           game_uuid?: string | null
           impact_type?: string | null
+          is_customizable?: boolean | null
           name: string
           uuid?: string
           weight?: number | null
         }
         Update: {
+          axis?: string
+          category?: string | null
           created_at?: string | null
           default_value?: number | null
           game_uuid?: string | null
           impact_type?: string | null
+          is_customizable?: boolean | null
           name?: string
           uuid?: string
           weight?: number | null

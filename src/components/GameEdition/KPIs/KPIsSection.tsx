@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { KPI } from "@/types/kpi";
 import KPICard from './KPICard';
 import KPIEditDialog from './KPIEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
@@ -17,22 +18,23 @@ interface KPIsSectionProps {
 const KPIsSection = ({ gameId }: KPIsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedKPI, setSelectedKPI] = useState<any>(null);
+  const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: kpis, isLoading } = useQuery({
+  const { data: kpis = [], isLoading } = useQuery({
     queryKey: ['kpis', gameId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('kpis')
         .select('*')
         .eq('game_uuid', gameId)
-        .order('created_at');
+        .order('category', { ascending: true })
+        .order('name', { ascending: true });
 
       if (error) throw error;
-      return data;
+      return data as KPI[];
     },
   });
 
@@ -62,6 +64,9 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
     }
   };
 
+  const operationalKPIs = kpis.filter(kpi => kpi.category === 'operational');
+  const financialKPIs = kpis.filter(kpi => kpi.category === 'financial');
+
   return (
     <Card className="mt-8">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -86,27 +91,58 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
                   <div key={i} className="h-20 bg-gray-100 rounded-lg" />
                 ))}
               </div>
-            ) : kpis?.length ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {kpis.map((kpi) => (
-                  <KPICard
-                    key={kpi.uuid}
-                    kpi={kpi}
-                    onEdit={(kpi) => {
-                      setSelectedKPI(kpi);
-                      setIsCreateDialogOpen(true);
-                    }}
-                    onDelete={(kpi) => {
-                      setSelectedKPI(kpi);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  />
-                ))}
-              </div>
             ) : (
-              <p className="text-center text-gray-500 py-4">
-                No KPIs created yet
-              </p>
+              <div className="space-y-6">
+                {operationalKPIs.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Operational KPIs</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {operationalKPIs.map((kpi) => (
+                        <KPICard
+                          key={kpi.uuid}
+                          kpi={kpi}
+                          onEdit={(kpi) => {
+                            setSelectedKPI(kpi);
+                            setIsCreateDialogOpen(true);
+                          }}
+                          onDelete={(kpi) => {
+                            setSelectedKPI(kpi);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {financialKPIs.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Financial KPIs</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {financialKPIs.map((kpi) => (
+                        <KPICard
+                          key={kpi.uuid}
+                          kpi={kpi}
+                          onEdit={(kpi) => {
+                            setSelectedKPI(kpi);
+                            setIsCreateDialogOpen(true);
+                          }}
+                          onDelete={(kpi) => {
+                            setSelectedKPI(kpi);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {kpis.length === 0 && (
+                  <p className="text-center text-gray-500 py-4">
+                    No KPIs created yet
+                  </p>
+                )}
+              </div>
             )}
           </CardContent>
         </CollapsibleContent>
