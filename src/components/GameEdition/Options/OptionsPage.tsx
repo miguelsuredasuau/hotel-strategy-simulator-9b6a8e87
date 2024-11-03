@@ -19,7 +19,7 @@ const OptionsPage = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { gameId, turnId } = useParams();
+  const { gameId = '', turnId = '' } = useParams();
 
   // Fetch turn data
   const { data: turnData } = useQuery({
@@ -29,7 +29,7 @@ const OptionsPage = () => {
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
-        .eq('id', turnId)
+        .eq('uuid', turnId)
         .single();
 
       if (error) throw error;
@@ -47,8 +47,8 @@ const OptionsPage = () => {
       const { data, error } = await supabase
         .from('Options')
         .select('*')
-        .eq('turn', turnId)
-        .eq('game', gameId)
+        .eq('turn_uuid', turnId)
+        .eq('game_uuid', gameId)
         .order('optionnumber');
 
       if (error) throw error;
@@ -74,7 +74,7 @@ const OptionsPage = () => {
         const { error } = await supabase
           .from('Options')
           .update({ optionnumber: option.optionnumber })
-          .eq('id', option.id);
+          .eq('uuid', option.uuid);
         
         if (error) throw error;
       }
@@ -93,12 +93,12 @@ const OptionsPage = () => {
     }
   };
 
-  const handleDeleteOption = async (optionId: number) => {
+  const handleDeleteOption = async (optionUuid: string) => {
     try {
       const { error } = await supabase
         .from('Options')
         .delete()
-        .eq('id', optionId);
+        .eq('uuid', optionUuid);
 
       if (error) throw error;
 
@@ -167,7 +167,7 @@ const OptionsPage = () => {
                 ) : options?.length ? (
                   options.map((option, index) => (
                     <OptionCard
-                      key={option.id}
+                      key={option.uuid}
                       option={option}
                       index={index}
                       onEdit={(option) => {
@@ -194,8 +194,8 @@ const OptionsPage = () => {
         {(isEditDialogOpen || selectedOption) && (
           <OptionEditDialog
             option={selectedOption}
-            turnId={Number(turnId)}
-            gameId={Number(gameId)}
+            turnId={turnId}
+            gameId={gameId}
             open={isEditDialogOpen}
             onOpenChange={setIsEditDialogOpen}
           />
@@ -204,7 +204,7 @@ const OptionsPage = () => {
         <DeleteConfirmDialog
           open={isDeleteDialogOpen}
           onOpenChange={setIsDeleteDialogOpen}
-          onConfirm={() => selectedOption && handleDeleteOption(selectedOption.id)}
+          onConfirm={() => selectedOption && handleDeleteOption(selectedOption.uuid)}
         />
       </div>
     </div>
