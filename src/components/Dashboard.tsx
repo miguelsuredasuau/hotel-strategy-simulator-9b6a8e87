@@ -30,7 +30,6 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
 
       if (!turn) return null;
 
-      // First, try to get the selected option (you might need to add a 'selected' column to the Options table)
       const { data: options, error } = await supabase
         .from('Options')
         .select('*')
@@ -38,9 +37,7 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
         .eq('turn_uuid', turn.uuid);
 
       if (error) throw error;
-      
-      // For now, we'll just return the first option as selected
-      // In a real implementation, you would need to track which option was selected
+
       return (options as Option[])[0];
     },
     enabled: !!gameId
@@ -61,22 +58,21 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
             <h2 className="text-xl font-semibold mb-2">Selected Option: {selectedOption.title}</h2>
             <p className="text-gray-600">{selectedOption.description}</p>
+            {isCurrentTurn && (
+              <div className="flex justify-end mt-4">
+                <Button 
+                  onClick={onNextTurn}
+                  className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
+                >
+                  Next Turn
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
         <StatisticsCards />
         <ChartSection />
-
-        {isCurrentTurn && (
-          <div className="flex justify-end mt-8">
-            <Button 
-              onClick={onNextTurn}
-              className="bg-hotel-primary text-white hover:bg-hotel-primary/90"
-            >
-              Next Turn
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );
