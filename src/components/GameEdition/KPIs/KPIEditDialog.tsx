@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ interface KPIEditDialogProps {
 
 const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<KPI>>({
+    name: '',
     impact_type: 'value',
     weight: 1,
     default_value: 0,
@@ -34,9 +35,13 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
 
   useEffect(() => {
     if (kpi) {
-      setFormData(kpi);
+      setFormData({
+        ...kpi,
+        impact_type: 'value' // Ensure this is always set to 'value'
+      });
     } else {
       setFormData({
+        name: '',
         impact_type: 'value',
         weight: 1,
         default_value: 0,
@@ -55,11 +60,25 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
   };
 
   const handleSave = async () => {
+    if (!formData.name) {
+      toast({
+        title: "Error",
+        description: "KPI name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const kpiData = {
-        ...formData,
-        game_uuid: gameId,
+        name: formData.name,
         impact_type: 'value',
+        weight: formData.weight || 1,
+        default_value: formData.default_value || 0,
+        axis: formData.axis || 'Y',
+        category: formData.category || 'operational',
+        is_customizable: formData.is_customizable || false,
+        game_uuid: gameId,
       };
 
       if (kpi?.uuid) {
@@ -78,11 +97,11 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
       }
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-      onOpenChange(false);
       toast({
         title: "Success",
         description: `KPI ${kpi ? 'updated' : 'created'} successfully`,
       });
+      onOpenChange(false);
     } catch (error: any) {
       toast({
         title: "Error",
