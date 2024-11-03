@@ -29,7 +29,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
   const queryClient = useQueryClient();
 
   // Fetch turn data to get UUID
-  const { data: turnData } = useQuery({
+  const { data: turnData, isLoading: isTurnLoading } = useQuery({
     queryKey: ['turn', turnId],
     queryFn: async () => {
       if (!turnId) throw new Error('No turn ID provided');
@@ -43,15 +43,24 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       if (error) throw error;
       return data as Turn;
     },
-    enabled: !!turnId
+    enabled: !!turnId && open // Only fetch when dialog is open and turnId exists
   });
 
   const handleDownload = async () => {
+    if (!turnData?.uuid) {
+      toast({
+        title: "Error",
+        description: "Turn data not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data: options } = await supabase
         .from('Options')
         .select('*')
-        .eq('turn_uuid', turnId)
+        .eq('turn_uuid', turnData.uuid)
         .eq('game_uuid', gameId)
         .order('optionnumber');
 
@@ -80,7 +89,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(excelData);
       XLSX.utils.book_append_sheet(wb, ws, 'Options');
-      XLSX.writeFile(wb, `turn_${turnId}_options.xlsx`);
+      XLSX.writeFile(wb, `turn_${turnData.turnnumber}_options.xlsx`);
 
       toast({
         title: "Success",
@@ -103,7 +112,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
     if (!turnData?.uuid) {
       toast({
         title: "Error",
-        description: "Turn data not found",
+        description: "Turn data not available",
         variant: "destructive",
       });
       return;
@@ -153,6 +162,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
               onClick={handleDownload} 
               className="w-full"
               variant="outline"
+              disabled={isTurnLoading || !turnData}
             >
               <Download className="mr-2 h-4 w-4" />
               Export to Excel
@@ -165,7 +175,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleUpload}
-                disabled={isUploading}
+                disabled={isUploading || isTurnLoading || !turnData}
                 className="cursor-pointer"
               />
               {isUploading && (
