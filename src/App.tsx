@@ -42,6 +42,9 @@ const App = () => {
         });
 
         return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error('Session initialization error:', error);
+        setSession(null);
       } finally {
         setIsLoading(false);
       }
