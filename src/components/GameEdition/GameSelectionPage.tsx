@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,54 @@ const GameSelectionPage = () => {
   const handleDeleteClick = (gameId: string) => {
     setSelectedGameId(gameId);
     setIsDeleteGameOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedGameId) return;
+
+    try {
+      // First delete all options associated with the game's turns
+      const { data: turns } = await supabase
+        .from('Turns')
+        .select('uuid')
+        .eq('game_uuid', selectedGameId);
+
+      if (turns) {
+        for (const turn of turns) {
+          await supabase
+            .from('Options')
+            .delete()
+            .eq('turn_uuid', turn.uuid);
+        }
+      }
+
+      // Then delete all turns
+      await supabase
+        .from('Turns')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      // Finally delete the game
+      const { error } = await supabase
+        .from('Games')
+        .delete()
+        .eq('uuid', selectedGameId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+      setIsDeleteGameOpen(false);
+      toast({
+        title: "Success",
+        description: "Game deleted successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error deleting game",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -93,10 +141,7 @@ const GameSelectionPage = () => {
           <DeleteGameDialog
             open={isDeleteGameOpen}
             onOpenChange={setIsDeleteGameOpen}
-            onConfirm={() => {
-              // Handle delete confirmation
-              setIsDeleteGameOpen(false);
-            }}
+            onConfirm={handleDeleteConfirm}
           />
         )}
       </div>
