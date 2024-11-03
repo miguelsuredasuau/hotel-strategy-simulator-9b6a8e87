@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ScrollText, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, ScrollText, ChevronDown, ChevronRight, Download } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import * as XLSX from 'xlsx';
 import TurnCard from './TurnCard';
 import TurnEditDialog from '../TurnEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
@@ -29,6 +30,40 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const handleDownloadExcel = () => {
+    if (!turns || turns.length === 0) {
+      toast({
+        title: "No turns to export",
+        description: "Create some turns first before exporting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prepare data for Excel
+    const excelData = turns.map(turn => ({
+      'Turn Number': turn.turnnumber,
+      'Challenge': turn.challenge || '',
+      'Description': turn.description || '',
+      'Created At': turn.created_at ? new Date(turn.created_at).toLocaleDateString() : ''
+    }));
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Turns');
+
+    // Generate Excel file
+    XLSX.writeFile(wb, 'game_turns.xlsx');
+
+    toast({
+      title: "Success",
+      description: "Turns exported successfully",
+    });
+  };
 
   const handleSaveTurn = async (turn: Turn) => {
     try {
@@ -111,13 +146,23 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
             <ScrollText className="h-5 w-5" />
             <CardTitle>Turns Management</CardTitle>
           </div>
-          <Button onClick={() => {
-            setSelectedTurn(null);
-            setIsCreateDialogOpen(true);
-          }} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create New Turn
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={handleDownloadExcel}
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export to Excel
+            </Button>
+            <Button onClick={() => {
+              setSelectedTurn(null);
+              setIsCreateDialogOpen(true);
+            }} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create New Turn
+            </Button>
+          </div>
         </CardHeader>
         <CollapsibleContent>
           <CardContent>
