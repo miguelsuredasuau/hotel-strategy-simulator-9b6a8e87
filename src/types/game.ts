@@ -31,3 +31,12 @@ export interface Team {
   email?: string;
   created_at?: string;
 }
+
+export interface Game {
+  uuid: string;
+  name?: string;
+  description?: string;
+  status?: string;
+  inspirational_image?: string;
+  created_at?: string;
+}

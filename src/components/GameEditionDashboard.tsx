@@ -11,6 +11,17 @@ import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import { useTurnManagement } from './GameEdition/Dashboard/useTurnManagement';
 import DashboardHeader from './GameEdition/Dashboard/DashboardHeader';
 
+interface DashboardContentProps {
+  gameId: string;
+  gameData: Game;
+  turnsData: Turn[];
+  showingOptions: boolean;
+  onEditOptions: (turn: Turn) => void;
+  onEditTurn: (turn: Turn) => void;
+  onDeleteTurn: (turn: Turn) => void;
+  onAddTurn: () => void;
+}
+
 const GameEditionDashboard = () => {
   const { gameId = '' } = useParams();
   const isGamemaster = useGameMasterCheck();
@@ -59,26 +70,28 @@ const GameEditionDashboard = () => {
       <div className="max-w-5xl mx-auto p-6">
         <DashboardHeader onLogout={handleLogout} />
         
-        <DashboardContent
-          gameId={gameId}
-          gameData={gameData}
-          turnsData={turnsData}
-          showingOptions={showingOptions}
-          onEditOptions={(turn) => {
-            setSelectedTurn(turn);
-            setShowingOptions(true);
-            setIsOptionsOpen(true);
-          }}
-          onEditTurn={(turn) => {
-            setSelectedTurn(turn);
-            setIsEditOpen(true);
-          }}
-          onDeleteTurn={(turn) => {
-            setSelectedTurn(turn);
-            setIsDeleteOpen(true);
-          }}
-          onAddTurn={() => setIsNewTurnOpen(true)}
-        />
+        {gameData && (
+          <DashboardContent
+            gameId={gameId}
+            gameData={gameData}
+            turnsData={turnsData || []}
+            showingOptions={showingOptions}
+            onEditOptions={(turn) => {
+              setSelectedTurn(turn);
+              setShowingOptions(true);
+              setIsOptionsOpen(true);
+            }}
+            onEditTurn={(turn) => {
+              setSelectedTurn(turn);
+              setIsEditOpen(true);
+            }}
+            onDeleteTurn={(turn) => {
+              setSelectedTurn(turn);
+              setIsDeleteOpen(true);
+            }}
+            onAddTurn={() => setIsNewTurnOpen(true)}
+          />
+        )}
 
         {isNewTurnOpen && (
           <TurnEditDialog

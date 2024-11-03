@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +11,7 @@ const DashboardContent = () => {
     queryKey: ['game', gameId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('games')
+        .from('Games')
         .select('*')
         .eq('uuid', gameId)
         .single();
