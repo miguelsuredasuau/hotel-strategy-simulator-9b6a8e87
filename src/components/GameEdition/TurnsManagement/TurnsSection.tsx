@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ScrollText, ChevronDown, ChevronRight, Download } from "lucide-react";
+import { Plus, ScrollText, ChevronDown, ChevronRight, Download, Upload } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
@@ -41,7 +41,6 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
       return;
     }
 
-    // Prepare data for Excel
     const excelData = turns.map(turn => ({
       'Turn Number': turn.turnnumber,
       'Challenge': turn.challenge || '',
@@ -49,20 +48,46 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
       'Created At': turn.created_at ? new Date(turn.created_at).toLocaleDateString() : ''
     }));
 
-    // Create workbook and worksheet
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(excelData);
-
-    // Add worksheet to workbook
     XLSX.utils.book_append_sheet(wb, ws, 'Turns');
-
-    // Generate Excel file
     XLSX.writeFile(wb, 'game_turns.xlsx');
 
     toast({
       title: "Success",
       description: "Turns exported successfully",
     });
+  };
+
+  const handleUploadExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('gameId', gameId);
+
+      const { data, error } = await supabase.functions.invoke('bulk-upload-turns', {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
+      toast({
+        title: "Success",
+        description: "Turns updated successfully from Excel file",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading file",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const handleSaveTurn = async (turn: Turn) => {
@@ -155,6 +180,21 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
               <Download className="h-4 w-4" />
               Export to Excel
             </Button>
+            <div className="relative">
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleUploadExcel}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <Button 
+                variant="outline"
+                className="gap-2"
+              >
+                <Upload className="h-4 w-4" />
+                Import from Excel
+              </Button>
+            </div>
             <Button onClick={() => {
               setSelectedTurn(null);
               setIsCreateDialogOpen(true);
