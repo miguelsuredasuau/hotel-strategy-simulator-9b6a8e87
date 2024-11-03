@@ -15,9 +15,10 @@ import { FormulaInput } from "./FormulaEditor/FormulaInput";
 
 interface KPICalculatorProps {
   gameId: string;
+  onSuccess?: () => void;
 }
 
-export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
+export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [formula, setFormula] = useState("");
@@ -77,6 +78,8 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
       setUnit("");
       setIsPercentage(false);
       setIsCalculated(false);
+      
+      onSuccess?.();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -172,4 +175,3 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
       </CardContent>
     </Card>
   );
-};

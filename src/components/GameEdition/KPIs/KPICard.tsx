@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import { Calculator, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KPI } from "@/types/kpi";
-import { Draggable } from "@hello-pangea/dnd";
 
 interface KPICardProps {
   kpi: KPI;
@@ -23,21 +22,16 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
         <div className="flex items-center gap-3">
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-gray-900">{kpi.name}</h3>
               {isCalculated && (
-                <Calculator className="h-4 w-4 text-blue-500" />
+                <Calculator className="h-4 w-4 text-blue-500 shrink-0" />
               )}
+              <h3 className="font-medium text-gray-900">{kpi.name}</h3>
             </div>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-2xl font-bold text-gray-900">
                 {kpi.default_value}
                 {kpi.unit && <span className="text-sm ml-1 text-gray-500">{kpi.unit}</span>}
               </span>
-              {kpi.default_value !== undefined && !isCalculated && (
-                <span className="text-xs text-gray-400">
-                  (Default: {kpi.default_value})
-                </span>
-              )}
             </div>
           </div>
 

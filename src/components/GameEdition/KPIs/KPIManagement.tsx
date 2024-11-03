@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { useToast } from "@/components/ui/use-toast";
@@ -5,13 +6,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
-import { KPICalculator } from "./KPICalculator";
+import { KPICalculatorDialog } from "./KPICalculatorDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface KPIManagementProps {
   gameId: string;
 }
 
 export const KPIManagement = ({ gameId }: KPIManagementProps) => {
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -19,23 +23,18 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     if (!result.destination) return;
 
     try {
-      const sourceType = result.source.droppableId;
-      const destType = result.destination.droppableId;
-      
-      if (sourceType !== destType) {
-        const { error } = await supabase
-          .from('kpis')
-          .update({ type: destType })
-          .eq('uuid', result.draggableId);
+      const { error } = await supabase
+        .from('kpis')
+        .update({ type: result.destination.droppableId })
+        .eq('uuid', result.draggableId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-        toast({
-          title: "Success",
-          description: "KPI type updated successfully",
-        });
-      }
+      queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      toast({
+        title: "Success",
+        description: "KPI type updated successfully",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -48,8 +47,12 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>KPI Management</CardTitle>
+          <Button onClick={() => setIsCalculatorOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add New KPI
+          </Button>
         </CardHeader>
         <CardContent>
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -58,11 +61,13 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
               <OperationalKPIs gameId={gameId} />
             </div>
           </DragDropContext>
-          <div className="mt-6">
-            <KPICalculator gameId={gameId} />
-          </div>
         </CardContent>
       </Card>
+      <KPICalculatorDialog 
+        gameId={gameId}
+        open={isCalculatorOpen}
+        onOpenChange={setIsCalculatorOpen}
+      />
     </div>
   );
 };
