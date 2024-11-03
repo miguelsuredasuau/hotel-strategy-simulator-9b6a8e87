@@ -10,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Upload, Loader2 } from "lucide-react";
-import * as XLSX from 'xlsx';
-import { Turn } from "@/types/game";
+import { useTurnData } from "./hooks/useTurnData";
+import { downloadOptionsAsExcel } from "./utils/excelUtils";
 
 interface BulkOptionsDialogProps {
   turnId: string;
@@ -27,32 +27,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Validate UUID format
-  const isValidUUID = (uuid: string) => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  };
-
-  // Fetch turn data to get UUID
-  const { data: turnData, isLoading: isTurnLoading } = useQuery({
-    queryKey: ['turn', turnId],
-    queryFn: async () => {
-      if (!turnId || !isValidUUID(turnId)) {
-        throw new Error('Invalid turn ID format');
-      }
-
-      const { data, error } = await supabase
-        .from('Turns')
-        .select('*')
-        .eq('uuid', turnId)
-        .single();
-
-      if (error) throw error;
-      return data as Turn;
-    },
-    enabled: !!turnId && open && isValidUUID(turnId)
-  });
+  const { data: turnData, isLoading: isTurnLoading } = useTurnData(turnId, open);
 
   const handleDownload = async () => {
     if (!turnData?.uuid) {
@@ -72,39 +47,9 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
         .eq('game_uuid', gameId)
         .order('optionnumber');
 
-      if (!options || options.length === 0) {
-        toast({
-          title: "No options to export",
-          description: "Create some options first before exporting.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const excelData = options.map(option => ({
-        'Turn UUID': turnData.uuid,
-        'Game UUID': gameId,
-        'Option Number': option.optionnumber,
-        'Title': option.title || '',
-        'Description': option.description || '',
-        'Image URL': option.image || '',
-        'KPI 1': option.impactkpi1 || '',
-        'KPI 1 Amount': option.impactkpi1amount || '',
-        'KPI 2': option.impactkpi2 || '',
-        'KPI 2 Amount': option.impactkpi2amount || '',
-        'KPI 3': option.impactkpi3 || '',
-        'KPI 3 Amount': option.impactkpi3amount || '',
-      }));
-
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      XLSX.utils.book_append_sheet(wb, ws, 'Options');
-      XLSX.writeFile(wb, `turn_${turnData.turnnumber}_options.xlsx`);
-
-      toast({
-        title: "Success",
-        description: "Options exported successfully",
-      });
+      if (!options) return;
+      
+      downloadOptionsAsExcel(options, turnData.uuid, gameId, turnData.turnnumber || 0);
     } catch (error: any) {
       console.error('Export error:', error);
       toast({
@@ -117,25 +62,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!turnData?.uuid) {
-      toast({
-        title: "Error",
-        description: "Turn data not available",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!isValidUUID(turnData.uuid)) {
-      toast({
-        title: "Error",
-        description: "Invalid turn UUID format",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!file || !turnData?.uuid) return;
 
     setIsUploading(true);
     try {
@@ -204,7 +131,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              Upload an Excel file with columns: Option Number, Title, Description, Image URL, KPI 1, KPI 1 Amount, KPI 2, KPI 2 Amount, KPI 3, KPI 3 Amount
+              Upload an Excel file with columns: Turn UUID, Game UUID, Option Number, Title, Description, Image URL, KPI 1, KPI 1 Amount, KPI 2, KPI 2 Amount, KPI 3, KPI 3 Amount
             </p>
           </div>
         </div>
