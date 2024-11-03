@@ -1,5 +1,6 @@
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ImageOff } from "lucide-react";
 
 interface HotelCardProps {
   id: string;
@@ -12,12 +13,18 @@ interface HotelCardProps {
 const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) => {
   return (
     <Card className="overflow-hidden">
-      <div className="aspect-video relative overflow-hidden">
-        <img
-          src={image}
-          alt={name}
-          className="object-cover w-full h-full transition-transform hover:scale-105"
-        />
+      <div className="aspect-video relative overflow-hidden bg-gray-100">
+        {image ? (
+          <img
+            src={image}
+            alt={name}
+            className="object-cover w-full h-full transition-transform hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageOff className="h-12 w-12 text-gray-400" />
+          </div>
+        )}
       </div>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-2">{name}</h3>
