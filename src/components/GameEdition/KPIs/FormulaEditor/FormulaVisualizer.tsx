@@ -13,7 +13,8 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
   const formatFormula = (formula: string) => {
     try {
       let displayFormula = formula;
-      const kpiRefs = formula.match(/kpi:[a-zA-Z0-9-]+/g) || [];
+      // Match complete kpi:uuid patterns to avoid splitting UUIDs
+      const kpiRefs = formula.match(/kpi:[a-fA-F0-9-]{36}/g) || [];
 
       kpiRefs.forEach((ref) => {
         const uuid = ref.replace('kpi:', '');
@@ -37,8 +38,33 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete }: FormulaVisualizer
     }
   };
 
-  const parts = formatFormula(formula).split(/(\[[^\]]+\]|[-+*/()=<>!&|?:])/g).filter(Boolean);
-  const hasInvalidParts = parts.some(part => part.includes('kpi:'));
+  // Split by KPI references and operators while preserving the complete references
+  const splitFormula = (formula: string) => {
+    // First, temporarily replace KPI references with a unique marker
+    let tempFormula = formula;
+    const kpiRefs: string[] = [];
+    
+    tempFormula = tempFormula.replace(/\[([^\]]+)\]/g, (match) => {
+      kpiRefs.push(match);
+      return `###KPI${kpiRefs.length - 1}###`;
+    });
+
+    // Split by operators while preserving the KPI reference markers
+    const parts = tempFormula.split(/([+\-*/()=<>!&|?:])/g).filter(Boolean);
+
+    // Restore KPI references
+    return parts.map(part => {
+      if (part.startsWith('###KPI') && part.endsWith('###')) {
+        const index = parseInt(part.replace('###KPI', '').replace('###', ''));
+        return kpiRefs[index];
+      }
+      return part;
+    });
+  };
+
+  const formattedFormula = formatFormula(formula);
+  const parts = splitFormula(formattedFormula);
+  const hasInvalidParts = formula.includes('kpi:') && !formula.match(/kpi:[a-fA-F0-9-]{36}/g);
 
   if (hasInvalidParts) {
     return (
