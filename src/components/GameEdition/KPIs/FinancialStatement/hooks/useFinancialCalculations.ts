@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 
 export const useFinancialCalculations = (kpis: KPI[], gameId: string, turnId?: string) => {
-  const { data: kpiValues } = useQuery({
+  const { data: kpiValues = [] } = useQuery({
     queryKey: ['kpi-values', gameId, turnId],
     queryFn: async () => {
+      if (!gameId) throw new Error('Game ID is required');
+      
       const query = supabase
         .from('kpi_values')
         .select('*')
@@ -19,6 +21,7 @@ export const useFinancialCalculations = (kpis: KPI[], gameId: string, turnId?: s
 
       const { data, error } = await query;
       if (error) throw error;
+      console.log('Fetched KPI values:', data); // Debug log
       return data;
     },
     enabled: !!gameId
@@ -30,6 +33,7 @@ export const useFinancialCalculations = (kpis: KPI[], gameId: string, turnId?: s
   const getKPIValue = (kpiUuid: string) => {
     const kpiValue = kpiValues?.find(v => v.kpi_uuid === kpiUuid);
     const kpi = kpis.find(k => k.uuid === kpiUuid);
+    console.log('Getting KPI value for:', kpiUuid, 'Value:', kpiValue?.value, 'Default:', kpi?.default_value); // Debug log
     return kpiValue?.value ?? kpi?.default_value ?? 0;
   };
 

@@ -7,18 +7,12 @@ export const useKPIValueUpdates = (gameId: string, turnId?: string) => {
   const { toast } = useToast();
 
   const handleKPIValueChange = async (kpiUuid: string | undefined, newValue: number) => {
-    if (!kpiUuid) return;
+    if (!kpiUuid || !gameId) {
+      console.error('Missing required kpiUuid or gameId');
+      return;
+    }
 
     try {
-      // First check if a value already exists
-      const { data: existingValue } = await supabase
-        .from('kpi_values')
-        .select('*')
-        .eq('kpi_uuid', kpiUuid)
-        .eq('game_uuid', gameId)
-        .eq('turn_uuid', turnId)
-        .maybeSingle();
-
       const kpiValue = {
         kpi_uuid: kpiUuid,
         game_uuid: gameId,
@@ -26,29 +20,45 @@ export const useKPIValueUpdates = (gameId: string, turnId?: string) => {
         value: newValue
       };
 
+      // First check if a value already exists
+      const { data: existingValue, error: fetchError } = await supabase
+        .from('kpi_values')
+        .select('uuid')
+        .eq('kpi_uuid', kpiUuid)
+        .eq('game_uuid', gameId)
+        .eq('turn_uuid', turnId)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      let result;
+      
       if (existingValue) {
-        const { error } = await supabase
+        // Update existing value
+        result = await supabase
           .from('kpi_values')
           .update({ value: newValue })
           .eq('uuid', existingValue.uuid);
-
-        if (error) throw error;
       } else {
-        const { error } = await supabase
+        // Insert new value
+        result = await supabase
           .from('kpi_values')
           .insert([kpiValue]);
-
-        if (error) throw error;
       }
 
+      if (result.error) throw result.error;
+
       // Invalidate queries to refetch the latest data
-      await queryClient.invalidateQueries({ queryKey: ['kpi-values', gameId, turnId] });
+      await queryClient.invalidateQueries({ 
+        queryKey: ['kpi-values', gameId, turnId] 
+      });
       
       toast({
         title: "Success",
         description: "Value updated successfully",
       });
     } catch (error: any) {
+      console.error('Error updating KPI value:', error);
       toast({
         title: "Error",
         description: error.message,
