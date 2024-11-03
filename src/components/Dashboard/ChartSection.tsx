@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, ScatterChart, CartesianGrid, XAxis, YAxis, Scatter, ResponsiveContainer, Tooltip } from "recharts";
-import { Quote, Hotel } from "lucide-react";
+import { BarChart, Bar, ScatterChart, CartesianGrid, XAxis, YAxis, Scatter, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { Quote, Hotel, Users } from "lucide-react";
 import { mockRevenueData, mockCompetitiveData, mockHotels } from "./dashboardData";
 
 // Custom scatter dot component using Hotel icon
@@ -18,6 +18,26 @@ const CustomHotelDot = (props: any) => {
         strokeWidth: 1
       }}
     />
+  );
+};
+
+// Custom legend for the scatter plot
+const CustomLegend = (props: any) => {
+  const { payload } = props;
+  return (
+    <div className="flex gap-4 justify-center mt-2">
+      {payload.map((entry: any, index: number) => (
+        <div key={`item-${index}`} className="flex items-center gap-2">
+          <div 
+            className="w-3 h-3 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-gray-600">
+            {entry.value === 'travelers' ? 'Travelers' : 'Teams'}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 };
 
@@ -59,6 +79,7 @@ export const ChartSection = () => {
       <Card className="col-span-2 hover:shadow-lg transition-shadow">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-semibold text-hotel-text">Competitive Environment</CardTitle>
+          <p className="text-sm text-gray-500">Market position vs Performance analysis</p>
         </CardHeader>
         <CardContent className="p-4">
           <div className="w-full h-[300px]">
@@ -84,14 +105,22 @@ export const ChartSection = () => {
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}
+                  formatter={(value: any, name: any) => [value, name === 'travelers' ? 'Traveler Position' : 'Team Position']}
+                />
+                <Legend 
+                  content={<CustomLegend />}
+                  verticalAlign="bottom"
+                  height={36}
                 />
                 <Scatter 
+                  name="travelers"
                   data={mockCompetitiveData} 
                   fill="#60A5FA" 
                   fillOpacity={0.6}
                   shape={<CustomHotelDot />}
                 />
                 <Scatter 
+                  name="teams"
                   data={mockHotels} 
                   fill="#EF4444" 
                   fillOpacity={0.8}
