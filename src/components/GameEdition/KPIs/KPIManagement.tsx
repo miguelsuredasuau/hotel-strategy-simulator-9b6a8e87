@@ -32,11 +32,11 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 5000 // Refetch every 5 seconds
+    // Removed refetchInterval to prevent unnecessary polling
   });
 
-  // Use the enhanced KPI calculations hook
-  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId);
+  // Initialize the KPI calculations hook with immediate execution
+  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId, true);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -50,6 +50,9 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      // Trigger recalculation after drag and drop
+      updateCalculatedKPIs();
+      
       toast({
         title: "Success",
         description: "KPI type updated successfully",

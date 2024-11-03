@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { useToast } from "@/components/ui/use-toast";
 
-export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
+export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, executeImmediately: boolean = false) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -24,8 +24,10 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
     }
   };
 
-  const updateCalculatedKPIs = async () => {
+  const updateCalculatedKPIs = useCallback(async () => {
     if (!kpis?.length) return;
+
+    console.log('Updating calculated KPIs...');
 
     const kpiValues: Record<string, number> = {};
     const updates: { uuid: string; current_value: number }[] = [];
@@ -52,6 +54,8 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
       });
 
       const calculatedValue = evaluateFormula(kpi.formula, kpiValues);
+      console.log(`Calculated value for ${kpi.name}:`, calculatedValue);
+      
       if (calculatedValue !== kpi.current_value) {
         updates.push({
           uuid: kpi.uuid,
@@ -72,6 +76,8 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
     // Update calculated KPIs in database
     if (updates.length > 0) {
       try {
+        console.log('Updating KPIs in database:', updates);
+        
         for (const update of updates) {
           const { error } = await supabase
             .from('kpis')
@@ -81,7 +87,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
           if (error) throw error;
         }
         
-        queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+        await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
         toast({
           title: "Success",
           description: `Updated ${updates.length} calculated KPIs`,
@@ -94,13 +100,24 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
         });
         console.error('Error updating KPIs:', error);
       }
+    } else {
+      console.log('No KPI updates needed');
     }
-  };
+  }, [kpis, gameId, queryClient, toast]);
+
+  // Run calculations on mount if executeImmediately is true
+  useEffect(() => {
+    if (executeImmediately) {
+      updateCalculatedKPIs();
+    }
+  }, []); // Empty dependency array to only run on mount
 
   // Run calculations whenever KPIs change
   useEffect(() => {
-    updateCalculatedKPIs();
-  }, [kpis]);
+    if (kpis) {
+      updateCalculatedKPIs();
+    }
+  }, [kpis, updateCalculatedKPIs]);
 
   return { updateCalculatedKPIs };
 };
