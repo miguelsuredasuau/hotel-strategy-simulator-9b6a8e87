@@ -15,13 +15,13 @@ export const StatisticsCards = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <Card className="hover:shadow-lg transition-shadow">
+      <Card className="hover:shadow-lg transition-shadow h-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg font-medium text-gray-600">Revenue</CardTitle>
           <DollarSign className="h-5 w-5 text-blue-600" />
         </CardHeader>
-        <CardContent className="pt-6">
-          <div className="space-y-8">
+        <CardContent className="pt-4">
+          <div className="flex flex-col justify-between h-full">
             <div>
               <div className="text-4xl font-bold text-gray-900">€{revenueData.total}</div>
               <div className="flex items-center text-sm text-green-500 font-medium mt-1">
@@ -30,7 +30,7 @@ export const StatisticsCards = () => {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 mt-6">
               <div className="flex items-center justify-between text-base">
                 <div className="flex items-center">
                   <Check className="w-4 h-4 mr-3 text-blue-600" />
