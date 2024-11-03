@@ -56,7 +56,7 @@ export const KPIEditDialog = ({
   const handleSave = async () => {
     try {
       const dependsOn = isCalculated 
-        ? formData.formula?.match(/kpi:([a-zA-Z0-9_]+)/g)?.map(match => match.replace('kpi:', '')) || []
+        ? formData.formula?.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
         : null;
 
       const updatedData = {
@@ -125,6 +125,7 @@ export const KPIEditDialog = ({
                 onChange={(value) => setFormData({ ...formData, formula: value })}
                 availableKPIs={kpis || []}
                 gameId={gameId}
+                currentKpiId={kpi.uuid}
               />
             </div>
           ) : (

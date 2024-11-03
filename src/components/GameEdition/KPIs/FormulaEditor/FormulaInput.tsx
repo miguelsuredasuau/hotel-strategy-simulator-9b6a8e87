@@ -12,13 +12,23 @@ interface FormulaInputProps {
   onChange: (value: string) => void;
   availableKPIs: KPI[];
   gameId: string;
+  currentKpiId?: string;
 }
 
-export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: FormulaInputProps) => {
+export const FormulaInput = ({ 
+  value, 
+  onChange, 
+  availableKPIs, 
+  gameId,
+  currentKpiId 
+}: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [showRawFormula, setShowRawFormula] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
+  // Filter out the current KPI from the available KPIs
+  const filteredKPIs = availableKPIs.filter(kpi => kpi.uuid !== currentKpiId);
+
   const operators = [
     { symbol: '+', label: 'Add' },
     { symbol: '-', label: 'Subtract' },
@@ -121,7 +131,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
           </div>
           <ScrollArea className="h-[120px]">
             <div className="grid grid-cols-2 gap-2">
-              {availableKPIs.map((kpi) => (
+              {filteredKPIs.map((kpi) => (
                 <Button
                   key={kpi.uuid}
                   variant="outline"
