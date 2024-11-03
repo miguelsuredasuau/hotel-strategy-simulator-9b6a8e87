@@ -9,6 +9,7 @@ import TeamAssignDialog from './TeamAssignDialog';
 import { Team } from '@/types/game';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
 import { useNavigate } from 'react-router-dom';
+import { useSession } from '@supabase/auth-helpers-react';
 
 interface GameTeamsSectionProps {
   gameId: string;
@@ -21,11 +22,11 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const session = useSession();
 
   const { data: assignedTeams = [], isLoading } = useQuery({
     queryKey: ['game-teams', gameId],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/login');
         return [];
@@ -34,7 +35,7 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       const { data, error } = await supabase
         .from('game_teams')
         .select(`
-          teams:team_uuid (
+          teams (
             uuid,
             teamname,
             teamlogo,
@@ -48,18 +49,11 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       
       if (!data) return [];
 
-      // Map the nested team data to our Team interface
-      return data.map(item => {
-        if (!item.teams) return null;
-        return {
-          uuid: item.teams.uuid,
-          teamname: item.teams.teamname,
-          teamlogo: item.teams.teamlogo,
-          email: item.teams.email,
-          created_at: item.teams.created_at
-        };
-      }).filter((team): team is Team => team !== null);
+      return data
+        .map(item => item.teams)
+        .filter((team): team is NonNullable<typeof team> => team !== null);
     },
+    enabled: !!session,
   });
 
   const handleDeleteTeam = async () => {
@@ -88,6 +82,10 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
       });
     }
   };
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <Card>
@@ -120,7 +118,7 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
                     {team.teamlogo ? (
                       <img
                         src={team.teamlogo}
-                        alt={team.teamname}
+                        alt={team.teamname || ''}
                         className="w-full h-full object-cover"
                       />
                     ) : (
