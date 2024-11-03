@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,12 +19,10 @@ interface KPICalculatorProps {
 
 export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [formula, setFormula] = useState("");
   const [isCalculated, setIsCalculated] = useState(false);
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
-  const [isPercentage, setIsPercentage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,12 +51,10 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
           game_uuid: gameId,
           name,
           type: 'financial',
-          description,
           formula: isCalculated ? formula : null,
           depends_on: dependsOn,
           default_value: isCalculated ? null : defaultValue,
           unit,
-          is_percentage: isPercentage
         });
 
       if (error) throw error;
@@ -71,11 +66,9 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       });
 
       setName("");
-      setDescription("");
       setFormula("");
       setDefaultValue(0);
       setUnit("");
-      setIsPercentage(false);
       
       onSuccess?.();
     } catch (error: any) {
@@ -97,14 +90,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Operating Profit"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Description</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe how this KPI is calculated"
             />
           </div>
 
@@ -149,15 +134,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             <Input
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              placeholder="e.g., $, %, pts"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label>Is Percentage?</Label>
-            <Switch
-              checked={isPercentage}
-              onCheckedChange={setIsPercentage}
+              placeholder="e.g., $, pts"
             />
           </div>
 
