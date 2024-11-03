@@ -46,18 +46,35 @@ const GameSelectionPage = () => {
     if (!selectedGameId) return;
 
     try {
-      const { error } = await supabase
+      // First, delete all options associated with the game
+      const { error: optionsError } = await supabase
+        .from('Options')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      if (optionsError) throw optionsError;
+
+      // Then, delete all turns associated with the game
+      const { error: turnsError } = await supabase
+        .from('Turns')
+        .delete()
+        .eq('game_uuid', selectedGameId);
+
+      if (turnsError) throw turnsError;
+
+      // Finally, delete the game itself
+      const { error: gameError } = await supabase
         .from('Games')
         .delete()
         .eq('uuid', selectedGameId);
 
-      if (error) throw error;
+      if (gameError) throw gameError;
 
       queryClient.invalidateQueries({ queryKey: ['games'] });
       setIsDeleteDialogOpen(false);
       toast({
         title: "Game deleted",
-        description: "The game has been successfully deleted.",
+        description: "The game and all its associated data have been successfully deleted.",
       });
     } catch (error: any) {
       toast({

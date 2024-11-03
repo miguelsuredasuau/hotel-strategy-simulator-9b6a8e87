@@ -110,21 +110,29 @@ export type Database = {
           created_at: string | null
           id: string
           role: string | null
-          team_id: number | null
+          team_uuid: string | null
         }
         Insert: {
           created_at?: string | null
           id: string
           role?: string | null
-          team_id?: number | null
+          team_uuid?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           role?: string | null
-          team_id?: number | null
+          team_uuid?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_team_uuid_fkey"
+            columns: ["team_uuid"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["uuid"]
+          },
+        ]
       }
       teams: {
         Row: {
