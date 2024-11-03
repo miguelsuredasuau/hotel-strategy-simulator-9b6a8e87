@@ -10,6 +10,7 @@ import DeleteGameDialog from "./DeleteGameDialog";
 import GameDetailsCard from "./GameDetailsCard";
 import Header from "../Header/Header";
 import TeamMenu from "../Header/TeamMenu";
+import { Card, CardContent } from "@/components/ui/card";
 
 const GameSelectionPage = () => {
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
@@ -45,10 +46,14 @@ const GameSelectionPage = () => {
     <div className="min-h-screen bg-gray-50">
       <Header>
         <h1 className="text-2xl font-bold">Game Selection</h1>
+        <TeamMenu />
       </Header>
       <div className="max-w-7xl mx-auto p-6">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-semibold">Available Games</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Available Games</h2>
+            <p className="text-gray-500 mt-2">Select a game to edit or create a new one</p>
+          </div>
           <Button onClick={() => setIsCreateGameOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
             Create New Game
@@ -56,7 +61,13 @@ const GameSelectionPage = () => {
         </div>
 
         {isLoading ? (
-          <div>Loading...</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="animate-pulse">
+                <CardContent className="h-48" />
+              </Card>
+            ))}
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {games.map((game) => (
@@ -73,13 +84,19 @@ const GameSelectionPage = () => {
         <CreateGameDialog
           open={isCreateGameOpen}
           onOpenChange={setIsCreateGameOpen}
+          onGameCreated={(gameId) => {
+            navigate(`/game-edition/${gameId}`);
+          }}
         />
 
         {selectedGameId && (
           <DeleteGameDialog
-            gameId={selectedGameId}
             open={isDeleteGameOpen}
             onOpenChange={setIsDeleteGameOpen}
+            onConfirm={() => {
+              // Handle delete confirmation
+              setIsDeleteGameOpen(false);
+            }}
           />
         )}
       </div>
