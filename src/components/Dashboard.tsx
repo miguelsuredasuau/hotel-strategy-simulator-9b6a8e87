@@ -8,7 +8,7 @@ import { StatisticsCards } from "./Dashboard/StatisticsCards";
 import { ChartSection } from "./Dashboard/ChartSection";
 import { Button } from "@/components/ui/button";
 import { Option } from "@/types/game";
-import { Loader2, ImageOff } from "lucide-react";
+import { Loader2, ImageOff, ArrowRight } from "lucide-react";
 
 interface DashboardProps {
   onNextTurn: () => void;
@@ -55,8 +55,8 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
     <div className="min-h-screen bg-gray-50">
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <div className="flex gap-6">
-          {selectedOption && (
-            <div className="flex-grow bg-white p-6 rounded-lg shadow-sm">
+          <div className="flex-grow bg-white p-6 rounded-lg shadow-sm">
+            {selectedOption && (
               <div className="flex gap-6">
                 <div className="w-32 h-24 rounded-lg overflow-hidden bg-gray-100">
                   {selectedOption.image ? (
@@ -76,18 +76,17 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
                   <p className="text-gray-600">{selectedOption.description}</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
           
           {isCurrentTurn && (
-            <div className="w-[10%] bg-white p-4 rounded-lg shadow-sm flex items-center justify-center">
-              <Button 
-                onClick={onNextTurn}
-                className="bg-hotel-primary text-white hover:bg-hotel-primary/90 w-full"
-              >
-                Next Turn
-              </Button>
-            </div>
+            <Button 
+              onClick={onNextTurn}
+              className="bg-hotel-primary text-white hover:bg-hotel-primary/90 h-24 w-24 p-0"
+              size="icon"
+            >
+              <ArrowRight className="h-8 w-8" />
+            </Button>
           )}
         </div>
 
