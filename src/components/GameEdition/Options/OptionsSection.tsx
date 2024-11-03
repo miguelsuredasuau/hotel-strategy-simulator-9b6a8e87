@@ -103,6 +103,8 @@ export const OptionsSection = ({ turnId, gameId }: OptionsSectionProps) => {
           }
         }}
         onSave={handleSaveOption}
+        turnId={turnId}
+        gameId={gameId}
       />
 
       <DeleteConfirmDialog

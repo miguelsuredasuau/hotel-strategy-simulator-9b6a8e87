@@ -18,9 +18,14 @@ serve(async (req) => {
     const turnId = formData.get('turnId') as string
     const gameId = formData.get('gameId') as string
 
+    console.log('Received request with:', { turnId, gameId });
+
     if (!file || !turnId || !gameId) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ 
+          error: 'Missing required fields',
+          received: { file: !!file, turnId, gameId }
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
@@ -34,6 +39,8 @@ serve(async (req) => {
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' })
     const worksheet = workbook.Sheets[workbook.SheetNames[0]]
     const data = XLSX.utils.sheet_to_json(worksheet)
+
+    console.log('Processing data:', data);
 
     for (const row of data) {
       const optionNumber = row['Option Number']
@@ -81,6 +88,7 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error processing request:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
