@@ -119,6 +119,7 @@ export const FormulaInput = ({
             formula={value} 
             kpis={availableKPIs} 
             onDelete={handleDeletePart}
+            onChange={onChange}
           />
         )}
       </div>
