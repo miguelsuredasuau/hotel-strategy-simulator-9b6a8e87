@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,121 +7,84 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Loader2 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
-import { DefaultAmountsEditor } from "./DefaultAmountsEditor";
+import { useToast } from "@/components/ui/use-toast";
+import OptionForm from "./components/OptionForm";
 
-interface OptionsEditDialogProps {
-  turnId: string;
-  gameId: string;
+interface OptionEditDialogProps {
+  option: Partial<Option>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSave: (option: Option) => Promise<void>;
+  turnId?: string;
+  gameId?: string;
 }
 
-const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDialogProps) => {
-  const queryClient = useQueryClient();
+const OptionEditDialog = ({
+  option,
+  open,
+  onOpenChange,
+  onSave,
+  turnId,
+  gameId,
+}: OptionEditDialogProps) => {
   const { toast } = useToast();
-  const [newOption, setNewOption] = useState<Partial<Option>>({});
+  const [formData, setFormData] = useState<Partial<Option>>(option);
 
-  const { data: options, isLoading } = useQuery({
-    queryKey: ['options', turnId, gameId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('Options')
-        .select('*')
-        .eq('turn_uuid', turnId)
-        .eq('game_uuid', gameId)
-        .order('optionnumber');
+  useEffect(() => {
+    setFormData(option);
+  }, [option]);
 
-      if (error) throw error;
-      return data as Option[];
-    },
-  });
+  const handleChange = (field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
-  const handleAddOption = async () => {
-    try {
-      const optionNumber = options ? options.length + 1 : 1;
-      const { error } = await supabase
-        .from('Options')
-        .insert({
-          ...newOption,
-          turn_uuid: turnId,
-          game_uuid: gameId,
-          optionnumber: optionNumber,
-        });
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
-      setNewOption({});
-      toast({
-        title: "Success",
-        description: "Option added successfully",
-      });
-    } catch (error: any) {
+  const handleSave = async () => {
+    if (!formData.title) {
       toast({
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        description: "Title is required",
+        variant: "destructive"
       });
+      return;
     }
+
+    const optionToSave = {
+      ...formData,
+      turn_uuid: turnId,
+      game_uuid: gameId,
+    } as Option;
+
+    await onSave(optionToSave);
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Edit Options for Turn {turnId}</DialogTitle>
+          <DialogTitle>
+            {option.uuid ? 'Edit Option' : 'Create New Option'}
+          </DialogTitle>
         </DialogHeader>
-        <div className="flex gap-8">
-          <div className="w-1/2 space-y-6">
-            <div className="space-y-4">
-              {options?.map((option) => (
-                <div key={option.uuid} className="p-4 border rounded-lg">
-                  <div className="space-y-4">
-                    <Input
-                      value={option.title || ''}
-                      onChange={(e) => setNewOption({ ...option, title: e.target.value })}
-                      placeholder="Option title"
-                    />
-                    <Textarea
-                      value={option.description || ''}
-                      onChange={(e) => setNewOption({ ...option, description: e.target.value })}
-                      placeholder="Option description"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 border rounded-lg border-dashed">
-              <div className="space-y-4">
-                <Input
-                  value={newOption.title || ''}
-                  onChange={(e) => setNewOption({ ...newOption, title: e.target.value })}
-                  placeholder="New option title"
-                />
-                <Textarea
-                  value={newOption.description || ''}
-                  onChange={(e) => setNewOption({ ...newOption, description: e.target.value })}
-                  placeholder="New option description"
-                />
-                <Button onClick={handleAddOption} className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Option
-                </Button>
-              </div>
-            </div>
-          </div>
-          <DefaultAmountsEditor gameId={gameId} />
+        
+        <div className="py-4">
+          <OptionForm
+            option={formData}
+            gameId={gameId || ''}
+            onChange={handleChange}
+          />
         </div>
+
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            {option.uuid ? 'Save Changes' : 'Create Option'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -129,4 +92,4 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
   );
 };
 
-export default OptionsEditDialog;
+export default OptionEditDialog;
