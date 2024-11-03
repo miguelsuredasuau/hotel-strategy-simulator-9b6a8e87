@@ -1,17 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, ScatterChart, CartesianGrid, XAxis, YAxis, Scatter, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { Quote, Hotel, Users } from "lucide-react";
+import { BarChart, Bar, ScatterChart, CartesianGrid, XAxis, YAxis, Scatter, ResponsiveContainer, Tooltip } from "recharts";
+import { Quote, Hotel } from "lucide-react";
 import { mockRevenueData, mockCompetitiveData, mockHotels } from "./dashboardData";
 
-// Custom scatter dot component using Hotel icon
-const CustomHotelDot = (props: any) => {
+// Custom scatter dot component for teams (larger)
+const CustomTeamDot = (props: any) => {
   const { cx, cy, fill } = props;
   
   return (
     <Hotel
-      x={cx - 12}
-      y={cy - 12}
-      className="w-6 h-6"
+      x={cx - 16}
+      y={cy - 16}
+      className="w-8 h-8"
       style={{ 
         fill: fill,
         stroke: '#fff',
@@ -21,23 +21,19 @@ const CustomHotelDot = (props: any) => {
   );
 };
 
-// Custom legend for the scatter plot
-const CustomLegend = (props: any) => {
-  const { payload } = props;
+// Custom scatter dot component for travelers (smaller)
+const CustomTravelerDot = (props: any) => {
+  const { cx, cy, fill } = props;
+  
   return (
-    <div className="flex gap-4 justify-center mt-2">
-      {payload.map((entry: any, index: number) => (
-        <div key={`item-${index}`} className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-sm text-gray-600">
-            {entry.value === 'travelers' ? 'Travelers' : 'Teams'}
-          </span>
-        </div>
-      ))}
-    </div>
+    <circle
+      cx={cx}
+      cy={cy}
+      r={3}
+      fill={fill}
+      stroke="#fff"
+      strokeWidth={1}
+    />
   );
 };
 
@@ -105,26 +101,24 @@ export const ChartSection = () => {
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                   }}
-                  formatter={(value: any, name: any) => [value, name === 'travelers' ? 'Traveler Position' : 'Team Position']}
-                />
-                <Legend 
-                  content={<CustomLegend />}
-                  verticalAlign="bottom"
-                  height={36}
+                  formatter={(value: any, name: any, props: any) => {
+                    if (props.payload.name) {
+                      return [`${props.payload.name}`, ''];
+                    }
+                    return [value, ''];
+                  }}
                 />
                 <Scatter 
-                  name="travelers"
                   data={mockCompetitiveData} 
                   fill="#60A5FA" 
                   fillOpacity={0.6}
-                  shape={<CustomHotelDot />}
+                  shape={<CustomTravelerDot />}
                 />
                 <Scatter 
-                  name="teams"
                   data={mockHotels} 
                   fill="#EF4444" 
                   fillOpacity={0.8}
-                  shape={<CustomHotelDot />}
+                  shape={<CustomTeamDot />}
                 />
               </ScatterChart>
             </ResponsiveContainer>
