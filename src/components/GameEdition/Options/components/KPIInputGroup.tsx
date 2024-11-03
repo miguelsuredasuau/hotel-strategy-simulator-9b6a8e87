@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { KPIAutocomplete } from "./KPIAutocomplete";
+import { KPICombobox } from "./KPICombobox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,26 +30,20 @@ const KPIInputGroup = ({
   const queryClient = useQueryClient();
 
   const handleAmountChange = async (value: number) => {
-    // Update the local state
     onChange(`impactkpi${index}amount`, value);
     
-    // Find the KPI UUID based on the name
     const kpi = availableKPIs.find(k => k.name === kpiName);
     if (!kpi) return;
 
     try {
-      const kpiValue = {
-        kpi_uuid: kpi.uuid,
-        game_uuid: gameId,
-        turn_uuid: turnId,
-        value: value
-      };
-
-      console.log('Saving KPI value:', kpiValue);
-
       const { error } = await supabase
         .from('kpi_values')
-        .upsert(kpiValue, {
+        .upsert({
+          kpi_uuid: kpi.uuid,
+          game_uuid: gameId,
+          turn_uuid: turnId,
+          value: value
+        }, {
           onConflict: 'kpi_uuid,game_uuid,turn_uuid'
         });
 
@@ -61,7 +55,7 @@ const KPIInputGroup = ({
 
       toast({
         title: "Success",
-        description: "Value updated successfully",
+        description: "KPI value updated successfully",
       });
     } catch (error: any) {
       console.error('Error saving KPI value:', error);
@@ -77,12 +71,12 @@ const KPIInputGroup = ({
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label>{`KPI ${index}`}</Label>
-        <KPIAutocomplete
+        <KPICombobox
           value={kpiName || ''}
           gameId={gameId}
           kpis={availableKPIs}
           onChange={(value) => onChange(`impactkpi${index}`, value)}
-          onKPICreate={onKPICreate}
+          onCreateNew={onKPICreate}
         />
       </div>
       <div className="space-y-2">

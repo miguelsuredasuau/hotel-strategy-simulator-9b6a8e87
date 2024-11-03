@@ -7,8 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { KPI, KPIAxis, KPICategory } from "@/types/kpi";
+import { KPI } from "@/types/kpi";
 
 interface KPIFormFieldsProps {
   kpi: Partial<KPI>;
@@ -29,26 +28,10 @@ const KPIFormFields = ({ kpi, onChange }: KPIFormFieldsProps) => {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Axis</Label>
-          <Select
-            value={kpi.axis || 'Y'}
-            onValueChange={(value) => onChange('axis', value as KPIAxis)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select axis" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="X">X (Financial)</SelectItem>
-              <SelectItem value="Y">Y (Operational)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
           <Label>Category</Label>
           <Select
-            value={kpi.category}
-            onValueChange={(value) => onChange('category', value as KPICategory)}
+            value={kpi.category || 'operational'}
+            onValueChange={(value) => onChange('category', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select category" />
@@ -56,6 +39,22 @@ const KPIFormFields = ({ kpi, onChange }: KPIFormFieldsProps) => {
             <SelectContent>
               <SelectItem value="operational">Operational</SelectItem>
               <SelectItem value="financial">Financial</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Axis</Label>
+          <Select
+            value={kpi.axis || 'Y'}
+            onValueChange={(value) => onChange('axis', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select axis" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="X">X (Financial)</SelectItem>
+              <SelectItem value="Y">Y (Operational)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -82,14 +81,6 @@ const KPIFormFields = ({ kpi, onChange }: KPIFormFieldsProps) => {
             onChange={(e) => onChange('default_value', parseFloat(e.target.value))}
           />
         </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          checked={kpi.is_customizable || false}
-          onCheckedChange={(checked) => onChange('is_customizable', checked)}
-        />
-        <Label>Customizable by players</Label>
       </div>
     </div>
   );

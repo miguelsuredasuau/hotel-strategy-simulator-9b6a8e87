@@ -19,7 +19,6 @@ export interface KPI {
   default_value: number;
   axis: KPIAxis;
   category: KPICategory;
-  is_customizable: boolean;
   created_at?: string;
   financial_type?: FinancialKPIType;
 }
