@@ -107,23 +107,13 @@ export const KPIEditDialog = ({
           </div>
 
           {!isCalculated && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Current Value</Label>
-                <Input
-                  type="number"
-                  value={formData.current_value}
-                  onChange={(e) => setFormData({ ...formData, current_value: parseFloat(e.target.value) })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Default Value</Label>
-                <Input
-                  type="number"
-                  value={formData.default_value}
-                  onChange={(e) => setFormData({ ...formData, default_value: parseFloat(e.target.value) })}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Default Value</Label>
+              <Input
+                type="number"
+                value={formData.default_value}
+                onChange={(e) => setFormData({ ...formData, default_value: parseFloat(e.target.value) })}
+              />
             </div>
           )}
 

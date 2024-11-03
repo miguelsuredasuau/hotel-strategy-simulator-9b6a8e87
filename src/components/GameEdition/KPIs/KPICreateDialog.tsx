@@ -140,23 +140,13 @@ export const KPICreateDialog = ({ gameId, open, onOpenChange }: KPICreateDialogP
               gameId={gameId}
             />
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Current Value</Label>
-                <Input
-                  type="number"
-                  value={currentValue}
-                  onChange={(e) => setCurrentValue(parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Default Value</Label>
-                <Input
-                  type="number"
-                  value={defaultValue}
-                  onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Default Value</Label>
+              <Input
+                type="number"
+                value={defaultValue}
+                onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
+              />
             </div>
           )}
 
