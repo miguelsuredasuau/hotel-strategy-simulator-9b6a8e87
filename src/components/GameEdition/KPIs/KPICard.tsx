@@ -14,6 +14,12 @@ interface KPICardProps {
 const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = !!kpi.formula;
   const displayValue = kpi.current_value ?? kpi.default_value ?? 0;
+  const formattedValue = kpi.is_percentage 
+    ? `${displayValue}%`
+    : displayValue.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
 
   return (
     <Card className="bg-white hover:shadow-md transition-all duration-200">
@@ -33,12 +39,9 @@ const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
             </div>
             <div className="flex items-baseline gap-1 mt-0.5">
               <span className="text-base font-semibold text-gray-900">
-                {displayValue.toLocaleString(undefined, {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2
-                })}
+                {formattedValue}
               </span>
-              {kpi.unit && (
+              {kpi.unit && !kpi.is_percentage && (
                 <span className="text-xs text-gray-500">{kpi.unit}</span>
               )}
             </div>
