@@ -24,14 +24,14 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
     { symbol: '-', label: 'Subtract' },
     { symbol: '*', label: 'Multiply' },
     { symbol: '/', label: 'Divide' },
-    { symbol: '(', label: 'Open Bracket' },
-    { symbol: ')', label: 'Close Bracket' },
+    { symbol: '(', label: 'Open' },
+    { symbol: ')', label: 'Close' },
     { symbol: '=', label: 'Equal' },
     { symbol: '!=', label: 'Not Equal' },
-    { symbol: '>', label: 'Greater Than' },
-    { symbol: '<', label: 'Less Than' },
-    { symbol: '>=', label: 'Greater Equal' },
-    { symbol: '<=', label: 'Less Equal' },
+    { symbol: '>', label: 'Greater' },
+    { symbol: '<', label: 'Less' },
+    { symbol: '>=', label: 'Greater Eq' },
+    { symbol: '<=', label: 'Less Eq' },
     { symbol: '&&', label: 'AND' },
     { symbol: '||', label: 'OR' },
     { symbol: '?', label: 'If' },
@@ -41,14 +41,8 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
   const insertAtCursor = (textToInsert: string) => {
     const newValue = value.slice(0, cursorPosition) + textToInsert + value.slice(cursorPosition);
     onChange(newValue);
-    
-    // Calculate new cursor position after insertion
     const newPosition = cursorPosition + textToInsert.length;
-    
-    // Update cursor position state
     setCursorPosition(newPosition);
-    
-    // Use setTimeout to ensure the DOM has updated
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
@@ -79,9 +73,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto direction-ltr"
-            dir="ltr"
-            style={{ textAlign: 'left' }}
+            className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
           />
         </div>
       </div>
@@ -112,10 +104,14 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                   className="justify-start h-auto py-1.5 px-2 hover:bg-blue-50 group text-left"
                   onClick={() => handleKPIClick(kpi.name)}
                 >
-                  <div>
-                    <div className="font-medium group-hover:text-blue-700 truncate text-xs">{kpi.name}</div>
+                  <div className="w-full">
+                    <div className="font-medium group-hover:text-blue-700 truncate text-xs">
+                      {kpi.name}
+                    </div>
                     {kpi.unit && (
-                      <div className="text-[10px] text-muted-foreground truncate">{kpi.unit}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">
+                        {kpi.unit}
+                      </div>
                     )}
                   </div>
                 </Button>
@@ -127,7 +123,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
         <Card className="p-4 bg-white">
           <h3 className="font-medium mb-3">Operators</h3>
           <ScrollArea className="h-[280px]">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               {operators.map((op) => (
                 <Button
                   key={op.symbol}
@@ -135,7 +131,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                   size="sm"
                   onClick={() => handleOperatorClick(op.symbol)}
                   title={op.label}
-                  className="hover:bg-blue-50 hover:text-blue-700 px-2 py-1.5 h-8 text-xs"
+                  className="hover:bg-blue-50 hover:text-blue-700 px-1 py-1 h-7 text-xs"
                 >
                   {op.symbol}
                 </Button>

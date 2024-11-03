@@ -25,7 +25,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [isCalculated, setIsCalculated] = useState(false);
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
-  const [isPercentage, setIsPercentage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -59,7 +58,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
           depends_on: dependsOn,
           default_value: isCalculated ? null : defaultValue,
           unit,
-          is_percentage: isPercentage
+          is_percentage: false
         });
 
       if (error) throw error;
@@ -76,8 +75,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       setFormula("");
       setDefaultValue(0);
       setUnit("");
-      setIsPercentage(false);
-      setIsCalculated(false);
       
       onSuccess?.();
     } catch (error: any) {
@@ -116,7 +113,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             />
           </div>
 
-          <div className="flex items-center justify-between space-x-2 bg-gray-50 p-4 rounded-lg">
+          <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
             <div className="space-y-0.5">
               <Label>Calculated KPI</Label>
               <p className="text-sm text-gray-500">
@@ -156,14 +153,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               placeholder="e.g., $, %, pts"
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label>Is Percentage?</Label>
-            <Switch
-              checked={isPercentage}
-              onCheckedChange={setIsPercentage}
             />
           </div>
 
