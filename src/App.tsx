@@ -28,26 +28,22 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initSession = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        setSession(currentSession);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setIsLoading(false);
+    });
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-          setSession(session);
-          if (!session) {
-            queryClient.clear();
-            localStorage.clear();
-          }
-        });
-
-        return () => subscription.unsubscribe();
-      } finally {
-        setIsLoading(false);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (!session) {
+        queryClient.clear();
+        localStorage.clear();
       }
-    };
+    });
 
-    initSession();
+    return () => subscription.unsubscribe();
   }, []);
 
   if (isLoading) {
