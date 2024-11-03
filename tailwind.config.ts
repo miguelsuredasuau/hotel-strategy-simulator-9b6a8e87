@@ -13,7 +13,7 @@ export default {
     extend: {
       colors: {
         hotel: {
-          primary: "#4FA89B",
+          primary: "#82c4cb",
           secondary: "#60A5FA",
           accent: "#E0F2FE",
           text: "#1E293B",
