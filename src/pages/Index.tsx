@@ -13,7 +13,6 @@ const TOTAL_TURNS = 20;
 
 const Index = () => {
   const [currentTurn, setCurrentTurn] = useState(1);
-  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
   const [gameId, setGameId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -115,8 +114,7 @@ const Index = () => {
     enabled: !!gameId
   });
 
-  const handleHotelSelect = (option: Option) => {
-    setSelectedOption(option);
+  const handleHotelSelect = () => {
     setShowDashboard(true);
   };
 
@@ -125,7 +123,6 @@ const Index = () => {
       setCurrentTurn(prev => prev + 1);
     }
     setShowDashboard(false);
-    setSelectedOption(null);
   };
 
   if (!gameId) {
@@ -169,7 +166,7 @@ const Index = () => {
                   name={option.title || ''}
                   description={option.description || ''}
                   image={option.image || `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop`}
-                  onSelect={() => handleHotelSelect(option)}
+                  onSelect={handleHotelSelect}
                 />
               ))}
             </div>
@@ -183,7 +180,6 @@ const Index = () => {
         <Dashboard 
           onNextTurn={handleNextTurn} 
           gameId={gameId} 
-          selectedOptionId={selectedOption?.uuid}
         />
       )}
 
