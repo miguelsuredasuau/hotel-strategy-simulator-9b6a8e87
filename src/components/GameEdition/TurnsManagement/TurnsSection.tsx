@@ -38,16 +38,22 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
         const { error } = await supabase
           .from('Turns')
           .insert([{
-            ...turn,
+            challenge: turn.challenge,
+            description: turn.description,
             game_uuid: gameId,
-            turnnumber: turns ? turns.length + 1 : 1
+            turnnumber: turns ? turns.length + 1 : 1,
+            created_at: new Date().toISOString()
           }]);
         
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('Turns')
-          .update(turn)
+          .update({
+            challenge: turn.challenge,
+            description: turn.description,
+            turnnumber: turn.turnnumber
+          })
           .eq('uuid', turn.uuid);
         
         if (error) throw error;

@@ -28,6 +28,9 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editedTurn.challenge?.trim()) {
+      return;
+    }
     onSave(editedTurn);
   };
 
@@ -35,17 +38,19 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Turn {turn.turnnumber}</DialogTitle>
+          <DialogTitle>{turn.uuid ? `Edit Turn ${turn.turnnumber}` : 'Create New Turn'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="challenge">Challenge</Label>
+            <Label htmlFor="challenge">Challenge *</Label>
             <Input
               id="challenge"
               value={editedTurn.challenge || ""}
               onChange={(e) =>
                 setEditedTurn({ ...editedTurn, challenge: e.target.value })
               }
+              placeholder="Enter the challenge"
+              required
             />
           </div>
           <div className="space-y-2">
@@ -56,6 +61,7 @@ const TurnEditDialog = ({ turn, open, onOpenChange, onSave }: TurnEditDialogProp
               onChange={(e) =>
                 setEditedTurn({ ...editedTurn, description: e.target.value })
               }
+              placeholder="Enter a description for this turn"
             />
           </div>
           <DialogFooter>
