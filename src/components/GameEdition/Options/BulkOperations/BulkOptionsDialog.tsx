@@ -49,7 +49,21 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
 
       if (!options) return;
       
-      downloadOptionsAsExcel(options, turnData.uuid, gameId, turnData.turnnumber || 0);
+      const showToast = (title: string, description: string, variant: "default" | "destructive" = "default") => {
+        toast({
+          title,
+          description,
+          variant,
+        });
+      };
+
+      downloadOptionsAsExcel(
+        options, 
+        turnData.uuid, 
+        gameId, 
+        turnData.turnnumber || 0,
+        showToast
+      );
     } catch (error: any) {
       console.error('Export error:', error);
       toast({
@@ -131,7 +145,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              Upload an Excel file with columns: Turn UUID, Game UUID, Option Number, Title, Description, Image URL, KPI 1, KPI 1 Amount, KPI 2, KPI 2 Amount, KPI 3, KPI 3 Amount
+              Upload an Excel file with columns: Turn UUID, Game UUID, Turn Number, Option Number, Title, Description, Image URL, KPI 1, KPI 1 Amount, KPI 2, KPI 2 Amount, KPI 3, KPI 3 Amount
             </p>
           </div>
         </div>

@@ -1,16 +1,19 @@
 import * as XLSX from 'xlsx';
 import { Option } from "@/types/game";
-import { useToast } from "@/components/ui/use-toast";
 
-export const downloadOptionsAsExcel = (options: Option[], turnUuid: string, gameUuid: string, turnNumber: number) => {
-  const { toast } = useToast();
-
+export const downloadOptionsAsExcel = (
+  options: Option[], 
+  turnUuid: string, 
+  gameUuid: string, 
+  turnNumber: number,
+  showToast: (title: string, description: string, variant?: "default" | "destructive") => void
+) => {
   if (!options || options.length === 0) {
-    toast({
-      title: "No options to export",
-      description: "Create some options first before exporting.",
-      variant: "destructive",
-    });
+    showToast(
+      "No options to export",
+      "Create some options first before exporting.",
+      "destructive"
+    );
     return;
   }
 
@@ -18,7 +21,7 @@ export const downloadOptionsAsExcel = (options: Option[], turnUuid: string, game
     'Turn UUID': turnUuid,
     'Game UUID': gameUuid,
     'Turn Number': turnNumber,
-    'Option Number': option.optionnumber,
+    'Option Number': option.optionnumber || '',
     'Title': option.title || '',
     'Description': option.description || '',
     'Image URL': option.image || '',
@@ -35,8 +38,5 @@ export const downloadOptionsAsExcel = (options: Option[], turnUuid: string, game
   XLSX.utils.book_append_sheet(wb, ws, 'Options');
   XLSX.writeFile(wb, `turn_${turnNumber}_options.xlsx`);
 
-  toast({
-    title: "Success",
-    description: "Options exported successfully",
-  });
+  showToast("Success", "Options exported successfully");
 };
