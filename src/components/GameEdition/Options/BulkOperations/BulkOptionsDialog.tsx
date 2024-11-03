@@ -28,12 +28,20 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Validate UUID format
+  const isValidUUID = (uuid: string) => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(uuid);
+  };
+
   // Fetch turn data to get UUID
   const { data: turnData, isLoading: isTurnLoading } = useQuery({
     queryKey: ['turn', turnId],
     queryFn: async () => {
-      if (!turnId) throw new Error('No turn ID provided');
-      
+      if (!turnId || !isValidUUID(turnId)) {
+        throw new Error('Invalid turn ID format');
+      }
+
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
@@ -43,7 +51,7 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       if (error) throw error;
       return data as Turn;
     },
-    enabled: !!turnId && open // Only fetch when dialog is open and turnId exists
+    enabled: !!turnId && open && isValidUUID(turnId)
   });
 
   const handleDownload = async () => {
@@ -113,6 +121,15 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       toast({
         title: "Error",
         description: "Turn data not available",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidUUID(turnData.uuid)) {
+      toast({
+        title: "Error",
+        description: "Invalid turn UUID format",
         variant: "destructive",
       });
       return;
