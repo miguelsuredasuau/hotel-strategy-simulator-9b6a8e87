@@ -8,7 +8,6 @@ import TurnCard from "./TurnCard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
-import OptionsPage from "./Options/OptionsPage";
 
 interface TurnsCardProps {
   turns: Turn[];
@@ -21,8 +20,6 @@ interface TurnsCardProps {
 const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
-  const [showOptionsPage, setShowOptionsPage] = useState(false);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination || !turns) return;
@@ -31,13 +28,11 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update turn numbers for all affected turns
     const updatedTurns = items.map((turn, index) => ({
       ...turn,
       turnnumber: index + 1
     }));
 
-    // Update all turns in the database
     try {
       for (const turn of updatedTurns) {
         const { error } = await supabase
@@ -62,22 +57,6 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
     }
   };
 
-  if (showOptionsPage && selectedTurn) {
-    return (
-      <OptionsPage
-        turnId={selectedTurn.id}
-        gameId={selectedTurn.game}
-        turnNumber={selectedTurn.turnnumber}
-        turnChallenge={selectedTurn.challenge}
-        turnDescription={selectedTurn.description}
-        onBack={() => {
-          setShowOptionsPage(false);
-          setSelectedTurn(null);
-        }}
-      />
-    );
-  }
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -101,10 +80,7 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
                     key={turn.id}
                     turn={turn}
                     index={index}
-                    onEditOptions={() => {
-                      setSelectedTurn(turn);
-                      setShowOptionsPage(true);
-                    }}
+                    onEditOptions={onEditOptions}
                     onEditTurn={onEditTurn}
                     onDeleteTurn={onDeleteTurn}
                   />

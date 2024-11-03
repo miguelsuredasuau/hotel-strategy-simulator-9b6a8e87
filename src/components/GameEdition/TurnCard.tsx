@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Circle, Pencil, Copy, Trash2 } from "lucide-react";
+import { Pencil, Copy, Trash2 } from "lucide-react";
 import { Turn } from "@/types/game";
 import { Draggable } from "@hello-pangea/dnd";
+import { useNavigate } from "react-router-dom";
 
 interface TurnCardProps {
   turn: Turn;
@@ -13,6 +14,8 @@ interface TurnCardProps {
 }
 
 const TurnCard = ({ turn, index, onEditOptions, onEditTurn, onDeleteTurn }: TurnCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Draggable draggableId={`turn-${turn.id}`} index={index}>
       {(provided) => (
@@ -47,7 +50,7 @@ const TurnCard = ({ turn, index, onEditOptions, onEditTurn, onDeleteTurn }: Turn
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onEditOptions(turn)}
+                    onClick={() => navigate(`/game-edition/${turn.game}/turn/${turn.id}/options`)}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
