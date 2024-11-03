@@ -32,7 +32,7 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-hotel-primary flex-col justify-between p-12">
         <div>
           <img 
-            src="/anlak.png" 
+            src="/anlak-white.png" 
             alt="Anlak Logo" 
             className="w-32 h-auto"
           />
