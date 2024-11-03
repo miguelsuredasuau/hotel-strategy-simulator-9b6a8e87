@@ -10,11 +10,11 @@ export const ChartSection = () => {
         <CardHeader>
           <CardTitle>Cash Balance</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <div className="text-2xl font-bold mb-2">€1,565,367</div>
           <div className="text-sm text-green-500">+30% vs last month</div>
-          <div className="mt-4">
-            <BarChart width={150} height={100} data={mockRevenueData}>
+          <div className="mt-4 w-full">
+            <BarChart width={120} height={80} data={mockRevenueData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <Bar dataKey="revenue" fill="#1E40AF" />
             </BarChart>
           </div>
@@ -25,14 +25,16 @@ export const ChartSection = () => {
         <CardHeader>
           <CardTitle>Competitive Environment</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ScatterChart width={600} height={400}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" dataKey="x" />
-            <YAxis type="number" dataKey="y" />
-            <Scatter data={mockCompetitiveData} fill="#60A5FA" />
-            <Scatter data={mockHotels} fill="#EF4444" />
-          </ScatterChart>
+        <CardContent className="p-4">
+          <div className="w-full">
+            <ScatterChart width={500} height={300} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" dataKey="x" />
+              <YAxis type="number" dataKey="y" />
+              <Scatter data={mockCompetitiveData} fill="#60A5FA" />
+              <Scatter data={mockHotels} fill="#EF4444" />
+            </ScatterChart>
+          </div>
         </CardContent>
       </Card>
 
