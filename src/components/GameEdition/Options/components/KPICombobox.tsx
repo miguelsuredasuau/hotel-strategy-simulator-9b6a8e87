@@ -17,10 +17,15 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+interface KPI {
+  uuid: string;
+  name: string;
+}
+
 interface KPIComboboxProps {
   value: string;
   gameId: string;
-  kpis?: { uuid: string; name: string }[];
+  kpis?: KPI[];
   onChange: (value: string) => void;
   onCreateNew?: () => void;
 }
@@ -73,12 +78,18 @@ export function KPICombobox({
     }
   };
 
-  // Ensure kpis is always an array and filter out any undefined/null items
+  // Ensure kpis is always an array of valid KPIs
   const safeKpis = React.useMemo(() => {
-    return (Array.isArray(kpis) ? kpis : []).filter(kpi => kpi && kpi.name);
+    return kpis?.filter((kpi): kpi is KPI => 
+      kpi !== null && 
+      typeof kpi === 'object' && 
+      typeof kpi.name === 'string' && 
+      typeof kpi.uuid === 'string'
+    ) ?? [];
   }, [kpis]);
 
   const filteredKpis = React.useMemo(() => {
+    if (!search) return safeKpis;
     return safeKpis.filter(kpi => 
       kpi.name.toLowerCase().includes(search.toLowerCase())
     );
