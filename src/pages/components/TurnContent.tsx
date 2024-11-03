@@ -1,8 +1,8 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, DollarSign } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
-import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
@@ -87,7 +87,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
 
         <div className="w-[30%] shrink-0">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <Label 
                 htmlFor="adr" 
                 className="text-lg font-semibold text-hotel-primary flex items-center gap-2"
@@ -99,7 +99,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
                 <span className="text-lg">$</span>{adr}
               </div>
             </div>
-            <div className="space-y-4">
+            <div className="px-2">
               <Slider
                 id="adr"
                 min={50}
@@ -107,7 +107,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
                 step={1}
                 value={[adr]}
                 onValueChange={(value) => setAdr(value[0])}
-                className="w-full [&>.relative>div:first-child]:bg-blue-100 [&>.relative>div:nth-child(2)]:bg-blue-600 [&>span]:border-none [&>span]:bg-blue-600 [&>span]:shadow-none"
+                className="w-full"
               />
             </div>
           </div>
