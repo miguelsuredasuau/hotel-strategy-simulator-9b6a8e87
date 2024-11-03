@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,20 +6,11 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
 import OptionForm from "./OptionForm";
 
 interface OptionEditDialogProps {
-  option: Option | null;
-  turnId: string;
-  gameId: string;
+  option: Partial<Option>;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (option: Option) => Promise<void>;
@@ -28,50 +18,35 @@ interface OptionEditDialogProps {
 
 const OptionEditDialog = ({
   option,
-  turnId,
-  gameId,
   open,
   onOpenChange,
-  onSave
+  onSave,
 }: OptionEditDialogProps) => {
-  const [formData, setFormData] = useState<Partial<Option>>(option || {});
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const [formData, setFormData] = useState<Partial<Option>>(option);
+
+  useEffect(() => {
+    setFormData(option);
+  }, [option]);
+
+  const handleChange = (field: string, value: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const handleSave = async () => {
-    try {
-      if (!formData.title) {
-        toast({
-          title: "Error",
-          description: "Title is required",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const optionToSave = {
-        ...formData,
-        turn_uuid: turnId,
-        game_uuid: gameId,
-      } as Option;
-
-      await onSave(optionToSave);
-      
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
-      onOpenChange(false);
-      setFormData({});
-      
-      toast({
-        title: "Success",
-        description: "Option " + (option ? "updated" : "created") + " successfully"
-      });
-    } catch (error: any) {
+    if (!formData.title) {
       toast({
         title: "Error",
-        description: error.message,
-        variant: "destructive",
+        description: "Title is required",
+        variant: "destructive"
       });
+      return;
     }
+
+    await onSave(formData as Option);
+    onOpenChange(false);
   };
 
   return (
@@ -79,14 +54,14 @@ const OptionEditDialog = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {option?.uuid ? 'Edit Option' : 'Create New Option'}
+            {option.uuid ? 'Edit Option' : 'Create New Option'}
           </DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <OptionForm
-            formData={formData}
-            onChange={setFormData}
+            option={formData}
+            onChange={handleChange}
           />
         </div>
 
@@ -95,7 +70,7 @@ const OptionEditDialog = ({
             Cancel
           </Button>
           <Button onClick={handleSave}>
-            {option?.uuid ? 'Save Changes' : 'Create Option'}
+            {option.uuid ? 'Save Changes' : 'Create Option'}
           </Button>
         </DialogFooter>
       </DialogContent>
