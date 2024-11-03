@@ -15,13 +15,14 @@ interface FormulaVisualizerProps {
 
 export const FormulaVisualizer = ({ formula, kpis, onDelete, onChange }: FormulaVisualizerProps) => {
   const handleDelete = (index: number, token: { type: string; value: string; originalValue?: string }) => {
-    if (!onDelete) return;
+    if (!onDelete || !onChange) return;
     
     const tokens = tokenizeFormula(formula, kpis);
-    const position = calculateDeletePosition(tokens, index);
-    const deleteLength = token.type === 'kpi' ? token.originalValue?.length || token.value.length : token.value.length;
+    const { start, end } = calculateDeletePosition(tokens, index);
     
-    onDelete(position);
+    // Create new formula by removing the token
+    const newFormula = formula.slice(0, start) + formula.slice(end);
+    onChange(newFormula);
   };
 
   const handleDragEnd = (result: any) => {
