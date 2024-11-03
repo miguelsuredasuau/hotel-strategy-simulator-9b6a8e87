@@ -10,9 +10,10 @@ interface HotelCardProps {
   description: string;
   image: string;
   onSelect: () => void;
+  isDisabled?: boolean;
 }
 
-const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) => {
+const HotelCard = ({ id, name, description, image, onSelect, isDisabled }: HotelCardProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   return (
@@ -52,9 +53,10 @@ const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) =
         <CardFooter className="p-4 pt-0">
           <Button 
             onClick={onSelect}
-            className="w-full bg-hotel-primary text-white hover:bg-hotel-primary/90"
+            className="w-full bg-hotel-primary text-white hover:bg-hotel-primary/90 disabled:opacity-50"
+            disabled={isDisabled}
           >
-            Select Option
+            {isDisabled ? "Fill ADR to Select Option" : "Select Option"}
           </Button>
         </CardFooter>
       </Card>
