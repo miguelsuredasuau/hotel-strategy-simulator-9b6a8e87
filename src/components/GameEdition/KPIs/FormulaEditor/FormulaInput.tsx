@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -60,7 +60,9 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
+            className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto direction-ltr"
+            dir="ltr"
+            style={{ textAlign: 'left' }}
           />
         </div>
       </div>
