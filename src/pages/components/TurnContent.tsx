@@ -68,7 +68,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto px-6 pt-6">
+    <div className="max-w-[1600px] mx-auto px-6 pt-6 min-h-[calc(100vh-4rem)] flex flex-col">
       <div className="flex gap-6 mb-6">
         <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-baseline gap-3 mb-2">
@@ -112,8 +112,8 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
         </div>
       </div>
 
-      {options && options.length > 0 ? (
-        <div className="space-y-6">
+      <div className="flex-1 overflow-auto pb-6">
+        {options && options.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {options.map((option) => (
               <HotelCard
@@ -127,12 +127,12 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
               />
             ))}
           </div>
-        </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-600">No options available for this turn.</p>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-600">No options available for this turn.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
