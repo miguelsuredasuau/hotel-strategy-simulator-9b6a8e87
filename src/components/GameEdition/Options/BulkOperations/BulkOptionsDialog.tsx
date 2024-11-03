@@ -82,6 +82,8 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
       }
 
       const excelData = options.map(option => ({
+        'Turn UUID': turnData.uuid,
+        'Game UUID': gameId,
         'Option Number': option.optionnumber,
         'Title': option.title || '',
         'Description': option.description || '',
