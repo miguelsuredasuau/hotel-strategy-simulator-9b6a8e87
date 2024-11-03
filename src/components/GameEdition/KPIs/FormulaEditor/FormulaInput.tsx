@@ -44,16 +44,16 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
   ];
 
   useEffect(() => {
-    // Format the formula with tag-like syntax highlighting
+    // Format the formula with consistent styling
     const formatted = value
       .split(/(\bkpi:[a-zA-Z0-9_]+\b|[-+*/()=<>!&|?:])/g)
       .map((part, index) => {
         if (part.startsWith('kpi:')) {
-          return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mx-0.5">${part}</span>`;
+          return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 mx-0.5">${part}</span>`;
         } else if (['+', '-', '*', '/', '(', ')', '=', '!=', '>', '<', '>=', '<=', '&&', '||', '?', ':'].includes(part)) {
-          return `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium bg-purple-100 text-purple-800 mx-0.5">${part}</span>`;
+          return `<span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium bg-purple-100 text-purple-800 mx-0.5">${part}</span>`;
         }
-        return `<span class="text-white">${part}</span>`;
+        return part;
       })
       .join('');
     
@@ -61,16 +61,12 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
   }, [value]);
 
   const handleKPIClick = (kpiName: string) => {
-    const before = value.slice(0, cursorPosition);
-    const after = value.slice(cursorPosition);
-    const newValue = `${before}kpi:${kpiName}${after}`;
+    const newValue = value.slice(0, cursorPosition) + `kpi:${kpiName}` + value.slice(cursorPosition);
     onChange(newValue);
   };
 
   const handleOperatorClick = (operator: string) => {
-    const before = value.slice(0, cursorPosition);
-    const after = value.slice(cursorPosition);
-    const newValue = `${before}${operator}${after}`;
+    const newValue = value.slice(0, cursorPosition) + operator + value.slice(cursorPosition);
     onChange(newValue);
   };
 
@@ -87,10 +83,10 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
             placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
-            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2 text-transparent"
+            className="font-mono bg-white/50 backdrop-blur-sm h-auto min-h-[2.5rem] py-2 text-sm"
           />
           <div 
-            className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden whitespace-pre-wrap break-words"
+            className="absolute inset-0 pointer-events-none font-mono px-3 py-2 overflow-hidden whitespace-pre-wrap break-words text-sm"
             dangerouslySetInnerHTML={{ __html: formattedValue }}
           />
         </div>
@@ -112,20 +108,20 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
               <Plus className="h-4 w-4" /> New KPI
             </Button>
           </div>
-          <ScrollArea className="h-[calc(100vh-24rem)]">
+          <ScrollArea className="h-[280px]">
             <div className="grid grid-cols-3 gap-2">
               {availableKPIs.map((kpi) => (
                 <Button
                   key={kpi.uuid}
                   variant="outline"
                   size="sm"
-                  className="justify-start h-auto py-2 px-2 hover:bg-blue-50 group text-left"
+                  className="justify-start h-auto py-1.5 px-2 hover:bg-blue-50 group text-left"
                   onClick={() => handleKPIClick(kpi.name)}
                 >
                   <div>
-                    <div className="font-medium group-hover:text-blue-700 truncate text-sm">{kpi.name}</div>
+                    <div className="font-medium group-hover:text-blue-700 truncate text-xs">{kpi.name}</div>
                     {kpi.unit && (
-                      <div className="text-xs text-muted-foreground truncate">{kpi.unit}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{kpi.unit}</div>
                     )}
                   </div>
                 </Button>
@@ -136,7 +132,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
 
         <Card className="p-4 bg-white/50 backdrop-blur-sm">
           <h3 className="font-medium mb-3">Operators</h3>
-          <ScrollArea className="h-[calc(100vh-24rem)]">
+          <ScrollArea className="h-[280px]">
             <div className="grid grid-cols-2 gap-2">
               {operators.map((op) => (
                 <Button
@@ -145,7 +141,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                   size="sm"
                   onClick={() => handleOperatorClick(op.symbol)}
                   title={op.label}
-                  className="hover:bg-purple-50 hover:text-purple-700 px-2 py-1.5 h-8"
+                  className="hover:bg-purple-50 hover:text-purple-700 px-2 py-1.5 h-8 text-xs"
                 >
                   {op.symbol}
                 </Button>

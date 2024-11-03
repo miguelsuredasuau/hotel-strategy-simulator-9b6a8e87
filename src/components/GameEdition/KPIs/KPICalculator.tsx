@@ -136,6 +136,7 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
                 value={formula}
                 onChange={setFormula}
                 availableKPIs={kpis || []}
+                gameId={gameId}
               />
             </div>
           ) : (
