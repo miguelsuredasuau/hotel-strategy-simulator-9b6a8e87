@@ -46,23 +46,25 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>KPI Management</CardTitle>
-          <Button onClick={() => setIsCalculatorOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Add New KPI
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <div className="grid md:grid-cols-2 gap-6">
-              <FinancialKPIs gameId={gameId} />
-              <OperationalKPIs gameId={gameId} />
-            </div>
-          </DragDropContext>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">KPI Management</h2>
+        <Button 
+          onClick={() => setIsCalculatorOpen(true)} 
+          size="lg"
+          className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Plus className="h-5 w-5" />
+          Add New KPI
+        </Button>
+      </div>
+
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid md:grid-cols-2 gap-6">
+          <FinancialKPIs gameId={gameId} />
+          <OperationalKPIs gameId={gameId} />
+        </div>
+      </DragDropContext>
+
       <KPICalculatorDialog 
         gameId={gameId}
         open={isCalculatorOpen}

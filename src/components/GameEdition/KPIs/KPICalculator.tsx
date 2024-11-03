@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Calculator, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { KPI } from "@/types/kpi";
 import { FormulaInput } from "./FormulaEditor/FormulaInput";
@@ -25,6 +25,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [isCalculated, setIsCalculated] = useState(false);
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
+  const [isPercentage, setIsPercentage] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -44,7 +45,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const handleCreateKPI = async () => {
     try {
       const dependsOn = isCalculated 
-        ? formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || []
+        ? formula.match(/kpi:([a-zA-Z0-9_]+)/g)?.map(match => match.replace('kpi:', '')) || []
         : null;
 
       const { error } = await supabase
@@ -58,7 +59,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
           depends_on: dependsOn,
           default_value: isCalculated ? null : defaultValue,
           unit,
-          is_percentage: false
+          is_percentage: isPercentage
         });
 
       if (error) throw error;
@@ -74,6 +75,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       setFormula("");
       setDefaultValue(0);
       setUnit("");
+      setIsPercentage(false);
       
       onSuccess?.();
     } catch (error: any) {
@@ -151,9 +153,17 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             />
           </div>
 
+          <div className="flex items-center justify-between">
+            <Label>Is Percentage?</Label>
+            <Switch
+              checked={isPercentage}
+              onCheckedChange={setIsPercentage}
+            />
+          </div>
+
           <Button 
             onClick={handleCreateKPI} 
-            className="w-full bg-hotel-primary text-white hover:bg-hotel-primary/90"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create KPI
