@@ -1,32 +1,26 @@
 import { Card } from "@/components/ui/card";
-import { Calculator, GripHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Calculator, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KPI } from "@/types/kpi";
+import { Draggable } from "@hello-pangea/dnd";
 
 interface KPICardProps {
   kpi: KPI;
   dragHandleProps: any;
   onClick: () => void;
+  onDelete: () => void;
 }
 
-const KPICard = ({ kpi, dragHandleProps, onClick }: KPICardProps) => {
+const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = !!kpi.formula;
 
   return (
     <Card 
+      {...dragHandleProps}
       className="group bg-white hover:shadow-md transition-all duration-200"
-      onClick={onClick}
     >
       <div className="p-4">
         <div className="flex items-center gap-3">
-          <div
-            {...dragHandleProps}
-            className="cursor-grab hover:text-blue-500 transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <GripHorizontal className="h-4 w-4 text-gray-400" />
-          </div>
-          
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="font-medium text-gray-900">{kpi.name}</h3>
@@ -65,7 +59,7 @@ const KPICard = ({ kpi, dragHandleProps, onClick }: KPICardProps) => {
               className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
               onClick={(e) => {
                 e.stopPropagation();
-                // Handle delete action here
+                onDelete();
               }}
             >
               <Trash2 className="h-4 w-4" />
