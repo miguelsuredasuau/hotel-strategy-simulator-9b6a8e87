@@ -22,7 +22,6 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
   const [description, setDescription] = useState("");
   const [formula, setFormula] = useState("");
   const [isCalculated, setIsCalculated] = useState(false);
-  const [currentValue, setCurrentValue] = useState<number>(0);
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
   const [isPercentage, setIsPercentage] = useState(false);
@@ -57,7 +56,6 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
           description,
           formula: isCalculated ? formula : null,
           depends_on: dependsOn,
-          current_value: isCalculated ? null : currentValue,
           default_value: isCalculated ? null : defaultValue,
           unit,
           is_percentage: isPercentage
@@ -75,7 +73,6 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
       setName("");
       setDescription("");
       setFormula("");
-      setCurrentValue(0);
       setDefaultValue(0);
       setUnit("");
       setIsPercentage(false);
@@ -140,23 +137,13 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Current Value</Label>
-                <Input
-                  type="number"
-                  value={currentValue}
-                  onChange={(e) => setCurrentValue(parseFloat(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Default Value</Label>
-                <Input
-                  type="number"
-                  value={defaultValue}
-                  onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Default Value</Label>
+              <Input
+                type="number"
+                value={defaultValue}
+                onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
+              />
             </div>
           )}
 
