@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import FinancialMetric from "./FinancialMetric";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FinancialStatementSectionProps {
   kpis: KPI[];
@@ -14,6 +15,7 @@ interface FinancialStatementSectionProps {
 
 const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: FinancialStatementSectionProps) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: kpiValues } = useQuery({
     queryKey: ['kpi-values', gameId, turnId],
@@ -42,6 +44,34 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
   const getKPIValue = (kpiUuid: string) => {
     const kpiValue = kpiValues?.find(v => v.kpi_uuid === kpiUuid);
     return kpiValue?.value ?? findKPI(kpiUuid)?.default_value ?? 0;
+  };
+
+  const handleValueChange = async (kpiUuid: string, newValue: number) => {
+    try {
+      const { error } = await supabase
+        .from('kpi_values')
+        .upsert({
+          kpi_uuid: kpiUuid,
+          game_uuid: gameId,
+          turn_uuid: turnId,
+          value: newValue
+        });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['kpi-values', gameId, turnId] });
+      
+      toast({
+        title: "Success",
+        description: "Value updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const rooms = findKPI('rooms');
@@ -79,6 +109,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={roomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => rooms && handleValueChange(rooms.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
@@ -87,6 +118,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={occupiedRoomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => occupiedRooms && handleValueChange(occupiedRooms.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
@@ -95,6 +127,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={adrValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => adr && handleValueChange(adr.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
@@ -103,6 +136,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={extrasValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => extras && handleValueChange(extras.uuid, value)}
           isEditable={true}
         />
 
@@ -128,6 +162,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={variableCostsPercentValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => variableCostsPercent && handleValueChange(variableCostsPercent.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
@@ -141,6 +176,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={fixedCostsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => fixedCosts && handleValueChange(fixedCosts.uuid, value)}
           isEditable={true}
         />
 
@@ -158,6 +194,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={investmentsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          onChange={(value) => investments && handleValueChange(investments.uuid, value)}
           isEditable={true}
         />
         <FinancialMetric 
