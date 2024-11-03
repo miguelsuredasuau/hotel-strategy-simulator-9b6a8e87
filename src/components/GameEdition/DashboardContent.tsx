@@ -1,6 +1,6 @@
 import GameDetailsCard from './GameDetailsCard';
-import TeamsCard from './GameEdition/TeamsCard';
-import TurnsCard from './GameEdition/TurnsCard';
+import TeamsCard from './TeamsCard';
+import TurnsCard from './TurnsCard';
 import { Turn } from '@/types/game';
 import { useQueryClient } from "@tanstack/react-query";
 

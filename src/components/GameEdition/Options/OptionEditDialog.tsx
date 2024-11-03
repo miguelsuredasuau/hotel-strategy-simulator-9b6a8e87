@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
 
 interface OptionEditDialogProps {
-  option: Option | null;
+  option: Partial<Option> | null;
   turnId: number;
   gameId: number;
   open: boolean;
@@ -24,24 +24,15 @@ interface OptionEditDialogProps {
 }
 
 const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: OptionEditDialogProps) => {
-  const [formData, setFormData] = useState<Partial<Option>>({});
+  const [formData, setFormData] = useState<Omit<Option, 'id'>>({});
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   useEffect(() => {
     if (option) {
-      setFormData({
-        title: option.title || "",
-        description: option.description || "",
-        image: option.image || "",
-        impactkpi1: option.impactkpi1 || "",
-        impactkpi1amount: option.impactkpi1amount || 0,
-        impactkpi2: option.impactkpi2 || "",
-        impactkpi2amount: option.impactkpi2amount || 0,
-        impactkpi3: option.impactkpi3 || "",
-        impactkpi3amount: option.impactkpi3amount || 0,
-      });
+      const { id, ...rest } = option;
+      setFormData(rest);
     } else {
       setFormData({});
     }
@@ -52,32 +43,23 @@ const OptionEditDialog = ({ option, turnId, gameId, open, onOpenChange }: Option
     setIsLoading(true);
 
     try {
-      if (option) {
-        // Update existing option
+      const dataToSend = {
+        ...formData,
+        turn: turnId,
+        game: gameId,
+      };
+
+      if (option?.id) {
         const { error } = await supabase
           .from('Options')
-          .update(formData)
+          .update(dataToSend)
           .eq('id', option.id);
 
         if (error) throw error;
       } else {
-        // Create new option
-        const { data: options } = await supabase
-          .from('Options')
-          .select('optionnumber')
-          .eq('turn', turnId)
-          .eq('game', gameId);
-
-        const optionNumber = (options?.length || 0) + 1;
-
         const { error } = await supabase
           .from('Options')
-          .insert({
-            ...formData,
-            turn: turnId,
-            game: gameId,
-            optionnumber: optionNumber,
-          });
+          .insert([dataToSend]);
 
         if (error) throw error;
       }
