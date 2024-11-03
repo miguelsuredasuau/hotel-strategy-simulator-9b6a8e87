@@ -3,9 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Database, Calculator, Plus } from "lucide-react";
+import { Database, Calculator } from "lucide-react";
 import { KPI } from "@/types/kpi";
-import { KPICreateDialog } from "../KPICreateDialog";
 
 interface FormulaInputProps {
   value: string;
@@ -16,7 +15,6 @@ interface FormulaInputProps {
 
 export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const operators = [
@@ -80,21 +78,11 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
 
       <div className="grid grid-cols-3 gap-4">
         <Card className="col-span-2 p-4 bg-white">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              <h3 className="font-medium">Variables</h3>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowCreateDialog(true)}
-              className="gap-1"
-            >
-              <Plus className="h-4 w-4" /> New KPI
-            </Button>
+          <div className="flex items-center gap-2 mb-3">
+            <Database className="h-4 w-4" />
+            <h3 className="font-medium">Variables</h3>
           </div>
-          <ScrollArea className="h-[280px]">
+          <ScrollArea className="h-[200px]">
             <div className="grid grid-cols-3 gap-2">
               {availableKPIs.map((kpi) => (
                 <Button
@@ -122,7 +110,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
 
         <Card className="p-4 bg-white">
           <h3 className="font-medium mb-3">Operators</h3>
-          <ScrollArea className="h-[280px]">
+          <ScrollArea className="h-[200px]">
             <div className="grid grid-cols-4 gap-1.5">
               {operators.map((op) => (
                 <Button
@@ -140,12 +128,6 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
           </ScrollArea>
         </Card>
       </div>
-
-      <KPICreateDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        gameId={gameId}
-      />
     </div>
   );
 };
