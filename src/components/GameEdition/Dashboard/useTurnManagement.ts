@@ -19,7 +19,7 @@ export const useTurnManagement = (gameId: string) => {
       const { data: turnsData } = await supabase
         .from('Turns')
         .select('*')
-        .eq('game', gameId);
+        .eq('game_uuid', gameId);
 
       const newTurnNumber = turnsData ? turnsData.length + 1 : 1;
       const { data, error } = await supabase
@@ -28,7 +28,7 @@ export const useTurnManagement = (gameId: string) => {
           challenge: turn.challenge,
           description: turn.description,
           turnnumber: newTurnNumber,
-          game: parseInt(gameId)
+          game_uuid: gameId
         })
         .select()
         .single();

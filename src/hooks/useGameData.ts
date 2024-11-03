@@ -13,7 +13,7 @@ export const useGameData = (gameId: string | undefined) => {
       const { data, error } = await supabase
         .from('Games')
         .select('*')
-        .eq('id', parseInt(gameId))
+        .eq('uuid', gameId)
         .single();
 
       if (error) {
@@ -38,7 +38,7 @@ export const useGameData = (gameId: string | undefined) => {
       const { data, error } = await supabase
         .from('Turns')
         .select('*')
-        .eq('game', parseInt(gameId))
+        .eq('game_uuid', gameId)
         .order('turnnumber');
 
       if (error) {

@@ -12,7 +12,6 @@ export type Database = {
       Games: {
         Row: {
           created_at: string | null
-          id: number
           inspirational_image: string | null
           name: string | null
           status: string | null
@@ -20,7 +19,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          id?: never
           inspirational_image?: string | null
           name?: string | null
           status?: string | null
@@ -28,7 +26,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          id?: never
           inspirational_image?: string | null
           name?: string | null
           status?: string | null
@@ -42,7 +39,6 @@ export type Database = {
           description: string | null
           game: number | null
           game_uuid: string | null
-          id: number
           image: string | null
           impactkpi1: string | null
           impactkpi1amount: number | null
@@ -61,7 +57,6 @@ export type Database = {
           description?: string | null
           game?: number | null
           game_uuid?: string | null
-          id?: never
           image?: string | null
           impactkpi1?: string | null
           impactkpi1amount?: number | null
@@ -80,7 +75,6 @@ export type Database = {
           description?: string | null
           game?: number | null
           game_uuid?: string | null
-          id?: never
           image?: string | null
           impactkpi1?: string | null
           impactkpi1amount?: number | null
@@ -136,7 +130,6 @@ export type Database = {
         Row: {
           created_at: string | null
           email: string | null
-          id: number
           teamlogo: string | null
           teamname: string | null
           uuid: string
@@ -144,7 +137,6 @@ export type Database = {
         Insert: {
           created_at?: string | null
           email?: string | null
-          id?: never
           teamlogo?: string | null
           teamname?: string | null
           uuid?: string
@@ -152,7 +144,6 @@ export type Database = {
         Update: {
           created_at?: string | null
           email?: string | null
-          id?: never
           teamlogo?: string | null
           teamname?: string | null
           uuid?: string
@@ -166,7 +157,6 @@ export type Database = {
           description: string | null
           game: number | null
           game_uuid: string | null
-          id: number
           turnnumber: number | null
           uuid: string
         }
@@ -176,7 +166,6 @@ export type Database = {
           description?: string | null
           game?: number | null
           game_uuid?: string | null
-          id?: never
           turnnumber?: number | null
           uuid?: string
         }
@@ -186,7 +175,6 @@ export type Database = {
           description?: string | null
           game?: number | null
           game_uuid?: string | null
-          id?: never
           turnnumber?: number | null
           uuid?: string
         }

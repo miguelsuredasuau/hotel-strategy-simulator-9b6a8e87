@@ -5,13 +5,16 @@ export interface Turn {
   description?: string;
   game: number;
   created_at?: string;
+  uuid?: string;
+  game_uuid?: string;
 }
 
 export interface Option {
+  id: number;
   created_at?: string;
   description?: string;
   game?: number;
-  id?: never;
+  game_uuid?: string;
   image?: string;
   impactkpi1?: string;
   impactkpi1amount?: number;
@@ -22,6 +25,8 @@ export interface Option {
   optionnumber?: number;
   title?: string;
   turn?: number;
+  turn_uuid?: string;
+  uuid: string;
 }
 
 export interface Team {
