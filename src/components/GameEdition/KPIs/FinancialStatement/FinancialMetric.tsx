@@ -21,19 +21,19 @@ const FinancialMetric = ({
   className = ""
 }: FinancialMetricProps) => {
   return (
-    <div className={`flex justify-between items-center py-1.5 group ${className}`}>
+    <div className={`flex justify-between items-center py-0.5 group ${className}`}>
       <span className="text-sm text-gray-600">{label}</span>
-      <div className="flex items-center gap-4">
-        <span className={`font-medium ${isEditable ? 'bg-gray-50 px-3 py-1 rounded shadow-sm' : ''}`}>
+      <div className="flex items-center gap-2">
+        <span className={`font-medium ${isEditable ? 'bg-gray-50 px-2 py-0.5 rounded shadow-sm' : ''}`}>
           {value !== undefined ? value : kpi?.default_value || 0}
         </span>
-        {isEditable && kpi && (
+        {isEditable && kpi && onEdit && (
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onEdit?.(kpi)}
-              className="h-7 px-2 text-xs"
+              onClick={() => onEdit(kpi)}
+              className="h-6 px-2 text-xs"
             >
               Edit
             </Button>

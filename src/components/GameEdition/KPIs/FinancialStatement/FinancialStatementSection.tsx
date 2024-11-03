@@ -15,7 +15,6 @@ interface FinancialStatementSectionProps {
 const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: FinancialStatementSectionProps) => {
   const queryClient = useQueryClient();
 
-  // Fetch KPI values for this game/turn
   const { data: kpiValues } = useQuery({
     queryKey: ['kpi-values', gameId, turnId],
     queryFn: async () => {
@@ -24,7 +23,6 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
         .select('*')
         .eq('game_uuid', gameId);
       
-      // Only add turn_uuid filter if turnId is provided
       if (turnId) {
         query.eq('turn_uuid', turnId);
       } else {
@@ -38,17 +36,14 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
     enabled: !!gameId
   });
 
-  // Helper function to find KPI by financial type
   const findKPI = (type: string) => 
     kpis.find(kpi => kpi.financial_type === type);
 
-  // Helper function to get KPI value
   const getKPIValue = (kpiUuid: string) => {
     const kpiValue = kpiValues?.find(v => v.kpi_uuid === kpiUuid);
     return kpiValue?.value ?? findKPI(kpiUuid)?.default_value ?? 0;
   };
 
-  // Get KPIs by their financial types
   const rooms = findKPI('rooms');
   const occupiedRooms = findKPI('occupied_rooms');
   const adr = findKPI('adr');
@@ -57,7 +52,6 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
   const fixedCosts = findKPI('fixed_costs');
   const investments = findKPI('investments');
 
-  // Calculate derived values using actual KPI values
   const roomsValue = getKPIValue(rooms?.uuid || '');
   const occupiedRoomsValue = Math.min(getKPIValue(occupiedRooms?.uuid || ''), roomsValue);
   const adrValue = getKPIValue(adr?.uuid || '');
@@ -75,17 +69,17 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
   const freeCashFlow = operatingProfit - investmentsValue;
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm max-w-md">
-      <h3 className="font-semibold text-base text-center border-b pb-2 mb-3">Financial Statement</h3>
+    <div className="bg-white p-3 rounded-lg shadow-sm max-w-md">
+      <h3 className="font-semibold text-base text-center border-b pb-2 mb-2">Financial Statement</h3>
       
-      <div className="space-y-1">
-        {/* Customizable Inputs */}
+      <div className="space-y-0.5">
         <FinancialMetric 
           label="Number of Rooms"
           kpi={rooms}
           value={roomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
         <FinancialMetric 
           label="Occupied Rooms"
@@ -93,6 +87,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={occupiedRoomsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
         <FinancialMetric 
           label="ADR"
@@ -100,6 +95,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={adrValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
         <FinancialMetric 
           label="Extras Revenue"
@@ -107,11 +103,11 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={extrasValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
 
-        <Separator className="my-2" />
+        <Separator className="my-1" />
 
-        {/* Revenue Section */}
         <FinancialMetric 
           label="Room Revenue"
           value={roomRevenue}
@@ -124,15 +120,15 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           className="font-semibold"
         />
 
-        <Separator className="my-2" />
+        <Separator className="my-1" />
 
-        {/* Costs Section */}
         <FinancialMetric 
           label="Variable Costs %"
           kpi={variableCostsPercent}
           value={variableCostsPercentValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
         <FinancialMetric 
           label="Variable Costs Amount"
@@ -145,11 +141,11 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={fixedCostsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
 
-        <Separator className="my-2" />
+        <Separator className="my-1" />
 
-        {/* Bottom Line */}
         <FinancialMetric 
           label="Operating Profit"
           value={operatingProfit}
@@ -162,6 +158,7 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
           value={investmentsValue}
           onEdit={onEdit}
           onDelete={onDelete}
+          isEditable={true}
         />
         <FinancialMetric 
           label="Free Cash Flow"
