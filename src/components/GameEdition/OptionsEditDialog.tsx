@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Plus, Loader2, Trash } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
+import KPIInputGroup from "./KPIInputGroup"; // Import the KPIInputGroup component
 
 interface OptionsEditDialogProps {
   turnId: string;
@@ -72,62 +73,6 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
     }
   };
 
-  const handleUpdateOption = async (option: Option) => {
-    try {
-      const { error } = await supabase
-        .from('Options')
-        .update({
-          title: option.title,
-          description: option.description,
-          image: option.image,
-          impactkpi1: option.impactkpi1,
-          impactkpi1amount: option.impactkpi1amount,
-          impactkpi2: option.impactkpi2,
-          impactkpi2amount: option.impactkpi2amount,
-          impactkpi3: option.impactkpi3,
-          impactkpi3amount: option.impactkpi3amount,
-        })
-        .eq('uuid', option.uuid);
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
-      toast({
-        title: "Success",
-        description: "Option updated successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteOption = async (optionUuid: string) => {
-    try {
-      const { error } = await supabase
-        .from('Options')
-        .delete()
-        .eq('uuid', optionUuid);
-
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
-      toast({
-        title: "Success",
-        description: "Option deleted successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
@@ -149,23 +94,32 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
                         <Label>Title</Label>
                         <Input
                           value={option.title || ''}
-                          onChange={(e) => handleUpdateOption({ ...option, title: e.target.value })}
+                          onChange={(e) => setNewOption({ ...option, title: e.target.value })}
                         />
                       </div>
                       <div>
                         <Label>Description</Label>
                         <Textarea
                           value={option.description || ''}
-                          onChange={(e) => handleUpdateOption({ ...option, description: e.target.value })}
+                          onChange={(e) => setNewOption({ ...option, description: e.target.value })}
                         />
                       </div>
                       <div>
                         <Label>Image URL</Label>
                         <Input
                           value={option.image || ''}
-                          onChange={(e) => handleUpdateOption({ ...option, image: e.target.value })}
+                          onChange={(e) => setNewOption({ ...option, image: e.target.value })}
                         />
                       </div>
+                      {/* KPI Input Groups */}
+                      <KPIInputGroup
+                        index={1}
+                        kpiName={option.impactkpi1}
+                        kpiAmount={option.impactkpi1amount}
+                        availableKPIs={[]} // Pass available KPIs here
+                        onChange={(field, value) => setNewOption({ ...option, [field]: value })}
+                      />
+                      {/* Repeat for other KPIs as needed */}
                     </div>
                     <Button
                       variant="ghost"
