@@ -6,20 +6,24 @@ import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionContext } from "@supabase/auth-helpers-react";
+import { useGameData } from "@/hooks/useGameData";
 
 export interface GameEditionHeaderProps {
   title?: string;
   showBackButton?: boolean;
+  gameId?: string;
 }
 
 const GameEditionHeader = ({ 
-  title = "Game Edition Dashboard", 
-  showBackButton = true 
+  title,
+  showBackButton = true,
+  gameId
 }: GameEditionHeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { session } = useSessionContext();
+  const { gameData } = useGameData(gameId || '');
 
   const handleLogout = async () => {
     try {
@@ -28,15 +32,11 @@ const GameEditionHeader = ({
         return;
       }
       
-      // Clear all queries first
       queryClient.clear();
-      // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Clear any local storage items if needed
       localStorage.clear();
-      // Navigate to login page
       navigate('/login', { replace: true });
     } catch (error: any) {
       console.error('Logout error:', error);
@@ -61,7 +61,9 @@ const GameEditionHeader = ({
             Back to Games
           </Button>
         )}
-        <h1 className="text-2xl font-bold">{title}</h1>
+        <h1 className="text-2xl font-bold">
+          {gameData?.name || title || "Game Edition"}
+        </h1>
       </div>
       <TeamMenu onLogout={handleLogout} />
     </div>

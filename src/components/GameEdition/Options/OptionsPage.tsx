@@ -16,7 +16,7 @@ const OptionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <GameEditionHeader title="Options Management" />
+      <GameEditionHeader gameId={gameId} />
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         <Button 
           variant="ghost" 
