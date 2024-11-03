@@ -13,7 +13,11 @@ import TeamEditDialog from './TeamEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
 import { Team } from '@/types/game';
 
-const TeamsSection = () => {
+interface TeamsSectionProps {
+  gameId?: string;
+}
+
+const TeamsSection = ({ gameId }: TeamsSectionProps) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
