@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Database, Function } from "lucide-react";
+import { Database, Calculator } from "lucide-react";
 import { KPI } from "@/types/kpi";
 
 interface FormulaInputProps {
@@ -75,7 +75,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs }: FormulaInputPro
     <div className="space-y-4">
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <Function className="h-4 w-4 text-muted-foreground" />
+          <Calculator className="h-4 w-4 text-muted-foreground" />
           <h3 className="font-medium">Formula Editor</h3>
         </div>
         <div className="relative">
