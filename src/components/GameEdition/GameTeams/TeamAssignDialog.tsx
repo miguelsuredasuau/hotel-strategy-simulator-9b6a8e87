@@ -52,14 +52,14 @@ const TeamAssignDialog = ({
     try {
       // Remove existing assignments
       await supabase
-        .from('round_teams')
+        .from('game_teams')
         .delete()
         .eq('game_uuid', gameId);
 
       // Add new assignments
       if (selectedTeams.length > 0) {
         const { error } = await supabase
-          .from('round_teams')
+          .from('game_teams')
           .insert(
             selectedTeams.map((teamId) => ({
               game_uuid: gameId,

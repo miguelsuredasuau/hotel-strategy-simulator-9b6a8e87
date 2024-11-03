@@ -21,7 +21,7 @@ const GameTeamsSection = ({ gameId }: GameTeamsSectionProps) => {
     queryKey: ['game-teams', gameId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('round_teams')
+        .from('game_teams')
         .select(`
           team_uuid,
           teams:team_uuid (
