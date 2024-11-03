@@ -19,15 +19,23 @@ const FinancialStatementSection = ({ kpis, onEdit, onDelete, gameId, turnId }: F
   const { data: kpiValues } = useQuery({
     queryKey: ['kpi-values', gameId, turnId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const query = supabase
         .from('kpi_values')
         .select('*')
-        .eq('game_uuid', gameId)
-        .eq('turn_uuid', turnId || null);
+        .eq('game_uuid', gameId);
+      
+      // Only add turn_uuid filter if turnId is provided
+      if (turnId) {
+        query.eq('turn_uuid', turnId);
+      } else {
+        query.is('turn_uuid', null);
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !!gameId
   });
 
   // Helper function to find KPI by financial type
