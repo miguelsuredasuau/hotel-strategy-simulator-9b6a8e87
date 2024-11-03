@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Option, Turn } from "@/types/game";
 import { Loader2, DollarSign } from "lucide-react";
 import HotelCard from "@/components/HotelCard";
 import { useState } from "react";
@@ -36,7 +35,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
         .order('optionnumber');
 
       if (error) throw error;
-      return data as Option[];
+      return data;
     },
     enabled: !!gameId
   });
@@ -52,7 +51,7 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
         .single();
 
       if (error) throw error;
-      return data as Turn;
+      return data;
     },
     enabled: !!gameId
   });
@@ -88,13 +87,18 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
 
         <div className="w-[30%] shrink-0">
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <Label 
-              htmlFor="adr" 
-              className="text-lg font-semibold text-hotel-primary flex items-center gap-2 mb-4"
-            >
-              <DollarSign className="h-5 w-5" />
-              Average Daily Rate (ADR)
-            </Label>
+            <div className="flex items-center justify-between mb-4">
+              <Label 
+                htmlFor="adr" 
+                className="text-lg font-semibold text-hotel-primary flex items-center gap-2"
+              >
+                <DollarSign className="h-5 w-5" />
+                Average Daily Rate (ADR)
+              </Label>
+              <div className="text-2xl font-semibold text-hotel-primary">
+                <span className="text-lg">$</span>{adr}
+              </div>
+            </div>
             <div className="space-y-4">
               <Slider
                 id="adr"
@@ -103,11 +107,8 @@ export const TurnContent = ({ gameId, currentTurn, onHotelSelect }: TurnContentP
                 step={1}
                 value={[adr]}
                 onValueChange={(value) => setAdr(value[0])}
-                className="w-full"
+                className="w-full [&>.relative>div:first-child]:bg-hotel-secondary [&>.relative>div:nth-child(2)]:bg-hotel-primary [&>span]:border-hotel-primary [&>span]:bg-white"
               />
-              <div className="text-2xl font-semibold text-center text-hotel-primary">
-                <span className="text-lg">$</span>{adr}
-              </div>
             </div>
           </div>
         </div>
