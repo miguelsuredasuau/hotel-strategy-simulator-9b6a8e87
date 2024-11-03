@@ -85,11 +85,21 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
               className="space-y-4"
             >
               {kpis?.map((kpi, index) => (
-                <Draggable key={kpi.uuid} draggableId={kpi.uuid} index={index}>
-                  {(provided) => (
+                <Draggable 
+                  key={kpi.uuid} 
+                  draggableId={kpi.uuid} 
+                  index={index}
+                >
+                  {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        transform: snapshot.isDragging
+                          ? provided.draggableProps.style?.transform
+                          : "none",
+                      }}
                     >
                       <KPICard
                         kpi={kpi}
