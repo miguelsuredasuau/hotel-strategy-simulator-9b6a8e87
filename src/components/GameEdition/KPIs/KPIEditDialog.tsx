@@ -16,11 +16,12 @@ import KPIFormFields from "./KPIFormFields";
 interface KPIEditDialogProps {
   kpi: Partial<KPI> | null;
   gameId: string;
+  turnId?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) => {
+const KPIEditDialog = ({ kpi, gameId, turnId, open, onOpenChange }: KPIEditDialogProps) => {
   const [formData, setFormData] = useState<Partial<KPI>>({
     name: '',
     impact_type: 'value',
@@ -35,10 +36,7 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
 
   useEffect(() => {
     if (kpi) {
-      setFormData({
-        ...kpi,
-        impact_type: 'value' // Ensure this is always set to 'value'
-      });
+      setFormData(kpi);
     } else {
       setFormData({
         name: '',
@@ -79,7 +77,10 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
         category: formData.category || 'operational',
         is_customizable: formData.is_customizable || false,
         game_uuid: gameId,
+        financial_type: formData.financial_type,
       };
+
+      let kpiUuid: string;
 
       if (kpi?.uuid) {
         const { error } = await supabase
@@ -88,15 +89,35 @@ const KPIEditDialog = ({ kpi, gameId, open, onOpenChange }: KPIEditDialogProps) 
           .eq('uuid', kpi.uuid);
 
         if (error) throw error;
+        kpiUuid = kpi.uuid;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('kpis')
-          .insert([kpiData]);
+          .insert([kpiData])
+          .select()
+          .single();
 
         if (error) throw error;
+        kpiUuid = data.uuid;
+      }
+
+      // Update or create KPI value if we're editing in the context of a turn
+      if (turnId) {
+        const { error: valueError } = await supabase
+          .from('kpi_values')
+          .upsert({
+            kpi_uuid: kpiUuid,
+            game_uuid: gameId,
+            turn_uuid: turnId,
+            value: formData.default_value || 0,
+          });
+
+        if (valueError) throw valueError;
       }
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      queryClient.invalidateQueries({ queryKey: ['kpi-values', gameId, turnId] });
+      
       toast({
         title: "Success",
         description: `KPI ${kpi ? 'updated' : 'created'} successfully`,

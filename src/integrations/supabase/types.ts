@@ -72,12 +72,64 @@ export type Database = {
         }
         Relationships: []
       }
+      kpi_values: {
+        Row: {
+          created_at: string | null
+          game_uuid: string
+          kpi_uuid: string
+          turn_uuid: string | null
+          uuid: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          game_uuid: string
+          kpi_uuid: string
+          turn_uuid?: string | null
+          uuid?: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          game_uuid?: string
+          kpi_uuid?: string
+          turn_uuid?: string | null
+          uuid?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kpi_values_game_uuid_fkey"
+            columns: ["game_uuid"]
+            isOneToOne: false
+            referencedRelation: "Games"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "kpi_values_kpi_uuid_fkey"
+            columns: ["kpi_uuid"]
+            isOneToOne: false
+            referencedRelation: "kpis"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "kpi_values_turn_uuid_fkey"
+            columns: ["turn_uuid"]
+            isOneToOne: false
+            referencedRelation: "Turns"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
       kpis: {
         Row: {
           axis: string
           category: string | null
           created_at: string | null
           default_value: number | null
+          financial_type:
+            | Database["public"]["Enums"]["financial_kpi_type"]
+            | null
           game_uuid: string | null
           impact_type: string | null
           is_customizable: boolean | null
@@ -90,6 +142,9 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           default_value?: number | null
+          financial_type?:
+            | Database["public"]["Enums"]["financial_kpi_type"]
+            | null
           game_uuid?: string | null
           impact_type?: string | null
           is_customizable?: boolean | null
@@ -102,6 +157,9 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           default_value?: number | null
+          financial_type?:
+            | Database["public"]["Enums"]["financial_kpi_type"]
+            | null
           game_uuid?: string | null
           impact_type?: string | null
           is_customizable?: boolean | null
@@ -281,7 +339,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      financial_kpi_type:
+        | "rooms"
+        | "occupied_rooms"
+        | "adr"
+        | "extras_revenue"
+        | "variable_costs_percent"
+        | "fixed_costs"
+        | "investments"
     }
     CompositeTypes: {
       [_ in never]: never
