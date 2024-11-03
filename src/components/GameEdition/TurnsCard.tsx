@@ -10,13 +10,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 interface TurnsCardProps {
   turns: Turn[];
-  onEditOptions: (turn: Turn) => void;
   onEditTurn: (turn: Turn) => void;
   onDeleteTurn: (turn: Turn) => void;
   onAddTurn: () => void;
 }
 
-const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
+const TurnsCard = ({ turns, onEditTurn, onDeleteTurn, onAddTurn }: TurnsCardProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -79,7 +78,6 @@ const TurnsCard = ({ turns, onEditOptions, onEditTurn, onDeleteTurn, onAddTurn }
                     key={turn.uuid}
                     turn={turn}
                     index={index}
-                    onEditOptions={onEditOptions}
                     onEditTurn={onEditTurn}
                     onDeleteTurn={onDeleteTurn}
                   />
