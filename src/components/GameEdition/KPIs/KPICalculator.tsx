@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calculator, Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { KPI } from "@/types/kpi";
+import { FormulaInput } from "./FormulaEditor/FormulaInput";
 
 interface KPICalculatorProps {
   gameId: string;
@@ -37,7 +38,6 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
 
   const handleCreateCalculatedKPI = async () => {
     try {
-      // Extract KPI dependencies from formula
       const dependsOn = formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || [];
 
       const { error } = await supabase
@@ -59,7 +59,6 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
         description: "Calculated KPI created successfully",
       });
 
-      // Reset form
       setName("");
       setDescription("");
       setFormula("");
@@ -100,17 +99,11 @@ export const KPICalculator = ({ gameId }: KPICalculatorProps) => {
           </div>
           <div className="space-y-2">
             <Label>Formula</Label>
-            <Textarea
+            <FormulaInput
               value={formula}
-              onChange={(e) => setFormula(e.target.value)}
-              placeholder="e.g., kpi:revenue - kpi:costs"
+              onChange={setFormula}
+              availableKPIs={kpis || []}
             />
-            <p className="text-sm text-muted-foreground">
-              Available KPIs: {kpis?.map(k => k.name).join(', ')}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Use format: kpi:kpi_name for references (e.g., kpi:revenue)
-            </p>
           </div>
           <Button onClick={handleCreateCalculatedKPI} className="w-full">
             <Plus className="h-4 w-4 mr-2" />
