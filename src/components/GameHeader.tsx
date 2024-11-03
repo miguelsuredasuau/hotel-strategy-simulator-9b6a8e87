@@ -1,4 +1,5 @@
 import { Calendar } from "lucide-react";
+import TeamLogo from "./TeamLogo";
 
 interface GameHeaderProps {
   currentTurn: number;
@@ -31,9 +32,7 @@ const GameHeader = ({ currentTurn, totalTurns }: GameHeaderProps) => {
             ))}
           </div>
         </div>
-        <div className="bg-hotel-accent text-hotel-primary px-4 py-2 rounded-lg font-medium">
-          €4,000,000
-        </div>
+        <TeamLogo />
       </div>
     </header>
   );
