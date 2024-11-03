@@ -11,6 +11,8 @@ import TurnCard from './TurnCard';
 import TurnEditDialog from '../TurnEditDialog';
 import DeleteConfirmDialog from '../DeleteConfirmDialog';
 import { Turn } from '@/types/game';
+import { useTurnsQuery } from './useTurnsQuery';
+import { useTurnActions } from './useTurnActions';
 
 interface TurnsSectionProps {
   gameId: string;
@@ -22,109 +24,31 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
   const [isOpen, setIsOpen] = useState(true);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  // Only query if gameId is a valid UUID
-  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(gameId);
+  const { turns, isLoading, isError } = useTurnsQuery(gameId);
+  const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
 
-  const { data: turns, isLoading } = useQuery({
-    queryKey: ['turns', gameId],
-    queryFn: async () => {
-      if (!isValidUUID) {
-        throw new Error('Invalid game ID');
-      }
-
-      const { data, error } = await supabase
-        .from('Turns')
-        .select('*')
-        .eq('game_uuid', gameId)
-        .order('turnnumber');
-
-      if (error) throw error;
-      return data as Turn[];
-    },
-    enabled: isValidUUID // Only run query if gameId is valid
-  });
-
-  const handleDeleteTurn = async (turnUuid: string) => {
-    try {
-      // First delete all options associated with this turn
-      const { error: optionsError } = await supabase
-        .from('Options')
-        .delete()
-        .eq('turn_uuid', turnUuid);
-
-      if (optionsError) throw optionsError;
-
-      // Then delete the turn
-      const { error: turnError } = await supabase
-        .from('Turns')
-        .delete()
-        .eq('uuid', turnUuid);
-
-      if (turnError) throw turnError;
-
-      queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
-      toast({
-        title: "Success",
-        description: "Turn deleted successfully",
-      });
-      setIsDeleteDialogOpen(false);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDragEnd = async (result: any) => {
-    if (!result.destination || !turns) return;
-
-    const items = Array.from(turns);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    // Update turn numbers
-    const updatedTurns = items.map((turn, index) => ({
-      ...turn,
-      turnnumber: index + 1
-    }));
-
-    try {
-      for (const turn of updatedTurns) {
-        const { error } = await supabase
-          .from('Turns')
-          .update({ turnnumber: turn.turnnumber })
-          .eq('uuid', turn.uuid);
-        
-        if (error) throw error;
-      }
-
-      queryClient.setQueryData(['turns', gameId], updatedTurns);
-      toast({
-        title: "Success",
-        description: "Turn order updated successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (!isValidUUID) {
+  if (!gameId || gameId.trim() === '') {
     return (
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Invalid Game ID</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500">Unable to load turns: Invalid game ID provided.</p>
+          <p className="text-gray-500">Unable to load turns: No game ID provided.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Error Loading Turns</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-500">There was an error loading the turns. Please try again later.</p>
         </CardContent>
       </Card>
     );
@@ -214,11 +138,6 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
                 }]);
               
               if (error) throw error;
-              
-              toast({
-                title: "Success",
-                description: "Turn created successfully",
-              });
             } else {
               const { error } = await supabase
                 .from('Turns')
@@ -226,23 +145,13 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
                 .eq('uuid', updatedTurn.uuid);
               
               if (error) throw error;
-              
-              toast({
-                title: "Success",
-                description: "Turn updated successfully",
-              });
             }
             
-            queryClient.invalidateQueries({ queryKey: ['turns', gameId] });
             setIsCreateDialogOpen(false);
             setIsEditDialogOpen(false);
             setSelectedTurn(null);
           } catch (error: any) {
-            toast({
-              title: "Error",
-              description: error.message,
-              variant: "destructive",
-            });
+            console.error('Error saving turn:', error);
           }
         }}
       />

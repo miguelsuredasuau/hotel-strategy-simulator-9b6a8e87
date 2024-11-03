@@ -137,6 +137,52 @@ export type Database = {
           },
         ]
       }
+      round_teams: {
+        Row: {
+          created_at: string | null
+          game_uuid: string | null
+          team_uuid: string | null
+          turn_uuid: string | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          game_uuid?: string | null
+          team_uuid?: string | null
+          turn_uuid?: string | null
+          uuid?: string
+        }
+        Update: {
+          created_at?: string | null
+          game_uuid?: string | null
+          team_uuid?: string | null
+          turn_uuid?: string | null
+          uuid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "round_teams_game_uuid_fkey"
+            columns: ["game_uuid"]
+            isOneToOne: false
+            referencedRelation: "Games"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "round_teams_team_uuid_fkey"
+            columns: ["team_uuid"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "round_teams_turn_uuid_fkey"
+            columns: ["turn_uuid"]
+            isOneToOne: false
+            referencedRelation: "Turns"
+            referencedColumns: ["uuid"]
+          },
+        ]
+      }
       teams: {
         Row: {
           created_at: string | null
