@@ -24,7 +24,7 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const { turns, isLoading, isError } = useTurnsQuery(gameId);
   const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
