@@ -21,12 +21,18 @@ import { supabase } from "@/integrations/supabase/client";
 interface KPIComboboxProps {
   value: string;
   gameId: string;
-  kpis: { uuid: string; name: string }[];
+  kpis?: { uuid: string; name: string }[];
   onChange: (value: string) => void;
   onCreateNew?: (name: string) => void;
 }
 
-export function KPICombobox({ value, gameId, kpis, onChange, onCreateNew }: KPIComboboxProps) {
+export function KPICombobox({ 
+  value, 
+  gameId, 
+  kpis = [], // Provide default empty array
+  onChange, 
+  onCreateNew 
+}: KPIComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
   const { toast } = useToast();
