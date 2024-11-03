@@ -1,30 +1,54 @@
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Upload } from "lucide-react";
+import { useState } from "react";
+import CSVUploadDialog from "./BulkUpload/CSVUploadDialog";
 
 interface GameEditionHeaderProps {
+  gameId?: number;
   onLogout: () => void;
 }
 
-const GameEditionHeader = ({ onLogout }: GameEditionHeaderProps) => {
-  const navigate = useNavigate();
-  
+const GameEditionHeader = ({ gameId, onLogout }: GameEditionHeaderProps) => {
+  const [isTurnsUploadOpen, setIsTurnsUploadOpen] = useState(false);
+  const [isOptionsUploadOpen, setIsOptionsUploadOpen] = useState(false);
+
   return (
-    <div className="flex items-center justify-between mb-6">
-      <h1 className="text-3xl font-bold text-gray-900">Game Edition Dashboard</h1>
+    <div className="flex justify-between items-center mb-8">
+      <h1 className="text-2xl font-bold">Game Edition Dashboard</h1>
       <div className="flex gap-4">
-        <Button 
-          variant="outline"
-          onClick={() => navigate('/game-edition')}
-        >
-          Back to Games
-        </Button>
-        <Button 
-          variant="ghost"
-          onClick={onLogout}
-          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
+        {gameId && (
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setIsTurnsUploadOpen(true)}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Turns
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsOptionsUploadOpen(true)}
+              className="gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Options
+            </Button>
+            <CSVUploadDialog
+              gameId={gameId}
+              type="turns"
+              open={isTurnsUploadOpen}
+              onOpenChange={setIsTurnsUploadOpen}
+            />
+            <CSVUploadDialog
+              gameId={gameId}
+              type="options"
+              open={isOptionsUploadOpen}
+              onOpenChange={setIsOptionsUploadOpen}
+            />
+          </>
+        )}
+        <Button variant="outline" onClick={onLogout}>
           Logout
         </Button>
       </div>
