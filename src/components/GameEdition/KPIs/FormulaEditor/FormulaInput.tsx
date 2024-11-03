@@ -49,8 +49,9 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
     }, 0);
   };
 
-  const handleKPIClick = (kpiName: string) => {
-    insertAtCursor(`kpi:${kpiName}`);
+  const handleKPIClick = (kpi: KPI) => {
+    // Use UUID instead of name in formula
+    insertAtCursor(`kpi:${kpi.uuid}`);
   };
 
   const handleOperatorClick = (operator: string) => {
@@ -70,7 +71,7 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
-            placeholder="Build your formula (e.g., kpi:revenue - kpi:costs)"
+            placeholder="Build your formula using KPI UUIDs (e.g., kpi:uuid1 - kpi:uuid2)"
             className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
           />
         </div>
@@ -90,11 +91,14 @@ export const FormulaInput = ({ value, onChange, availableKPIs, gameId }: Formula
                   variant="outline"
                   size="sm"
                   className="justify-start h-auto py-1.5 px-2 hover:bg-blue-50 group text-left"
-                  onClick={() => handleKPIClick(kpi.name)}
+                  onClick={() => handleKPIClick(kpi)}
                 >
                   <div className="w-full">
                     <div className="font-medium group-hover:text-blue-700 truncate text-xs">
                       {kpi.name}
+                    </div>
+                    <div className="text-[10px] text-gray-500 truncate">
+                      {kpi.uuid}
                     </div>
                   </div>
                 </Button>

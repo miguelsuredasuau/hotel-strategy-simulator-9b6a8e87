@@ -10,9 +10,9 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
 
   const evaluateFormula = (formula: string, kpiValues: Record<string, number>): number => {
     try {
-      // Replace KPI references with their values
-      const evaluableFormula = formula.replace(/kpi:([a-zA-Z0-9_]+)/g, (_, kpiName) => {
-        return kpiValues[kpiName]?.toString() || '0';
+      // Replace KPI UUID references with their values
+      const evaluableFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, (_, kpiUuid) => {
+        return kpiValues[kpiUuid]?.toString() || '0';
       });
       
       // Use Function constructor to safely evaluate the formula
@@ -36,7 +36,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
     // First pass: get all non-calculated KPI values
     kpis.forEach(kpi => {
       if (!kpi.formula) {
-        kpiValues[kpi.name] = kpi.current_value ?? kpi.default_value ?? 0;
+        kpiValues[kpi.uuid] = kpi.current_value ?? kpi.default_value ?? 0;
       }
     });
 
@@ -46,15 +46,15 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
 
       // Process dependencies first
       const dependencies = kpi.depends_on || [];
-      dependencies.forEach(depName => {
-        const depKPI = kpis.find(k => k.name === depName);
+      dependencies.forEach(depUuid => {
+        const depKPI = kpis.find(k => k.uuid === depUuid);
         if (depKPI && !processedKPIs.has(depKPI.uuid)) {
           processKPI(depKPI);
         }
       });
 
       const calculatedValue = evaluateFormula(kpi.formula, kpiValues);
-      console.log(`Calculated value for ${kpi.name}:`, calculatedValue);
+      console.log(`Calculated value for ${kpi.name} (${kpi.uuid}):`, calculatedValue);
       
       if (calculatedValue !== kpi.current_value) {
         updates.push({
@@ -62,7 +62,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
           current_value: calculatedValue
         });
       }
-      kpiValues[kpi.name] = calculatedValue;
+      kpiValues[kpi.uuid] = calculatedValue;
       processedKPIs.add(kpi.uuid);
     };
 

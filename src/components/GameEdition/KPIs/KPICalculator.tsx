@@ -41,8 +41,9 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
   const handleCreateKPI = async () => {
     try {
+      // Extract UUIDs from formula instead of names
       const dependsOn = isCalculated 
-        ? formula.match(/kpi:([a-zA-Z0-9_]+)/g)?.map(match => match.replace('kpi:', '')) || []
+        ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
         : null;
 
       const { error } = await supabase
@@ -69,6 +70,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       setFormula("");
       setDefaultValue(0);
       setUnit("");
+      setIsCalculated(false);
       
       onSuccess?.();
     } catch (error: any) {
