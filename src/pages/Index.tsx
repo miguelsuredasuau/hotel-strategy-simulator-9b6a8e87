@@ -28,7 +28,6 @@ const Index = () => {
           return;
         }
 
-        // Get user's team
         const { data: profile } = await supabase
           .from('profiles')
           .select('team_uuid, role')
@@ -49,7 +48,6 @@ const Index = () => {
           return;
         }
 
-        // Get active game for the team
         const { data: gameTeam } = await supabase
           .from('game_teams')
           .select('game_uuid')
@@ -170,7 +168,7 @@ const Index = () => {
                   id={option.uuid}
                   name={option.title || ''}
                   description={option.description || ''}
-                  image={option.image || `https://source.unsplash.com/800x600/?hotel,luxury&sig=${option.uuid}`}
+                  image={option.image || `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=800&h=600&fit=crop`}
                   onSelect={() => handleHotelSelect(option.uuid)}
                 />
               ))}

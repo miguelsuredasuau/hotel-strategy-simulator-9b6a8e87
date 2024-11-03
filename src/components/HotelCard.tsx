@@ -28,7 +28,7 @@ const HotelCard = ({ id, name, description, image, onSelect }: HotelCardProps) =
       </div>
       <CardContent className="p-4">
         <h3 className="text-lg font-semibold mb-2">{name}</h3>
-        <p className="text-gray-600 text-sm">{description}</p>
+        <p className="text-gray-600 text-sm line-clamp-3">{description}</p>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button 

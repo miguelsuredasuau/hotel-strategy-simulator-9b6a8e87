@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Image } from "lucide-react";
+import { Users } from "lucide-react";
 
 const TeamLogo = () => {
   const [teamLogo, setTeamLogo] = useState<string | null>(null);
@@ -19,10 +19,7 @@ const TeamLogo = () => {
           .eq('id', user.id)
           .maybeSingle();
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          return;
-        }
+        if (profileError) throw profileError;
 
         if (profileData?.team_uuid) {
           const { data: teamData, error: teamError } = await supabase
@@ -31,10 +28,7 @@ const TeamLogo = () => {
             .eq('uuid', profileData.team_uuid)
             .single();
 
-          if (teamError) {
-            console.error('Error fetching team:', teamError);
-            return;
-          }
+          if (teamError) throw teamError;
 
           if (teamData) {
             setTeamLogo(teamData.teamlogo);
@@ -50,10 +44,13 @@ const TeamLogo = () => {
   }, []);
 
   return (
-    <Avatar>
-      <AvatarImage src={teamLogo || ''} alt={teamName || 'Team logo'} />
+    <Avatar className="h-10 w-10">
+      <AvatarImage 
+        src={teamLogo || 'https://images.unsplash.com/photo-1721322800607-8c38375eef04'} 
+        alt={teamName || 'Team logo'} 
+      />
       <AvatarFallback>
-        <Image className="h-4 w-4 text-gray-400" />
+        <Users className="h-4 w-4 text-gray-400" />
       </AvatarFallback>
     </Avatar>
   );
