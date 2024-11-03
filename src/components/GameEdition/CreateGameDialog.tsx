@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface CreateGameDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onGameCreated: (gameId: number) => void;
+  onGameCreated: (gameId: string) => void;
 }
 
 const CreateGameDialog = ({ open, onOpenChange, onGameCreated }: CreateGameDialogProps) => {
@@ -31,7 +31,7 @@ const CreateGameDialog = ({ open, onOpenChange, onGameCreated }: CreateGameDialo
         description: "Game created successfully",
       });
 
-      onGameCreated(data.id);
+      onGameCreated(data.uuid);
       onOpenChange(false);
       setGameName('');
     } catch (error: any) {

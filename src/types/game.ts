@@ -1,16 +1,15 @@
 export interface Turn {
-  id: number;
+  uuid: string;
   turnnumber: number;
   challenge?: string;
   description?: string;
-  game: number;
+  game?: number;
   created_at?: string;
-  uuid?: string;
   game_uuid?: string;
 }
 
 export interface Option {
-  id: number;
+  uuid: string;
   created_at?: string;
   description?: string;
   game?: number;
@@ -26,11 +25,10 @@ export interface Option {
   title?: string;
   turn?: number;
   turn_uuid?: string;
-  uuid: string;
 }
 
 export interface Team {
-  id: number;
+  uuid: string;
   teamname?: string;
   teamlogo?: string;
   email?: string;

@@ -14,7 +14,7 @@ import TeamsSection from './TeamsManagement/TeamsSection';
 const GameSelectionPage = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
+  const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,11 +32,11 @@ const GameSelectionPage = () => {
     },
   });
 
-  const handleGameSelect = (gameId: number) => {
+  const handleGameSelect = (gameId: string) => {
     navigate(`/game-edition/${gameId}`);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent, gameId: number) => {
+  const handleDeleteClick = (e: React.MouseEvent, gameId: string) => {
     e.stopPropagation();
     setSelectedGameId(gameId);
     setIsDeleteDialogOpen(true);
@@ -49,7 +49,7 @@ const GameSelectionPage = () => {
       const { error } = await supabase
         .from('Games')
         .delete()
-        .eq('id', selectedGameId);
+        .eq('uuid', selectedGameId);
 
       if (error) throw error;
 
@@ -96,9 +96,9 @@ const GameSelectionPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {games?.map((game) => (
               <Card 
-                key={game.id} 
+                key={game.uuid} 
                 className="group cursor-pointer hover:shadow-lg transition-all duration-300 overflow-hidden"
-                onClick={() => handleGameSelect(game.id)}
+                onClick={() => handleGameSelect(game.uuid)}
               >
                 <div className="relative">
                   <AspectRatio ratio={16 / 9}>
@@ -125,7 +125,7 @@ const GameSelectionPage = () => {
                       variant="ghost" 
                       size="icon"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => handleDeleteClick(e, game.id)}
+                      onClick={(e) => handleDeleteClick(e, game.uuid)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
