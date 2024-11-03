@@ -8,6 +8,7 @@ import { useGameMasterCheck } from './GameEdition/Dashboard/useGameMasterCheck';
 import TurnsSection from './GameEdition/TurnsManagement/TurnsSection';
 import { GameBulkOperations } from './GameEdition/BulkOperations/GameBulkOperations';
 import GameTeamsSection from './GameEdition/GameTeams/GameTeamsSection';
+import KPIsSection from './GameEdition/KPIs/KPIsSection';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
