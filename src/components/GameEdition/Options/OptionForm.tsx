@@ -6,10 +6,11 @@ import KPIInputGroup from "./KPIInputGroup";
 
 interface OptionFormProps {
   option: Partial<Option>;
+  availableKPIs: { uuid: string; name: string }[];
   onChange: (field: string, value: any) => void;
 }
 
-const OptionForm = ({ option, onChange }: OptionFormProps) => {
+const OptionForm = ({ option, availableKPIs = [], onChange }: OptionFormProps) => {
   const handleChange = (field: string, value: any) => {
     onChange(field, value);
   };
@@ -45,24 +46,16 @@ const OptionForm = ({ option, onChange }: OptionFormProps) => {
       </div>
 
       <div className="space-y-4">
-        <KPIInputGroup
-          index={1}
-          kpiName={option.impactkpi1}
-          kpiAmount={option.impactkpi1amount}
-          onChange={handleChange}
-        />
-        <KPIInputGroup
-          index={2}
-          kpiName={option.impactkpi2}
-          kpiAmount={option.impactkpi2amount}
-          onChange={handleChange}
-        />
-        <KPIInputGroup
-          index={3}
-          kpiName={option.impactkpi3}
-          kpiAmount={option.impactkpi3amount}
-          onChange={handleChange}
-        />
+        {[1, 2, 3].map((index) => (
+          <KPIInputGroup
+            key={index}
+            index={index}
+            kpiName={option[`impactkpi${index}` as keyof Option] as string}
+            kpiAmount={option[`impactkpi${index}amount` as keyof Option] as number}
+            availableKPIs={availableKPIs}
+            onChange={handleChange}
+          />
+        ))}
       </div>
     </div>
   );
