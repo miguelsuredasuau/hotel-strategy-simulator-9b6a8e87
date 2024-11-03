@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,7 +26,7 @@ const GameEditionDashboard = () => {
   const [inspirationalImage, setInspirationalImage] = useState(gameData?.inspirational_image || '');
 
   // Update state when gameData is loaded
-  useState(() => {
+  useEffect(() => {
     if (gameData) {
       setName(gameData.name || '');
       setDescription(gameData.description || '');
