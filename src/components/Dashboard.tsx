@@ -82,7 +82,8 @@ const Dashboard = ({ onNextTurn, gameId, turnNumber, isCurrentTurn }: DashboardP
           {isCurrentTurn && (
             <Button 
               onClick={onNextTurn}
-              className="bg-hotel-primary text-white hover:bg-hotel-primary/90 h-24 w-24 p-0"
+              className="bg-hotel-primary text-white hover:bg-hotel-primary/90 w-24 p-0"
+              style={{ height: 'auto', aspectRatio: '1' }}
               size="icon"
             >
               <ArrowRight className="h-8 w-8" />
