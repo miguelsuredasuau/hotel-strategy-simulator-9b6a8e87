@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Option } from "@/types/game";
-import KPIInputGroup from "./KPIInputGroup"; // Import the KPIInputGroup component
+import KPIInputGroup from "./Options/components/KPIInputGroup";
 
 interface OptionsEditDialogProps {
   turnId: string;
@@ -32,6 +32,8 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
   const { data: options, isLoading } = useQuery({
     queryKey: ['options', turnId, gameId],
     queryFn: async () => {
+      if (!turnId || !gameId) throw new Error('Turn ID and Game ID are required');
+      
       const { data, error } = await supabase
         .from('Options')
         .select('*')
@@ -42,6 +44,7 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
       if (error) throw error;
       return data as Option[];
     },
+    enabled: !!turnId && !!gameId
   });
 
   const handleAddOption = async () => {
@@ -63,6 +66,29 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
       toast({
         title: "Success",
         description: "Option added successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteOption = async (optionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('Options')
+        .delete()
+        .eq('uuid', optionId);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
+      toast({
+        title: "Success",
+        description: "Option deleted successfully",
       });
     } catch (error: any) {
       toast({
@@ -117,6 +143,7 @@ const OptionsEditDialog = ({ turnId, gameId, open, onOpenChange }: OptionsEditDi
                         kpiName={option.impactkpi1}
                         kpiAmount={option.impactkpi1amount}
                         availableKPIs={[]} // Pass available KPIs here
+                        gameId={gameId}
                         onChange={(field, value) => setNewOption({ ...option, [field]: value })}
                       />
                       {/* Repeat for other KPIs as needed */}

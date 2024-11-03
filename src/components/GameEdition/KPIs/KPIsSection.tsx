@@ -27,6 +27,8 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
   const { data: kpis = [], isLoading } = useQuery({
     queryKey: ['kpis', gameId],
     queryFn: async () => {
+      if (!gameId) throw new Error('Game ID is required');
+      
       const { data, error } = await supabase
         .from('kpis')
         .select('*')
@@ -37,6 +39,7 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
       if (error) throw error;
       return data as KPI[];
     },
+    enabled: !!gameId
   });
 
   const handleDeleteKPI = async () => {
@@ -98,6 +101,7 @@ const KPIsSection = ({ gameId }: KPIsSectionProps) => {
                 {financialKPIs.length > 0 && (
                   <FinancialStatementSection
                     kpis={financialKPIs}
+                    gameId={gameId}
                     onEdit={(kpi) => {
                       setSelectedKPI(kpi);
                       setIsCreateDialogOpen(true);
