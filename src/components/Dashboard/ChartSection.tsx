@@ -35,6 +35,18 @@ export const ChartSection = () => {
           </ScatterChart>
         </CardContent>
       </Card>
+
+      <Card className="md:col-span-3">
+        <CardContent className="flex items-center space-x-4 py-4">
+          <Quote className="w-4 h-4 text-hotel-primary flex-shrink-0" />
+          <div>
+            <p className="text-sm italic text-hotel-text">
+              "The best way to find yourself is to lose yourself in the service of others."
+              <span className="text-xs text-hotel-muted ml-2">— Mahatma Gandhi</span>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
