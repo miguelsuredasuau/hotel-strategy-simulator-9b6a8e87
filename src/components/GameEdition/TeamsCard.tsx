@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Team } from "@/types/game";
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
-import TeamCard from "./TeamCard";
+import TeamCard from "./TeamsManagement/TeamCard";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
