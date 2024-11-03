@@ -2,39 +2,30 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 
-export const useFinancialCalculations = (kpis: KPI[], gameId: string, turnId?: string) => {
-  const { data: kpiValues = [] } = useQuery({
-    queryKey: ['kpi-values', gameId, turnId],
+export const useFinancialCalculations = (gameId: string, turnId?: string) => {
+  const { data: kpis = [] } = useQuery({
+    queryKey: ['kpis', gameId],
     queryFn: async () => {
       if (!gameId) throw new Error('Game ID is required');
       
-      const query = supabase
-        .from('kpi_values')
+      const { data, error } = await supabase
+        .from('kpis')
         .select('*')
-        .eq('game_uuid', gameId);
-      
-      if (turnId) {
-        query.eq('turn_uuid', turnId);
-      } else {
-        query.is('turn_uuid', null);
-      }
+        .eq('game_uuid', gameId)
+        .eq('type', 'financial');
 
-      const { data, error } = await query;
       if (error) throw error;
-      console.log('Fetched KPI values:', data); // Debug log
-      return data;
+      return data as KPI[];
     },
     enabled: !!gameId
   });
 
-  const findKPI = (type: string) => 
-    kpis.find(kpi => kpi.financial_type === type);
+  const findKPI = (name: string) => 
+    kpis.find(kpi => kpi.name === name);
 
   const getKPIValue = (kpiUuid: string) => {
-    const kpiValue = kpiValues?.find(v => v.kpi_uuid === kpiUuid);
     const kpi = kpis.find(k => k.uuid === kpiUuid);
-    console.log('Getting KPI value for:', kpiUuid, 'Value:', kpiValue?.value, 'Default:', kpi?.default_value); // Debug log
-    return kpiValue?.value ?? kpi?.default_value ?? 0;
+    return kpi?.current_value ?? kpi?.default_value ?? 0;
   };
 
   const rooms = findKPI('rooms');
@@ -62,7 +53,7 @@ export const useFinancialCalculations = (kpis: KPI[], gameId: string, turnId?: s
   const freeCashFlow = operatingProfit - investmentsValue;
 
   return {
-    kpiValues,
+    kpis,
     findKPI,
     getKPIValue,
     calculatedValues: {

@@ -2,9 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Option } from "@/types/game";
-import { useQueryClient } from "@tanstack/react-query";
 import KPIInputGroup from "./KPIInputGroup";
-import { useGameKPIs } from "../hooks/useGameKPIs";
 
 interface OptionFormProps {
   option: Partial<Option>;
@@ -13,13 +11,6 @@ interface OptionFormProps {
 }
 
 const OptionForm = ({ option, gameId, onChange }: OptionFormProps) => {
-  const queryClient = useQueryClient();
-  const { data: kpis = [] } = useGameKPIs(gameId);
-
-  const handleKPICreate = () => {
-    queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-  };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
@@ -57,10 +48,8 @@ const OptionForm = ({ option, gameId, onChange }: OptionFormProps) => {
             index={index}
             kpiName={option[`impactkpi${index}` as keyof Option] as string}
             kpiAmount={option[`impactkpi${index}amount` as keyof Option] as number}
-            availableKPIs={kpis}
             gameId={gameId}
             onChange={onChange}
-            onKPICreate={handleKPICreate}
           />
         ))}
       </div>
