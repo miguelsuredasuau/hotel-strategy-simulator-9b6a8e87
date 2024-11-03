@@ -18,13 +18,50 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
 
   const handleDownload = async () => {
     try {
-      const { data: options } = await supabase
-        .from('Options')
-        .select('*, Turns(turnnumber)')
+      // Fetch all turns first to get turn numbers
+      const { data: turns } = await supabase
+        .from('Turns')
+        .select('uuid, turnnumber')
         .eq('game_uuid', gameId)
-        .order('turn_uuid, optionnumber');
+        .order('turnnumber');
 
-      if (!options || options.length === 0) {
+      if (!turns || turns.length === 0) {
+        toast({
+          title: "No turns found",
+          description: "Create some turns first before exporting options.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Fetch all options for each turn
+      const allOptions = [];
+      for (const turn of turns) {
+        const { data: options } = await supabase
+          .from('Options')
+          .select('*')
+          .eq('turn_uuid', turn.uuid)
+          .eq('game_uuid', gameId)
+          .order('optionnumber');
+
+        if (options) {
+          allOptions.push(...options.map(option => ({
+            'Turn Number': turn.turnnumber,
+            'Option Number': option.optionnumber,
+            'Title': option.title || '',
+            'Description': option.description || '',
+            'Image URL': option.image || '',
+            'KPI 1': option.impactkpi1 || '',
+            'KPI 1 Amount': option.impactkpi1amount || '',
+            'KPI 2': option.impactkpi2 || '',
+            'KPI 2 Amount': option.impactkpi2amount || '',
+            'KPI 3': option.impactkpi3 || '',
+            'KPI 3 Amount': option.impactkpi3amount || '',
+          })));
+        }
+      }
+
+      if (allOptions.length === 0) {
         toast({
           title: "No options to export",
           description: "Create some options first before exporting.",
@@ -33,24 +70,17 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
         return;
       }
 
-      const excelData = options.map(option => ({
-        'Turn Number': option.Turns?.turnnumber || '',
-        'Option Number': option.optionnumber,
-        'Title': option.title || '',
-        'Description': option.description || '',
-        'Image URL': option.image || '',
-      }));
-
       const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(excelData);
+      const ws = XLSX.utils.json_to_sheet(allOptions);
       XLSX.utils.book_append_sheet(wb, ws, 'Options');
       XLSX.writeFile(wb, `game_${gameId}_options.xlsx`);
 
       toast({
         title: "Success",
-        description: "Options exported successfully",
+        description: `Exported ${allOptions.length} options successfully`,
       });
     } catch (error: any) {
+      console.error('Export error:', error);
       toast({
         title: "Error exporting options",
         description: error.message,
@@ -69,22 +99,25 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
       formData.append('file', file);
       formData.append('gameId', gameId);
 
-      const { error } = await supabase.functions.invoke('bulk-upload-options', {
+      const { data, error } = await supabase.functions.invoke('bulk-upload-options', {
         body: formData,
       });
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['options'] });
+      await queryClient.invalidateQueries({ queryKey: ['options'] });
+      await queryClient.invalidateQueries({ queryKey: ['turns'] });
+      
       toast({
         title: "Success",
         description: "Options uploaded successfully",
       });
       event.target.value = '';
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "Error uploading options",
-        description: error.message,
+        description: error.message || 'Failed to upload file',
         variant: "destructive",
       });
     } finally {
@@ -108,7 +141,7 @@ export const GameBulkOperations = ({ gameId }: GameBulkOperationsProps) => {
           accept=".xlsx,.xls"
           onChange={handleUpload}
           disabled={isUploading}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
         />
         <Button 
           variant="outline"
