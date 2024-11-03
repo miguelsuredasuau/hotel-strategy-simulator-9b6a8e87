@@ -39,7 +39,7 @@ const Index = () => {
 
       return (options as Option[])?.[0] || null;
     },
-    enabled: !!gameId // Reverted back to only checking for gameId
+    enabled: !!gameId && !!currentTurn // Only fetch when both gameId and currentTurn are available
   });
 
   // Find the latest completed turn
