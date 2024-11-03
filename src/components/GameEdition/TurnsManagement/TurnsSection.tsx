@@ -24,9 +24,9 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedTurn, setSelectedTurn] = useState<Turn | null>(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const { turns, isLoading, isError } = useTurnsQuery(gameId);
+  const { turns, isLoading } = useTurnsQuery(gameId);
   const { handleDeleteTurn, handleDragEnd } = useTurnActions(gameId);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -147,14 +147,14 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
     );
   }
 
-  if (isError) {
+  if (isLoading) {
     return (
       <Card className="mt-8">
         <CardHeader>
-          <CardTitle>Error Loading Turns</CardTitle>
+          <CardTitle>Loading Turns...</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-gray-500">There was an error loading the turns. Please try again later.</p>
+          <p className="text-gray-500">Please wait, loading turns.</p>
         </CardContent>
       </Card>
     );
@@ -214,13 +214,7 @@ const TurnsSection = ({ gameId }: TurnsSectionProps) => {
                     ref={provided.innerRef}
                     className="space-y-4"
                   >
-                    {isLoading ? (
-                      <div className="animate-pulse space-y-4">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="h-20 bg-gray-100 rounded-lg" />
-                        ))}
-                      </div>
-                    ) : turns?.length ? (
+                    {turns?.length ? (
                       turns.map((turn, index) => (
                         <TurnCard
                           key={turn.uuid}
