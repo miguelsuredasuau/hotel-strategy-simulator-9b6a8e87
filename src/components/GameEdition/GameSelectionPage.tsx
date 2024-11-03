@@ -54,8 +54,8 @@ const GameSelectionPage = () => {
             <GameDetailsCard
               key={game.uuid}
               game={game}
-              onEdit={() => navigate(`/game-edition/${game.uuid}`)}
-              onDelete={() => setSelectedGameId(game.uuid)}
+              onGameClick={() => navigate(`/game-edition/${game.uuid}`)}
+              onDeleteClick={() => setSelectedGameId(game.uuid)}
             />
           ))}
         </div>
@@ -69,8 +69,7 @@ const GameSelectionPage = () => {
         <DeleteGameDialog
           open={!!selectedGameId}
           onOpenChange={() => setSelectedGameId(null)}
-          gameId={selectedGameId}
-          onGameDeleted={handleGameDeleted}
+          onConfirm={() => handleGameDeleted()}
         />
       </div>
     </div>
