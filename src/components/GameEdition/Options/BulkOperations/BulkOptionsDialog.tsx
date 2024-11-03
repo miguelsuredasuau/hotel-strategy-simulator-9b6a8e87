@@ -14,7 +14,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Download, Upload, Loader2 } from "lucide-react";
 import * as XLSX from 'xlsx';
-import { Option } from "@/types/game";
 
 interface BulkOptionsDialogProps {
   turnId: string;
@@ -94,16 +93,17 @@ export const BulkOptionsDialog = ({ turnId, gameId, open, onOpenChange }: BulkOp
 
       if (error) throw error;
 
-      queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
+      await queryClient.invalidateQueries({ queryKey: ['options', turnId, gameId] });
       toast({
         title: "Success",
         description: "Options uploaded successfully",
       });
       event.target.value = '';
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
         title: "Error uploading options",
-        description: error.message,
+        description: error.message || 'Failed to upload file',
         variant: "destructive",
       });
     } finally {

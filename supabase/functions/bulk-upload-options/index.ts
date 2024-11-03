@@ -18,7 +18,7 @@ serve(async (req) => {
     const turnId = formData.get('turnId') as string
     const gameId = formData.get('gameId') as string
 
-    console.log('Received request with:', { turnId, gameId });
+    console.log('Received request with:', { turnId, gameId, fileName: file?.name });
 
     if (!file || !turnId || !gameId) {
       return new Response(
@@ -43,29 +43,30 @@ serve(async (req) => {
     console.log('Processing data:', data);
 
     for (const row of data) {
-      const optionNumber = row['Option Number']
+      const optionNumber = row['Option Number'] || row['optionnumber']
+      
+      const optionData = {
+        title: row['Title'] || row['title'],
+        description: row['Description'] || row['description'],
+        image: row['Image URL'] || row['image'],
+        impactkpi1: row['KPI 1'] || row['impactkpi1'],
+        impactkpi1amount: parseFloat(row['KPI 1 Amount'] || row['impactkpi1amount']) || 0,
+        impactkpi2: row['KPI 2'] || row['impactkpi2'],
+        impactkpi2amount: parseFloat(row['KPI 2 Amount'] || row['impactkpi2amount']) || 0,
+        impactkpi3: row['KPI 3'] || row['impactkpi3'],
+        impactkpi3amount: parseFloat(row['KPI 3 Amount'] || row['impactkpi3amount']) || 0,
+        game_uuid: gameId,
+        turn_uuid: turnId,
+        optionnumber: parseInt(optionNumber) || 1
+      }
+
       const { data: existingOption } = await supabase
         .from('Options')
         .select('uuid')
         .eq('turn_uuid', turnId)
         .eq('game_uuid', gameId)
-        .eq('optionnumber', optionNumber)
+        .eq('optionnumber', optionData.optionnumber)
         .single()
-
-      const optionData = {
-        title: row['Title'],
-        description: row['Description'],
-        image: row['Image URL'],
-        impactkpi1: row['KPI 1'],
-        impactkpi1amount: parseFloat(row['KPI 1 Amount']) || 0,
-        impactkpi2: row['KPI 2'],
-        impactkpi2amount: parseFloat(row['KPI 2 Amount']) || 0,
-        impactkpi3: row['KPI 3'],
-        impactkpi3amount: parseFloat(row['KPI 3 Amount']) || 0,
-        game_uuid: gameId,
-        turn_uuid: turnId,
-        optionnumber: optionNumber
-      }
 
       if (existingOption) {
         const { error } = await supabase
