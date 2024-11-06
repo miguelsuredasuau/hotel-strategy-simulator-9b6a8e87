@@ -26,11 +26,12 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
         .from('kpis')
         .select('*')
         .eq('game_uuid', gameId)
-        .order('name');
+        .order('order');
 
       if (error) throw error;
       return data as KPI[];
     },
+    enabled: !!gameId,
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
@@ -47,18 +48,29 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   }, [error, toast]);
 
   const handleDragEnd = async (result: any) => {
-    if (!result.destination) return;
+    if (!result.destination || !kpis) return;
 
-    const items = Array.from(kpis || []);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    const sourceType = result.source.droppableId;
+    const destinationType = result.destination.droppableId;
+
+    if (sourceType !== destinationType) return; // Prevent dragging between different types
+
+    const typeKpis = kpis.filter(kpi => kpi.type === sourceType);
+    const [reorderedItem] = typeKpis.splice(result.source.index, 1);
+    typeKpis.splice(result.destination.index, 0, reorderedItem);
+
+    // Update order for all KPIs of this type
+    const updates = typeKpis.map((kpi, index) => ({
+      uuid: kpi.uuid,
+      order: index,
+    }));
 
     try {
-      for (const [index, kpi] of items.entries()) {
+      for (const update of updates) {
         const { error } = await supabase
           .from('kpis')
-          .update({ name: kpi.name })
-          .eq('uuid', kpi.uuid);
+          .update({ order: update.order })
+          .eq('uuid', update.uuid);
         
         if (error) throw error;
       }

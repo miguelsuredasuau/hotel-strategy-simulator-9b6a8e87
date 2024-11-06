@@ -29,11 +29,12 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
         .select('*')
         .eq('game_uuid', gameId)
         .eq('type', 'financial')
-        .order('name');
+        .order('order');
 
       if (error) throw error;
       return data as KPI[];
     },
+    enabled: !!gameId,
   });
 
   const handleDeleteKPI = async () => {
@@ -97,6 +98,7 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
                     >
                       <KPICard
                         kpi={kpi}
+                        gameId={gameId}
                         calculatedValue={calculatedValues[kpi.uuid]}
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}

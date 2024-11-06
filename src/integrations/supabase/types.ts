@@ -82,6 +82,7 @@ export type Database = {
           game_uuid: string | null
           is_percentage: boolean | null
           name: string
+          order: number
           type: Database["public"]["Enums"]["kpi_type"]
           unit: string | null
           uuid: string
@@ -95,6 +96,7 @@ export type Database = {
           game_uuid?: string | null
           is_percentage?: boolean | null
           name: string
+          order: number
           type: Database["public"]["Enums"]["kpi_type"]
           unit?: string | null
           uuid?: string
@@ -108,6 +110,7 @@ export type Database = {
           game_uuid?: string | null
           is_percentage?: boolean | null
           name?: string
+          order?: number
           type?: Database["public"]["Enums"]["kpi_type"]
           unit?: string | null
           uuid?: string
