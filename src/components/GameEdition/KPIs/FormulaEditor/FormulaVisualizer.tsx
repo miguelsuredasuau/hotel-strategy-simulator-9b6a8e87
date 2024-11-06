@@ -4,30 +4,15 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIToken } from "./components/KPIToken";
 import { OperatorToken } from "./components/OperatorToken";
 import { TextToken } from "./components/TextToken";
-import { tokenizeFormula, calculateDeletePosition } from "./utils/formulaUtils";
+import { tokenizeFormula } from "./utils/formulaUtils";
 
 interface FormulaVisualizerProps {
   formula: string;
   kpis: KPI[];
-  onDelete?: (index: number) => void;
   onChange?: (formula: string) => void;
 }
 
-export const FormulaVisualizer = ({ formula, kpis, onDelete, onChange }: FormulaVisualizerProps) => {
-  const handleDelete = (index: number, token: { type: string; value: string; originalValue?: string }) => {
-    if (!onDelete || !onChange) return;
-    
-    const tokens = tokenizeFormula(formula, kpis);
-    const { start, end } = calculateDeletePosition(tokens, index);
-    
-    // Create new formula by removing the token and any extra spaces
-    const newFormula = (formula.slice(0, start) + formula.slice(end))
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    onChange(newFormula);
-  };
-
+export const FormulaVisualizer = ({ formula, kpis, onChange }: FormulaVisualizerProps) => {
   const handleDragEnd = (result: any) => {
     if (!result.destination || !onChange) return;
 
@@ -82,7 +67,6 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete, onChange }: Formula
                       innerRef: provided.innerRef,
                       draggableProps: provided.draggableProps,
                       dragHandleProps: provided.dragHandleProps,
-                      onDelete: () => handleDelete(index, token)
                     };
 
                     if (token.type === 'kpi') {
