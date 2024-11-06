@@ -15,7 +15,7 @@ export const useKPIValueUpdates = (gameId: string) => {
     try {
       const { error } = await supabase
         .from('kpis')
-        .update({ current_value: newValue })
+        .update({ default_value: newValue })
         .eq('uuid', kpiUuid)
         .eq('game_uuid', gameId);
 

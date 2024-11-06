@@ -25,7 +25,7 @@ export const useFinancialCalculations = (gameId: string, turnId?: string) => {
 
   const getKPIValue = (kpiUuid: string) => {
     const kpi = kpis.find(k => k.uuid === kpiUuid);
-    return kpi?.current_value ?? kpi?.default_value ?? 0;
+    return kpi?.default_value ?? 0;
   };
 
   const rooms = findKPI('rooms');

@@ -34,8 +34,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     },
   });
 
-  // Initialize the KPI calculations hook without immediate execution
-  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId, false);
+  const { calculateKPIValues } = useKPICalculations(kpis, gameId, false);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -65,7 +64,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
   const handleRecalculate = async () => {
     try {
-      await updateCalculatedKPIs();
+      const newValues = calculateKPIValues();
       await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
       toast({
         title: "Success",
