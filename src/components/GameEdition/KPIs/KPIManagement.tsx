@@ -34,7 +34,16 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
-  const calculatedValues = !isLoading && kpis ? calculateKPIValues(kpis) : {};
+  const { values: calculatedValues, error } = !isLoading && kpis ? calculateKPIValues(kpis) : { values: {}, error: null };
+
+  // Show toast if there's an error in KPI calculations
+  if (error) {
+    toast({
+      title: "KPI Calculation Error",
+      description: error,
+      variant: "destructive",
+    });
+  }
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
