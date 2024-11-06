@@ -23,6 +23,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
   const [isCustomVariable, setIsCustomVariable] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -39,8 +40,36 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
     }
   });
 
+  const validateName = (value: string) => {
+    if (!value.trim()) {
+      setNameError("Name is required");
+      return false;
+    }
+
+    const isDuplicate = kpis?.some(kpi => 
+      kpi.name.toLowerCase() === value.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setNameError("A KPI with this name already exists");
+      return false;
+    }
+
+    setNameError(null);
+    return true;
+  };
+
+  const handleNameChange = (value: string) => {
+    setName(value);
+    validateName(value);
+  };
+
   const handleCreateKPI = async () => {
     try {
+      if (!validateName(name)) {
+        return;
+      }
+
       if (isCustomVariable) {
         const { error } = await supabase
           .from('kpis')
@@ -48,7 +77,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             game_uuid: gameId,
             name,
             type: 'operational',
-            is_custom_variable: true,
             default_value: Number(defaultValue),
             unit,
           });
@@ -67,7 +95,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             depends_on: dependsOn,
             default_value: null,
             unit,
-            is_custom_variable: false,
           });
 
         if (error) throw error;
@@ -84,6 +111,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       setDefaultValue(0);
       setUnit("");
       setIsCustomVariable(false);
+      setNameError(null);
       
       onSuccess?.();
     } catch (error: any) {
@@ -103,9 +131,13 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             <Label>Name</Label>
             <Input
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               placeholder="e.g., Operating Profit"
+              className={nameError ? "border-red-500" : ""}
             />
+            {nameError && (
+              <p className="text-sm text-red-500 mt-1">{nameError}</p>
+            )}
           </div>
 
           <KPITypeToggle
@@ -147,6 +179,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
           <Button 
             onClick={handleCreateKPI} 
             className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+            disabled={!!nameError}
           >
             <Plus className="h-4 w-4 mr-2" />
             Create {isCustomVariable ? "Variable" : "KPI"}
