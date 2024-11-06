@@ -34,7 +34,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
-  const { values: calculatedValues, error } = !isLoading && kpis ? calculateKPIValues(kpis) : { values: {}, error: null };
+  const { values: calculatedValues, error, circularDependencies } = !isLoading && kpis ? calculateKPIValues(kpis) : { values: {}, error: null, circularDependencies: {} };
 
   useEffect(() => {
     if (error) {
@@ -91,10 +91,12 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
           <FinancialKPIs
             gameId={gameId}
             calculatedValues={calculatedValues}
+            circularDependencies={circularDependencies}
           />
           <OperationalKPIs
             gameId={gameId}
             calculatedValues={calculatedValues}
+            circularDependencies={circularDependencies}
           />
         </div>
 

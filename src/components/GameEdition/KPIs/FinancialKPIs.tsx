@@ -13,9 +13,10 @@ import { useToast } from "@/components/ui/use-toast";
 interface FinancialKPIsProps {
   gameId: string;
   calculatedValues: Record<string, number>;
+  circularDependencies?: Record<string, boolean>;
 }
 
-export const FinancialKPIs = ({ gameId, calculatedValues }: FinancialKPIsProps) => {
+export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies = {} }: FinancialKPIsProps) => {
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
   const { toast } = useToast();
@@ -100,6 +101,7 @@ export const FinancialKPIs = ({ gameId, calculatedValues }: FinancialKPIsProps) 
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}
                         onDelete={() => setKpiToDelete(kpi)}
+                        hasCircularDependency={circularDependencies[kpi.uuid]}
                       />
                     </div>
                   )}
