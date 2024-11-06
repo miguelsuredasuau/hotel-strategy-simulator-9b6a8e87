@@ -8,11 +8,25 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const evaluateFormula = (formula: string, kpiValues: Record<string, number>): number => {
+  const evaluateFormula = (formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
     try {
       // Replace KPI UUID references with their values
       const evaluableFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, (_, kpiUuid) => {
-        return kpiValues[kpiUuid]?.toString() || '0';
+        if (processedKPIs.has(kpiUuid)) {
+          return kpiValues[kpiUuid]?.toString() || '0';
+        }
+        
+        const kpi = kpis?.find(k => k.uuid === kpiUuid);
+        if (!kpi) return '0';
+        
+        if (kpi.formula) {
+          processedKPIs.add(kpiUuid);
+          const value = evaluateFormula(kpi.formula, kpiValues, processedKPIs);
+          kpiValues[kpiUuid] = value;
+          return value.toString();
+        }
+        
+        return (kpiValues[kpiUuid] ?? 0).toString();
       });
       
       // Use Function constructor to safely evaluate the formula
@@ -40,37 +54,36 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
       }
     });
 
-    // Helper function to process a KPI and its dependencies
-    const processKPI = (kpi: KPI) => {
-      if (!kpi.formula || processedKPIs.has(kpi.uuid)) return;
+    // Process KPIs in dependency order
+    const processKPI = (kpi: KPI, visited: Set<string>) => {
+      if (visited.has(kpi.uuid)) return;
+      visited.add(kpi.uuid);
 
       // Process dependencies first
       const dependencies = kpi.depends_on || [];
       dependencies.forEach(depUuid => {
         const depKPI = kpis.find(k => k.uuid === depUuid);
-        if (depKPI && !processedKPIs.has(depKPI.uuid)) {
-          processKPI(depKPI);
+        if (depKPI) {
+          processKPI(depKPI, visited);
         }
       });
 
-      const calculatedValue = evaluateFormula(kpi.formula, kpiValues);
-      console.log(`Calculated value for ${kpi.name} (${kpi.uuid}):`, calculatedValue);
-      
-      if (calculatedValue !== kpi.current_value) {
-        updates.push({
-          uuid: kpi.uuid,
-          current_value: calculatedValue
-        });
+      if (kpi.formula) {
+        const calculatedValue = evaluateFormula(kpi.formula, kpiValues, new Set());
+        if (calculatedValue !== kpi.current_value) {
+          updates.push({
+            uuid: kpi.uuid,
+            current_value: calculatedValue
+          });
+        }
+        kpiValues[kpi.uuid] = calculatedValue;
       }
-      kpiValues[kpi.uuid] = calculatedValue;
-      processedKPIs.add(kpi.uuid);
     };
 
-    // Process all calculated KPIs
+    // Process all KPIs
+    const visited = new Set<string>();
     kpis.forEach(kpi => {
-      if (kpi.formula) {
-        processKPI(kpi);
-      }
+      processKPI(kpi, visited);
     });
 
     // Update calculated KPIs in database
