@@ -33,7 +33,6 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
       if (error) throw error;
       return data as KPI[];
     },
-    refetchInterval: 5000, // Refetch every 5 seconds to keep values updated
   });
 
   const { calculateKPIValues } = useKPICalculations(kpis, gameId);

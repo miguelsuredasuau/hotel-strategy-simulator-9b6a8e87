@@ -20,7 +20,6 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
           return value.toString();
         }
         
-        // For non-calculated KPIs, use default_value
         const value = kpi.default_value ?? 0;
         kpiValues[kpiUuid] = value;
         return value.toString();
@@ -39,7 +38,6 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
     if (!kpis?.length) return {};
 
     const kpiValues: Record<string, number> = {};
-    const processedKPIs = new Set<string>();
 
     // First pass: get all non-calculated KPI values
     kpis.forEach(kpi => {
@@ -48,31 +46,11 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
       }
     });
 
-    // Process KPIs in dependency order
-    const processKPI = (kpi: KPI, visited: Set<string>) => {
-      if (visited.has(kpi.uuid)) return;
-      visited.add(kpi.uuid);
-
-      // Process dependencies first
-      const dependencies = kpi.depends_on || [];
-      dependencies.forEach(depUuid => {
-        const depKPI = kpis.find(k => k.uuid === depUuid);
-        if (depKPI) {
-          processKPI(depKPI, visited);
-        }
-      });
-
+    // Second pass: calculate values for KPIs with formulas
+    kpis.forEach(kpi => {
       if (kpi.formula) {
         const calculatedValue = evaluateFormula(kpi.formula, kpiValues, new Set());
         kpiValues[kpi.uuid] = calculatedValue;
-      }
-    };
-
-    // Process all KPIs
-    const visited = new Set<string>();
-    kpis.forEach(kpi => {
-      if (kpi.formula) {
-        processKPI(kpi, visited);
       }
     });
 
