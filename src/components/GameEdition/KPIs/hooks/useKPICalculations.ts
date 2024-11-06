@@ -44,19 +44,27 @@ export const useKPICalculations = (gameId: string) => {
           return '0';
         }
 
+        // If this KPI has a formula, evaluate it first
         if (kpi.formula) {
           processedKPIs.add(kpiUuid);
           const value = evaluateFormula(kpi.formula, kpiValues, kpis, processedKPIs);
+          processedKPIs.delete(kpiUuid); // Remove from processed set after evaluation
           kpiValues[kpiUuid] = value;
-          return value.toString();
+          return `(${value})`;  // Wrap in parentheses to maintain operator precedence
         }
 
         // Use existing value or default value
-        return (kpiValues[kpiUuid] ?? kpi.default_value ?? 0).toString();
+        const value = kpiValues[kpiUuid] ?? kpi.default_value ?? 0;
+        return `(${value})`; // Wrap in parentheses to maintain operator precedence
       });
 
-      // Handle basic arithmetic operations
-      const cleanFormula = evaluableFormula.trim();
+      // Clean up the formula and handle arithmetic operations
+      const cleanFormula = evaluableFormula
+        .replace(/-/g, ' - ')  // Add spaces around minus signs
+        .replace(/\+/g, ' + ') // Add spaces around plus signs
+        .replace(/\s+/g, ' ')  // Normalize spaces
+        .trim();
+
       if (!cleanFormula) return 0;
 
       // Evaluate the formula in a safe context
@@ -74,14 +82,14 @@ export const useKPICalculations = (gameId: string) => {
     // First pass: initialize non-formula KPIs
     kpis.forEach(kpi => {
       if (!kpi.formula) {
-        kpiValues[kpi.uuid] = typeof kpi.default_value === 'number' ? kpi.default_value : 0;
+        kpiValues[kpi.uuid] = kpi.default_value ?? 0;
       }
     });
 
     // Second pass: calculate formula KPIs
     kpis.forEach(kpi => {
-      if (kpi.formula && !kpiValues[kpi.uuid]) {
-        const processedKPIs = new Set<string>([kpi.uuid]);
+      if (kpi.formula) {
+        const processedKPIs = new Set<string>();
         kpiValues[kpi.uuid] = evaluateFormula(kpi.formula, kpiValues, kpis, processedKPIs);
       }
     });
