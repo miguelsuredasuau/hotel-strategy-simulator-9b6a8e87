@@ -31,7 +31,7 @@ export const useKPICalculations = (gameId: string) => {
     };
   }, [gameId, queryClient]);
 
-  const findCircularDependencies = (
+  const findCircularDependencies = useCallback((
     kpiUuid: string,
     kpis: KPI[],
     visited: Set<string> = new Set(),
@@ -40,7 +40,7 @@ export const useKPICalculations = (gameId: string) => {
     if (visited.has(kpiUuid)) {
       const cycleStart = path.indexOf(kpiUuid);
       const cycle = path.slice(cycleStart);
-      cycle.push(kpiUuid); // Complete the cycle
+      cycle.push(kpiUuid);
       return cycle;
     }
 
@@ -53,7 +53,6 @@ export const useKPICalculations = (gameId: string) => {
       return null;
     }
 
-    // Extract KPI references from formula
     const dependencies = kpi.formula.match(/\${([^}]+)}/g)?.map(match => match.replace(/\${(.+)}/, '$1')) || [];
 
     for (const depUuid of dependencies) {
@@ -65,7 +64,7 @@ export const useKPICalculations = (gameId: string) => {
 
     path.pop();
     return null;
-  };
+  }, []);
 
   const evaluateFormula = useCallback((
     formula: string, 
@@ -80,10 +79,8 @@ export const useKPICalculations = (gameId: string) => {
     }
 
     try {
-      // Convert old kpi:uuid format to new ${uuid} format if needed
       const updatedFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, '${$1}');
 
-      // Replace KPI references with their values
       const evaluableFormula = updatedFormula.replace(/\${([^}]+)}/g, (match, kpiUuid) => {
         if (processedKPIs.has(kpiUuid)) {
           return kpiValues[kpiUuid]?.toString() || '0';
@@ -107,10 +104,8 @@ export const useKPICalculations = (gameId: string) => {
         return `(${value})`;
       });
 
-      // Log the formula for debugging
       console.debug('Evaluating formula:', evaluableFormula);
 
-      // Evaluate the formula in a safe context
       const result = new Function(`return ${evaluableFormula}`)();
       return typeof result === 'number' && !isNaN(result) ? result : 0;
     } catch (error) {
@@ -123,23 +118,17 @@ export const useKPICalculations = (gameId: string) => {
     const kpiValues: Record<string, number> = {};
     const calculatedKPIs = new Set<string>();
     
-    // First check for circular dependencies
+    // Check for circular dependencies first
     for (const kpi of kpis) {
       if (kpi.formula) {
         const cycle = findCircularDependencies(kpi.uuid, kpis);
         if (cycle) {
           const kpiNames = cycle.map(uuid => kpis.find(k => k.uuid === uuid)?.name || uuid);
-          toast({
-            title: "Circular Dependency Detected",
-            description: `Found circular dependency in KPIs: ${kpiNames.join(' → ')}`,
-            variant: "destructive",
-          });
-          return kpiValues;
+          return { values: kpiValues, error: `Found circular dependency in KPIs: ${kpiNames.join(' → ')}` };
         }
       }
     }
 
-    // Calculate values for non-circular KPIs
     const calculateSingleKPI = (kpi: KPI): number => {
       if (calculatedKPIs.has(kpi.uuid)) {
         return kpiValues[kpi.uuid];
@@ -163,8 +152,8 @@ export const useKPICalculations = (gameId: string) => {
       calculateSingleKPI(kpi);
     });
 
-    return kpiValues;
-  }, [evaluateFormula, toast]);
+    return { values: kpiValues, error: null };
+  }, [evaluateFormula, findCircularDependencies]);
 
   return { calculateKPIValues };
 };
