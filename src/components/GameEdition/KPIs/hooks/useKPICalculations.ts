@@ -42,8 +42,8 @@ export const useKPICalculations = (gameId: string) => {
     }
 
     try {
-      // Replace KPI references with their values
-      const evaluableFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, (match, kpiUuid) => {
+      // Replace KPI references with their values using the new ${uuid} format
+      const evaluableFormula = formula.replace(/\${([a-zA-Z0-9-]+)}/g, (match, kpiUuid) => {
         if (processedKPIs.has(kpiUuid)) {
           console.warn('Circular dependency detected:', kpiUuid);
           return '0';
@@ -55,27 +55,25 @@ export const useKPICalculations = (gameId: string) => {
           return '0';
         }
 
-        // If this KPI has a formula, evaluate it first
         if (kpi.formula) {
           processedKPIs.add(kpiUuid);
           const value = evaluateFormula(kpi.formula, kpiValues, kpis, processedKPIs, depth + 1);
-          processedKPIs.delete(kpiUuid); // Remove from processed set after evaluation
-          kpiValues[kpiUuid] = value; // Cache the calculated value
-          return `(${value})`; // Wrap in parentheses to maintain operator precedence
+          processedKPIs.delete(kpiUuid);
+          kpiValues[kpiUuid] = value;
+          return `(${value})`;
         }
 
-        // Use cached value if available, otherwise use default value
         const value = kpiValues[kpiUuid] ?? kpi.default_value ?? 0;
-        return `(${value})`; // Wrap in parentheses to maintain operator precedence
+        return `(${value})`;
       });
 
       // Clean up the formula and handle arithmetic operations
       const cleanFormula = evaluableFormula
-        .replace(/\-/g, ' - ') // Add spaces around minus signs
-        .replace(/\+/g, ' + ') // Add spaces around plus signs
-        .replace(/\*/g, ' * ') // Add spaces around multiplication signs
-        .replace(/\//g, ' / ') // Add spaces around division signs
-        .replace(/\s+/g, ' ')  // Normalize spaces
+        .replace(/\-/g, ' - ') 
+        .replace(/\+/g, ' + ') 
+        .replace(/\*/g, ' * ') 
+        .replace(/\//g, ' / ') 
+        .replace(/\s+/g, ' ')  
         .trim();
 
       if (!cleanFormula) return 0;

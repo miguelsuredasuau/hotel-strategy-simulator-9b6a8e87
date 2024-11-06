@@ -48,7 +48,7 @@ export const FormulaInput = ({
   };
 
   const handleKPIClick = (kpi: KPI) => {
-    insertAtCursor(`kpi:${kpi.uuid}`);
+    insertAtCursor(`\${${kpi.uuid}}`);
   };
 
   const handleOperatorClick = (operator: string) => {
@@ -103,7 +103,7 @@ export const FormulaInput = ({
                 setCursorPosition(e.target.selectionStart || 0);
               }}
               onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
-              placeholder="Build your formula using KPI UUIDs (e.g., kpi:uuid1 - kpi:uuid2)"
+              placeholder="Build your formula using KPI UUIDs (e.g., ${uuid1} - ${uuid2})"
               className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
             />
           </div>

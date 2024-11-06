@@ -11,15 +11,15 @@ export const tokenizeFormula = (formula: string, kpis: KPI[]): Token[] => {
 
   // Add spaces around operators and parentheses if they're missing
   const spacedFormula = formula
-    .replace(/([+\-*/()])/g, ' $1 ')
+    .replace(/([+\-*/()=<>!&|?:])/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim();
 
   const tokens = spacedFormula.split(' ');
   return tokens.map(token => {
-    // Check if token is a KPI reference
-    if (token.startsWith('kpi:')) {
-      const kpiId = token.replace('kpi:', '');
+    // Check if token is a KPI reference (now using ${uuid} format)
+    if (token.match(/\${[a-zA-Z0-9-]+}/)) {
+      const kpiId = token.replace(/\${(.*)}/, '$1');
       const kpi = kpis.find(k => k.uuid === kpiId);
       return {
         type: 'kpi',
@@ -29,17 +29,9 @@ export const tokenizeFormula = (formula: string, kpis: KPI[]): Token[] => {
     }
 
     // Check if token is an operator
-    if (['+', '-', '*', '/'].includes(token)) {
+    if (['+', '-', '*', '/', '(', ')', '=', '!=', '>', '<', '>=', '<=', '&&', '||', '?', ':'].includes(token)) {
       return {
         type: 'operator',
-        value: token
-      };
-    }
-
-    // Check if token is a parenthesis
-    if (['(', ')'].includes(token)) {
-      return {
-        type: 'parenthesis',
         value: token
       };
     }
@@ -68,7 +60,6 @@ export const calculateDeletePosition = (tokens: Token[], index: number) => {
     } else {
       position += token.value.length;
     }
-    // Add space after each token except the last one
     if (i < tokens.length - 1) position += 1;
   }
 
@@ -86,9 +77,18 @@ export const calculateDeletePosition = (tokens: Token[], index: number) => {
 export const formatFormula = (formula: string): string => {
   if (!formula) return '';
 
+  // Convert old kpi:uuid format to new ${uuid} format if needed
+  const updatedFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, '${$1}');
+
   // Add spaces around operators and parentheses
-  return formula
-    .replace(/([+\-*/()])/g, ' $1 ')
+  return updatedFormula
+    .replace(/([+\-*/()=<>!&|?:])/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim();
+};
+
+// Helper function to convert between formats
+export const convertKpiReference = {
+  toDisplay: (uuid: string) => `\${${uuid}}`,
+  fromDisplay: (reference: string) => reference.replace(/\${(.*)}/, '$1')
 };
