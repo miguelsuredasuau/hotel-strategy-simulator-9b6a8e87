@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Calculator, Pencil, Trash2, Variable } from "lucide-react";
+import { Calculator, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KPI } from "@/types/kpi";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
@@ -14,7 +14,6 @@ interface KPICardProps {
 
 const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = Boolean(kpi.formula);
-  const isCustomVariable = Boolean(kpi.is_custom_variable);
   
   const displayValue = isCalculated 
     ? (calculatedValue ?? 0) 
@@ -22,12 +21,10 @@ const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: K
 
   const formattedValue = kpi.is_percentage 
     ? `${displayValue}%`
-    : isCustomVariable 
-      ? String(kpi.default_value)
-      : Number(displayValue).toLocaleString(undefined, {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2
-        });
+    : Number(displayValue).toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
 
   return (
     <Card className="bg-white hover:shadow-md transition-all duration-200 transform-gpu">
@@ -40,9 +37,6 @@ const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: K
             <div className="flex items-center gap-1.5">
               {isCalculated && (
                 <Calculator className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-              )}
-              {isCustomVariable && (
-                <Variable className="h-3.5 w-3.5 text-purple-500 shrink-0" />
               )}
               <h3 className="font-medium text-sm text-gray-900 truncate">
                 {kpi.name}
