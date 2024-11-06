@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
@@ -26,7 +26,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
           return value.toString();
         }
         
-        return (kpiValues[kpiUuid] ?? 0).toString();
+        return (kpi.current_value ?? kpi.default_value ?? 0).toString();
       });
       
       // Use Function constructor to safely evaluate the formula
@@ -40,8 +40,6 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
 
   const updateCalculatedKPIs = useCallback(async () => {
     if (!kpis?.length) return;
-
-    console.log('Updating calculated KPIs...');
 
     const kpiValues: Record<string, number> = {};
     const updates: { uuid: string; current_value: number }[] = [];
@@ -70,12 +68,10 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
 
       if (kpi.formula) {
         const calculatedValue = evaluateFormula(kpi.formula, kpiValues, new Set());
-        if (calculatedValue !== kpi.current_value) {
-          updates.push({
-            uuid: kpi.uuid,
-            current_value: calculatedValue
-          });
-        }
+        updates.push({
+          uuid: kpi.uuid,
+          current_value: calculatedValue
+        });
         kpiValues[kpi.uuid] = calculatedValue;
       }
     };
@@ -83,14 +79,14 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
     // Process all KPIs
     const visited = new Set<string>();
     kpis.forEach(kpi => {
-      processKPI(kpi, visited);
+      if (kpi.formula) {
+        processKPI(kpi, visited);
+      }
     });
 
     // Update calculated KPIs in database
     if (updates.length > 0) {
       try {
-        console.log('Updating KPIs in database:', updates);
-        
         for (const update of updates) {
           const { error } = await supabase
             .from('kpis')
@@ -101,36 +97,12 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
         }
         
         await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-        toast({
-          title: "Success",
-          description: `Updated ${updates.length} calculated KPIs`,
-        });
       } catch (error: any) {
-        toast({
-          title: "Error",
-          description: "Failed to update calculated KPIs",
-          variant: "destructive",
-        });
         console.error('Error updating KPIs:', error);
+        throw error;
       }
-    } else {
-      console.log('No KPI updates needed');
     }
-  }, [kpis, gameId, queryClient, toast]);
-
-  // Run calculations on mount if executeImmediately is true
-  useEffect(() => {
-    if (executeImmediately) {
-      updateCalculatedKPIs();
-    }
-  }, []); // Empty dependency array to only run on mount
-
-  // Run calculations whenever KPIs change
-  useEffect(() => {
-    if (kpis) {
-      updateCalculatedKPIs();
-    }
-  }, [kpis, updateCalculatedKPIs]);
+  }, [kpis, gameId, queryClient]);
 
   return { updateCalculatedKPIs };
 };

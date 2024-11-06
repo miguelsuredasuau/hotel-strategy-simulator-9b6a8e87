@@ -32,11 +32,10 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
       return data;
     },
-    // Removed refetchInterval to prevent unnecessary polling
   });
 
-  // Initialize the KPI calculations hook with immediate execution
-  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId, true);
+  // Initialize the KPI calculations hook without immediate execution
+  const { updateCalculatedKPIs } = useKPICalculations(kpis, gameId, false);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -50,8 +49,6 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-      // Trigger recalculation after drag and drop
-      updateCalculatedKPIs();
       
       toast({
         title: "Success",
@@ -66,13 +63,30 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     }
   };
 
+  const handleRecalculate = async () => {
+    try {
+      await updateCalculatedKPIs();
+      await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      toast({
+        title: "Success",
+        description: "KPIs recalculated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to recalculate KPIs",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">KPI Management</h2>
         <div className="flex gap-2">
           <Button
-            onClick={() => updateCalculatedKPIs()}
+            onClick={handleRecalculate}
             variant="outline"
             size="lg"
             className="gap-2"
