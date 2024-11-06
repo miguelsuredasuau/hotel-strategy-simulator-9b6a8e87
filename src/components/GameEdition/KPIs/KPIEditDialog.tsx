@@ -30,7 +30,7 @@ export const KPIEditDialog = ({
   onOpenChange,
   gameId,
 }: KPIEditDialogProps) => {
-  const [formData, setFormData] = useState(kpi);
+  const [formData, setFormData] = useState<KPI>(kpi);
   const [isCalculated, setIsCalculated] = useState(!!kpi.formula);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -63,7 +63,7 @@ export const KPIEditDialog = ({
         ...formData,
         formula: isCalculated ? formData.formula : null,
         depends_on: dependsOn,
-        default_value: isCalculated ? null : formData.default_value,
+        default_value: isCalculated ? null : Number(formData.default_value || 0),
       };
 
       const { error } = await supabase

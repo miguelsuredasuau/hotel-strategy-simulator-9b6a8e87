@@ -27,7 +27,8 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
         }
 
         // Return existing calculated value or default value
-        return (kpiValues[kpiUuid] ?? kpi.default_value ?? 0).toString();
+        const value = kpiValues[kpiUuid] ?? (typeof kpi.default_value === 'number' ? kpi.default_value : 0);
+        return value.toString();
       });
 
       // Clean up and evaluate the formula
@@ -51,7 +52,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
     // First pass: calculate non-formula KPIs
     kpis.forEach(kpi => {
       if (!kpi.formula) {
-        kpiValues[kpi.uuid] = kpi.default_value ?? 0;
+        kpiValues[kpi.uuid] = typeof kpi.default_value === 'number' ? kpi.default_value : 0;
       }
     });
 
