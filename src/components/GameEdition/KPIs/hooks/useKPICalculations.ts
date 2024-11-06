@@ -2,11 +2,9 @@ import { useCallback } from 'react';
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
-import { useToast } from "@/components/ui/use-toast";
 
 export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, executeImmediately: boolean = false) => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const evaluateFormula = (formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
     try {
@@ -26,9 +24,12 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
           return value.toString();
         }
         
-        return (kpi.current_value ?? kpi.default_value ?? 0).toString();
+        // For non-calculated KPIs, use current_value if available, otherwise use default_value
+        const value = kpi.current_value ?? kpi.default_value ?? 0;
+        kpiValues[kpiUuid] = value;
+        return value.toString();
       });
-      
+
       // Use Function constructor to safely evaluate the formula
       const result = new Function(`return ${evaluableFormula}`)();
       return typeof result === 'number' && !isNaN(result) ? result : 0;
