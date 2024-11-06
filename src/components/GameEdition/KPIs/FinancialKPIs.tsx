@@ -6,7 +6,7 @@ import { DollarSign, Loader2 } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIEditDialog } from "./KPIEditDialog";
 import { useState } from "react";
-import { KPICard } from "./KPICard";
+import KPICard from "./KPICard";
 import DeleteConfirmDialog from "../DeleteConfirmDialog";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -34,7 +34,6 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
       if (error) throw error;
       return data as KPI[];
     },
-    enabled: !!gameId,
   });
 
   const handleDeleteKPI = async () => {
@@ -98,7 +97,6 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
                     >
                       <KPICard
                         kpi={kpi}
-                        gameId={gameId}
                         calculatedValue={calculatedValues[kpi.uuid]}
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}
