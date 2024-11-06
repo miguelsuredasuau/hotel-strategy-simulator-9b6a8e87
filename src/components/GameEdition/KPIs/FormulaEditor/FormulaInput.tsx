@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Database, Calculator, Eye, EyeOff } from "lucide-react";
+import { Database, Calculator, Eye, EyeOff, Hash } from "lucide-react";
 import { KPI } from "@/types/kpi";
 import { FormulaVisualizer } from "./FormulaVisualizer";
 
@@ -24,6 +24,7 @@ export const FormulaInput = ({
 }: FormulaInputProps) => {
   const [cursorPosition, setCursorPosition] = useState(0);
   const [showRawFormula, setShowRawFormula] = useState(false);
+  const [numberInput, setNumberInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   
   // Filter out the current KPI from the available KPIs
@@ -67,6 +68,13 @@ export const FormulaInput = ({
 
   const handleOperatorClick = (operator: string) => {
     insertAtCursor(operator);
+  };
+
+  const handleNumberInsert = () => {
+    if (numberInput) {
+      insertAtCursor(numberInput);
+      setNumberInput("");
+    }
   };
 
   const handleDeletePart = (index: number) => {
@@ -129,6 +137,24 @@ export const FormulaInput = ({
           <div className="flex items-center gap-2 mb-3">
             <Database className="h-4 w-4" />
             <h3 className="font-medium">Variables</h3>
+          </div>
+          <div className="flex gap-2 mb-3">
+            <Input
+              type="number"
+              value={numberInput}
+              onChange={(e) => setNumberInput(e.target.value)}
+              placeholder="Enter a number..."
+              className="w-40"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNumberInsert}
+              className="flex items-center gap-2 hover:bg-blue-50 hover:text-blue-700"
+            >
+              <Hash className="h-4 w-4" />
+              Add Number
+            </Button>
           </div>
           <ScrollArea className="h-[120px]">
             <div className="grid grid-cols-2 gap-2">
