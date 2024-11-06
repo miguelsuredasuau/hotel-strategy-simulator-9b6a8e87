@@ -1,108 +1,117 @@
-import { Card } from "@/components/ui/card";
-import { Calculator, Pencil, Trash2, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { KPI } from "@/types/kpi";
-import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2, AlertCircle, Edit } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { KPIEditDialog } from "./KPIEditDialog";
 
 interface KPICardProps {
   kpi: KPI;
   calculatedValue?: number;
-  dragHandleProps?: DraggableProvidedDragHandleProps;
-  onClick: () => void;
-  onDelete: () => void;
   hasCircularDependency?: boolean;
+  gameId: string;
 }
 
-const KPICard = ({ 
-  kpi, 
-  calculatedValue, 
-  dragHandleProps, 
-  onClick, 
-  onDelete,
-  hasCircularDependency 
-}: KPICardProps) => {
-  const isCalculated = Boolean(kpi.formula);
-  
-  const displayValue = isCalculated 
-    ? (calculatedValue ?? 0) 
-    : (kpi.default_value ?? 0);
+export const KPICard = ({ kpi, calculatedValue, hasCircularDependency, gameId }: KPICardProps) => {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const formattedValue = kpi.is_percentage 
-    ? `${displayValue}%`
-    : Number(displayValue).toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
+  const handleDelete = async () => {
+    try {
+      // First, get all KPIs that might reference this one
+      const { data: allKpis, error: fetchError } = await supabase
+        .from('kpis')
+        .select('*')
+        .eq('game_uuid', gameId);
+
+      if (fetchError) throw fetchError;
+
+      // Update formulas in other KPIs to remove references to the deleted KPI
+      for (const otherKpi of allKpis || []) {
+        if (otherKpi.formula?.includes(`\${${kpi.uuid}}`)) {
+          const updatedFormula = otherKpi.formula
+            .replace(`\${${kpi.uuid}}`, '0')  // Replace KPI reference with 0
+            .replace(/\s*[+\-*/]\s*0\s*(?=[+\-*/]|$)|0\s*[+\-*/]\s*/, ''); // Clean up operators
+
+          const { error: updateError } = await supabase
+            .from('kpis')
+            .update({ 
+              formula: updatedFormula,
+              depends_on: (otherKpi.depends_on || []).filter(id => id !== kpi.uuid)
+            })
+            .eq('uuid', otherKpi.uuid);
+
+          if (updateError) throw updateError;
+        }
+      }
+
+      // Finally, delete the KPI
+      const { error: deleteError } = await supabase
+        .from('kpis')
+        .delete()
+        .eq('uuid', kpi.uuid);
+
+      if (deleteError) throw deleteError;
+
+      queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      toast({
+        title: "Success",
+        description: "KPI deleted successfully",
       });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <Card className="bg-white hover:shadow-md transition-all duration-200 transform-gpu">
-      <div 
-        className="p-3 cursor-grab active:cursor-grabbing touch-none"
-        {...dragHandleProps}
-      >
-        <div className="flex items-center justify-between group">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              {isCalculated && (
-                <div className="flex items-center gap-1">
-                  <Calculator className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-                  {hasCircularDependency && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Circular dependency detected in formula</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-              )}
-              <h3 className="font-medium text-sm text-gray-900 truncate">
-                {kpi.name}
-              </h3>
-            </div>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-base font-semibold text-gray-900">
-                {formattedValue}
-              </span>
-              {kpi.unit && !kpi.is_percentage && (
-                <span className="text-xs text-gray-500">{kpi.unit}</span>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="flex justify-between items-start gap-4">
+          <div className="space-y-1 flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium">{kpi.name}</h3>
+              {hasCircularDependency && (
+                <AlertCircle className="h-4 w-4 text-destructive" />
               )}
             </div>
+            <p className="text-sm text-muted-foreground">
+              {typeof calculatedValue === 'number' ? calculatedValue.toFixed(2) : 'N/A'}
+              {kpi.unit ? ` ${kpi.unit}` : ''}
+            </p>
           </div>
-
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-2">
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 px-2 hover:bg-blue-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClick();
-              }}
+              size="icon"
+              onClick={() => setShowEditDialog(true)}
             >
-              <Pencil className="h-3.5 w-3.5 text-blue-600" />
+              <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
+              size="icon"
+              onClick={handleDelete}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         </div>
-      </div>
+      </CardContent>
+
+      <KPIEditDialog
+        kpi={kpi}
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        gameId={gameId}
+      />
     </Card>
   );
 };
-
-export default KPICard;
