@@ -14,7 +14,11 @@ interface KPICardProps {
 
 const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = Boolean(kpi.formula);
-  const displayValue = isCalculated ? (calculatedValue ?? 0) : (kpi.default_value ?? 0);
+  // Use calculatedValue if it exists, otherwise fall back to default_value
+  const displayValue = isCalculated 
+    ? (calculatedValue ?? 0) 
+    : (kpi.default_value ?? 0);
+
   const formattedValue = kpi.is_percentage 
     ? `${displayValue}%`
     : displayValue.toLocaleString(undefined, {
