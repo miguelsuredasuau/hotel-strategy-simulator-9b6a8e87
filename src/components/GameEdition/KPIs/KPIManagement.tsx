@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
+import { DragDropContext } from "@hello-pangea/dnd";
 
 interface KPIManagementProps {
   gameId: string;
@@ -48,7 +49,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
 
-    const items = Array.from(kpis);
+    const items = Array.from(kpis || []);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
@@ -56,7 +57,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       for (const [index, kpi] of items.entries()) {
         const { error } = await supabase
           .from('kpis')
-          .update({ order: index + 1 })
+          .update({ name: kpi.name })
           .eq('uuid', kpi.uuid);
         
         if (error) throw error;
@@ -76,33 +77,33 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">KPI Management</h2>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add KPI
-        </Button>
-      </div>
+    <DragDropContext onDragEnd={handleDragEnd}>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">KPI Management</h2>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add KPI
+          </Button>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FinancialKPIs
-          kpis={kpis?.filter(kpi => kpi.type === 'financial') || []}
-          calculatedValues={calculatedValues}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FinancialKPIs
+            gameId={gameId}
+            calculatedValues={calculatedValues}
+          />
+          <OperationalKPIs
+            gameId={gameId}
+            calculatedValues={calculatedValues}
+          />
+        </div>
+
+        <KPICreateDialog
           gameId={gameId}
-        />
-        <OperationalKPIs
-          kpis={kpis?.filter(kpi => kpi.type === 'operational') || []}
-          calculatedValues={calculatedValues}
-          gameId={gameId}
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
         />
       </div>
-
-      <KPICreateDialog
-        gameId={gameId}
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-      />
-    </div>
+    </DragDropContext>
   );
 };
