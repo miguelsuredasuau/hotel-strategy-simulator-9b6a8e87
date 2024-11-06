@@ -50,10 +50,14 @@ export const FormulaInput = ({
   ];
 
   const insertAtCursor = (textToInsert: string) => {
-    const newValue = value.slice(0, cursorPosition) + textToInsert + value.slice(cursorPosition);
+    // If there's no cursor position set, append to the end
+    const position = cursorPosition || value.length;
+    const newValue = value.slice(0, position) + textToInsert + value.slice(position);
     onChange(newValue);
-    const newPosition = cursorPosition + textToInsert.length;
+    const newPosition = position + textToInsert.length;
     setCursorPosition(newPosition);
+    
+    // Focus and set cursor position after a short delay to ensure the input is ready
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
@@ -72,8 +76,12 @@ export const FormulaInput = ({
 
   const handleNumberInsert = () => {
     if (numberInput) {
-      insertAtCursor(numberInput);
-      setNumberInput("");
+      // Convert to number and back to string to ensure proper formatting
+      const numericValue = Number(numberInput);
+      if (!isNaN(numericValue)) {
+        insertAtCursor(numericValue.toString());
+        setNumberInput("");
+      }
     }
   };
 
@@ -116,7 +124,10 @@ export const FormulaInput = ({
             <Input
               ref={inputRef}
               value={value}
-              onChange={(e) => onChange(e.target.value)}
+              onChange={(e) => {
+                onChange(e.target.value);
+                setCursorPosition(e.target.selectionStart || 0);
+              }}
               onSelect={(e) => setCursorPosition(e.currentTarget.selectionStart || 0)}
               placeholder="Build your formula using KPI UUIDs (e.g., kpi:uuid1 - kpi:uuid2)"
               className="font-mono bg-white h-auto min-h-[2.5rem] py-2 text-sm whitespace-nowrap overflow-x-auto"
@@ -143,6 +154,12 @@ export const FormulaInput = ({
               type="number"
               value={numberInput}
               onChange={(e) => setNumberInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleNumberInsert();
+                }
+              }}
               placeholder="Enter a number..."
               className="w-40"
             />
