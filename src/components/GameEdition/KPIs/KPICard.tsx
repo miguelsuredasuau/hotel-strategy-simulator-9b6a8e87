@@ -12,7 +12,7 @@ interface KPICardProps {
 }
 
 const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
-  const isCalculated = !!kpi.formula;
+  const isCalculated = Boolean(kpi.formula);
   const displayValue = kpi.current_value ?? kpi.default_value ?? 0;
   const formattedValue = kpi.is_percentage 
     ? `${displayValue}%`
