@@ -1,8 +1,37 @@
 import { useCallback } from 'react';
 import { KPI } from "@/types/kpi";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
-  const evaluateFormula = (formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
+  const queryClient = useQueryClient();
+
+  // Subscribe to KPI changes
+  useQuery({
+    queryKey: ['kpis', gameId],
+    queryFn: async () => {
+      const { data: changes } = await supabase
+        .channel('kpis-changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'kpis',
+            filter: `game_uuid=eq.${gameId}`
+          }, 
+          (payload) => {
+            // Invalidate the query to trigger a refresh
+            queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+          }
+        )
+        .subscribe();
+
+      return changes;
+    },
+    enabled: !!gameId,
+  });
+
+  const evaluateFormula = useCallback((formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
     try {
       // Replace KPI references with their actual values
       const evaluableFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, (match, kpiUuid) => {
@@ -41,7 +70,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
       console.error('Error evaluating formula:', error, 'Formula:', formula);
       return 0;
     }
-  };
+  }, [kpis]);
 
   const calculateKPIValues = useCallback(() => {
     if (!kpis?.length) return {};
@@ -64,7 +93,7 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
     });
 
     return kpiValues;
-  }, [kpis]);
+  }, [kpis, evaluateFormula]);
 
   return { calculateKPIValues };
 };
