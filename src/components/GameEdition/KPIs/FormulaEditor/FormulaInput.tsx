@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Calculator, Eye, EyeOff } from "lucide-react";
 import { KPI } from "@/types/kpi";
 import { FormulaVisualizer } from "./FormulaVisualizer";
-import { formatFormula } from "./utils/operatorUtils";
+import { formatFormula } from "./utils/formulaUtils";
 import { VariablesPanel } from "./components/VariablesPanel";
 import { OperatorsPanel } from "./components/OperatorsPanel";
 
@@ -32,10 +32,10 @@ export const FormulaInput = ({
 
   const insertAtCursor = (textToInsert: string) => {
     const position = cursorPosition || value.length;
-    const newValue = formatFormula(
+    const newFormula = formatFormula(
       value.slice(0, position) + textToInsert + value.slice(position)
     );
-    onChange(newValue);
+    onChange(newFormula);
     const newPosition = position + textToInsert.length;
     setCursorPosition(newPosition);
 

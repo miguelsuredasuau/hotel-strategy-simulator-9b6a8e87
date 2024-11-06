@@ -1,85 +1,94 @@
 import { KPI } from "@/types/kpi";
 
 interface Token {
-  type: 'kpi' | 'operator' | 'text';
+  type: 'kpi' | 'operator' | 'number' | 'parenthesis';
   value: string;
   originalValue?: string;
 }
 
 export const tokenizeFormula = (formula: string, kpis: KPI[]): Token[] => {
-  const tokens: Token[] = [];
-  const kpiPattern = /kpi:[a-fA-F0-9-]{36}/g;
-  let lastIndex = 0;
-  let match;
+  if (!formula) return [];
 
-  while ((match = kpiPattern.exec(formula)) !== null) {
-    if (match.index > lastIndex) {
-      const textBefore = formula.slice(lastIndex, match.index);
-      const parts = textBefore.split(/([+\-*/()=<>!&|?:])/);
-      parts.forEach(part => {
-        if (part) {
-          if (/^[+\-*/()=<>!&|?:]$/.test(part)) {
-            tokens.push({ type: 'operator', value: part });
-          } else {
-            tokens.push({ type: 'text', value: part.trim() });
-          }
-        }
-      });
+  // Add spaces around operators and parentheses if they're missing
+  const spacedFormula = formula
+    .replace(/([+\-*/()])/g, ' $1 ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const tokens = spacedFormula.split(' ');
+  return tokens.map(token => {
+    // Check if token is a KPI reference
+    if (token.startsWith('kpi:')) {
+      const kpiId = token.replace('kpi:', '');
+      const kpi = kpis.find(k => k.uuid === kpiId);
+      return {
+        type: 'kpi',
+        value: kpi ? `[${kpi.name}]` : '[Unknown KPI]',
+        originalValue: token
+      };
     }
 
-    const kpiRef = match[0];
-    const uuid = kpiRef.replace('kpi:', '');
-    const kpi = kpis.find(k => k.uuid === uuid);
-    if (kpi) {
-      const displayName = kpis.filter(k => k.name === kpi.name).length > 1 
-        ? `${kpi.name} (${kpi.uuid.slice(0, 4)})`
-        : kpi.name;
-      tokens.push({ 
-        type: 'kpi', 
-        value: `[${displayName}]`,
-        originalValue: kpiRef
-      });
+    // Check if token is an operator
+    if (['+', '-', '*', '/'].includes(token)) {
+      return {
+        type: 'operator',
+        value: token
+      };
     }
 
-    lastIndex = match.index + kpiRef.length;
-  }
+    // Check if token is a parenthesis
+    if (['(', ')'].includes(token)) {
+      return {
+        type: 'parenthesis',
+        value: token
+      };
+    }
 
-  if (lastIndex < formula.length) {
-    const remainingText = formula.slice(lastIndex);
-    const parts = remainingText.split(/([+\-*/()=<>!&|?:])/);
-    parts.forEach(part => {
-      if (part) {
-        if (/^[+\-*/()=<>!&|?:]$/.test(part)) {
-          tokens.push({ type: 'operator', value: part });
-        } else {
-          tokens.push({ type: 'text', value: part.trim() });
-        }
-      }
-    });
-  }
+    // Check if token is a number
+    if (!isNaN(Number(token))) {
+      return {
+        type: 'number',
+        value: token
+      };
+    }
 
-  return tokens;
+    return {
+      type: 'number',
+      value: token
+    };
+  });
 };
 
-export const calculateDeletePosition = (tokens: Token[], targetIndex: number): { start: number; end: number } => {
+export const calculateDeletePosition = (tokens: Token[], index: number) => {
   let position = 0;
-  let deleteStart = 0;
-  
-  for (let i = 0; i < tokens.length; i++) {
-    if (i === targetIndex) {
-      deleteStart = position;
-      const token = tokens[i];
-      const length = token.type === 'kpi' ? token.originalValue?.length || token.value.length : token.value.length;
-      return { start: deleteStart, end: deleteStart + length };
-    }
-    
+  for (let i = 0; i < index; i++) {
     const token = tokens[i];
-    if (token.type === 'kpi' && token.originalValue) {
-      position += token.originalValue.length;
+    if (token.type === 'kpi') {
+      position += token.originalValue?.length || token.value.length;
     } else {
       position += token.value.length;
     }
+    // Add space after each token except the last one
+    if (i < tokens.length - 1) position += 1;
   }
-  
-  return { start: 0, end: 0 };
+
+  const currentToken = tokens[index];
+  const length = currentToken.type === 'kpi' 
+    ? currentToken.originalValue?.length || currentToken.value.length 
+    : currentToken.value.length;
+
+  return {
+    start: position,
+    end: position + length
+  };
+};
+
+export const formatFormula = (formula: string): string => {
+  if (!formula) return '';
+
+  // Add spaces around operators and parentheses
+  return formula
+    .replace(/([+\-*/()])/g, ' $1 ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };

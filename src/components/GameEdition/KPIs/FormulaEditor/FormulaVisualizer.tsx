@@ -20,8 +20,11 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete, onChange }: Formula
     const tokens = tokenizeFormula(formula, kpis);
     const { start, end } = calculateDeletePosition(tokens, index);
     
-    // Create new formula by removing the token
-    const newFormula = formula.slice(0, start) + formula.slice(end);
+    // Create new formula by removing the token and any extra spaces
+    const newFormula = (formula.slice(0, start) + formula.slice(end))
+      .replace(/\s+/g, ' ')
+      .trim();
+    
     onChange(newFormula);
   };
 
@@ -33,14 +36,15 @@ export const FormulaVisualizer = ({ formula, kpis, onDelete, onChange }: Formula
     const [removed] = reorderedTokens.splice(result.source.index, 1);
     reorderedTokens.splice(result.destination.index, 0, removed);
 
-    let newFormula = '';
-    reorderedTokens.forEach(token => {
-      if (token.type === 'kpi') {
-        newFormula += token.originalValue;
-      } else {
-        newFormula += token.value;
-      }
-    });
+    let newFormula = reorderedTokens
+      .map(token => {
+        if (token.type === 'kpi') {
+          return token.originalValue;
+        }
+        return token.value;
+      })
+      .join(' ')
+      .trim();
 
     onChange(newFormula);
   };
