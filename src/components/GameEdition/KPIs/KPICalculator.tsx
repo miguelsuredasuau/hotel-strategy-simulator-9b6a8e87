@@ -7,10 +7,11 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Variable } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { KPI } from "@/types/kpi";
 import { FormulaInput } from "./FormulaEditor/FormulaInput";
+import { KPITypeToggle } from "./KPITypeToggle";
 
 interface KPICalculatorProps {
   gameId: string;
@@ -43,7 +44,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const handleCreateKPI = async () => {
     try {
       if (isCustomVariable) {
-        // For custom variables, we don't use formulas
         const { error } = await supabase
           .from('kpis')
           .insert({
@@ -57,7 +57,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
         if (error) throw error;
       } else {
-        // Extract UUIDs from formula instead of names
         const dependsOn = isCalculated 
           ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
           : null;
@@ -114,23 +113,10 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             />
           </div>
 
-          <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
-            <div className="space-y-0.5">
-              <Label>Custom Variable</Label>
-              <p className="text-sm text-gray-500">
-                Create a custom variable that can be used in formulas
-              </p>
-            </div>
-            <Switch
-              checked={isCustomVariable}
-              onCheckedChange={(checked) => {
-                setIsCustomVariable(checked);
-                if (checked) {
-                  setIsCalculated(false);
-                }
-              }}
-            />
-          </div>
+          <KPITypeToggle
+            isCustomVariable={isCustomVariable}
+            onChange={setIsCustomVariable}
+          />
 
           {!isCustomVariable && (
             <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
