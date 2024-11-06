@@ -6,7 +6,7 @@ import { Activity, Loader2 } from "lucide-react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIEditDialog } from "./KPIEditDialog";
 import { useState } from "react";
-import KPICard from "./KPICard";
+import { KPICard } from "./KPICard";
 import DeleteConfirmDialog from "../DeleteConfirmDialog";
 import { useToast } from "@/components/ui/use-toast";
 
