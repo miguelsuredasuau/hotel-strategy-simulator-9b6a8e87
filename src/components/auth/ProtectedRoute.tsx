@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@supabase/auth-helpers-react";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,11 +16,12 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const session = useSession();
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        if (!session) {
+        if (!session?.user) {
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
@@ -30,9 +32,14 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
           .select('role')
           .eq('id', session.user.id)
           .single();
-        
+
         if (error) {
           console.error('Error fetching profile:', error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch user profile",
+            variant: "destructive",
+          });
           setIsAuthenticated(false);
         } else {
           setIsAuthenticated(true);
@@ -47,7 +54,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     };
 
     checkAuth();
-  }, [session]);
+  }, [session, toast]);
 
   if (isLoading) {
     return (
@@ -62,11 +69,12 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   }
 
   if (requiredRole && userRole !== requiredRole) {
+    toast({
+      title: "Access Denied",
+      description: `You need ${requiredRole} role to access this page`,
+      variant: "destructive",
+    });
     return <Navigate to="/" replace />;
-  }
-
-  if (userRole === 'gamemaster' && !requiredRole) {
-    return <Navigate to="/game-edition" replace />;
   }
 
   return <>{children}</>;
