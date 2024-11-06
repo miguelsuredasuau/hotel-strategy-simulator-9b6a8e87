@@ -21,7 +21,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [name, setName] = useState("");
   const [formula, setFormula] = useState("");
   const [isCalculated, setIsCalculated] = useState(false);
-  const [defaultValue, setDefaultValue] = useState<number>(0);
+  const [defaultValue, setDefaultValue] = useState<string | number>("");
   const [unit, setUnit] = useState("");
   const [isCustomVariable, setIsCustomVariable] = useState(false);
   const { toast } = useToast();
@@ -43,6 +43,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const handleCreateKPI = async () => {
     try {
       if (isCustomVariable) {
+        // For custom variables, we don't use formulas
         const { error } = await supabase
           .from('kpis')
           .insert({
@@ -50,12 +51,13 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             name,
             type: 'operational',
             is_custom_variable: true,
-            default_value: Number(defaultValue),
+            default_value: defaultValue,
             unit,
           });
 
         if (error) throw error;
       } else {
+        // Extract UUIDs from formula instead of names
         const dependsOn = isCalculated 
           ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
           : null;
@@ -68,7 +70,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             type: 'financial',
             formula: isCalculated ? formula : null,
             depends_on: dependsOn,
-            default_value: isCalculated ? null : Number(defaultValue),
+            default_value: isCalculated ? null : defaultValue,
             unit,
             is_custom_variable: false,
           });
@@ -84,7 +86,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
       setName("");
       setFormula("");
-      setDefaultValue(0);
+      setDefaultValue("");
       setUnit("");
       setIsCalculated(false);
       setIsCustomVariable(false);
@@ -161,10 +163,10 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             <div className="space-y-2">
               <Label>Default Value</Label>
               <Input
-                type="number"
+                type={isCustomVariable ? "text" : "number"}
                 value={defaultValue}
-                onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
-                placeholder="Enter number"
+                onChange={(e) => setDefaultValue(e.target.value)}
+                placeholder={isCustomVariable ? "Enter text or number" : "Enter number"}
               />
             </div>
           )}

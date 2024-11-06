@@ -23,9 +23,9 @@ export const useFinancialCalculations = (gameId: string, turnId?: string) => {
   const findKPI = (name: string) => 
     kpis.find(kpi => kpi.name === name);
 
-  const getKPIValue = (kpiUuid: string): number => {
+  const getKPIValue = (kpiUuid: string) => {
     const kpi = kpis.find(k => k.uuid === kpiUuid);
-    return Number(kpi?.default_value ?? 0);
+    return kpi?.default_value ?? 0;
   };
 
   const rooms = findKPI('rooms');
@@ -36,20 +36,20 @@ export const useFinancialCalculations = (gameId: string, turnId?: string) => {
   const fixedCosts = findKPI('fixed_costs');
   const investments = findKPI('investments');
 
-  const roomsValue = Number(getKPIValue(rooms?.uuid || ''));
-  const occupiedRoomsValue = Math.min(Number(getKPIValue(occupiedRooms?.uuid || '')), roomsValue);
-  const adrValue = Number(getKPIValue(adr?.uuid || ''));
-  const extrasValue = Number(getKPIValue(extras?.uuid || ''));
+  const roomsValue = getKPIValue(rooms?.uuid || '');
+  const occupiedRoomsValue = Math.min(getKPIValue(occupiedRooms?.uuid || ''), roomsValue);
+  const adrValue = getKPIValue(adr?.uuid || '');
+  const extrasValue = getKPIValue(extras?.uuid || '');
   
   const roomRevenue = occupiedRoomsValue * adrValue;
   const totalRevenue = roomRevenue + extrasValue;
   
-  const variableCostsPercentValue = Number(getKPIValue(variableCostsPercent?.uuid || ''));
+  const variableCostsPercentValue = getKPIValue(variableCostsPercent?.uuid || '');
   const variableCostsAmount = totalRevenue * (variableCostsPercentValue / 100);
-  const fixedCostsValue = Number(getKPIValue(fixedCosts?.uuid || ''));
+  const fixedCostsValue = getKPIValue(fixedCosts?.uuid || '');
   
   const operatingProfit = totalRevenue - variableCostsAmount - fixedCostsValue;
-  const investmentsValue = Number(getKPIValue(investments?.uuid || ''));
+  const investmentsValue = getKPIValue(investments?.uuid || '');
   const freeCashFlow = operatingProfit - investmentsValue;
 
   return {
