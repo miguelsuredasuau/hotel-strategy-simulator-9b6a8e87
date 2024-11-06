@@ -1,24 +1,22 @@
-import { useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import { useToast } from "@/components/ui/use-toast";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FinancialKPIs } from "./FinancialKPIs";
-import { OperationalKPIs } from "./OperationalKPIs";
-import { KPICalculatorDialog } from "./KPICalculatorDialog";
+import { KPI } from "@/types/kpi";
+import { useToast } from "@/components/ui/use-toast";
+import { useKPICalculations } from "./hooks/useKPICalculations";
+import { KPICreateDialog } from "./KPICreateDialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useKPICalculations } from "./hooks/useKPICalculations";
+import { FinancialKPIs } from "./FinancialKPIs";
+import { OperationalKPIs } from "./OperationalKPIs";
 
 interface KPIManagementProps {
   gameId: string;
 }
 
 export const KPIManagement = ({ gameId }: KPIManagementProps) => {
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId],
@@ -26,45 +24,51 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       const { data, error } = await supabase
         .from('kpis')
         .select('*')
-        .eq('game_uuid', gameId);
-      
+        .eq('game_uuid', gameId)
+        .order('name');
+
       if (error) throw error;
-      return data;
+      return data as KPI[];
     },
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
   const { values: calculatedValues, error } = !isLoading && kpis ? calculateKPIValues(kpis) : { values: {}, error: null };
 
-  // Show toast if there's an error in KPI calculations
-  if (error) {
-    toast({
-      title: "KPI Calculation Error",
-      description: error,
-      variant: "destructive",
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "KPI Calculation Error",
+        description: error,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
 
+    const items = Array.from(kpis);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
     try {
-      const { error } = await supabase
-        .from('kpis')
-        .update({ type: result.destination.droppableId })
-        .eq('uuid', result.draggableId);
+      for (const [index, kpi] of items.entries()) {
+        const { error } = await supabase
+          .from('kpis')
+          .update({ order: index + 1 })
+          .eq('uuid', kpi.uuid);
+        
+        if (error) throw error;
+      }
 
-      if (error) throw error;
-
-      queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-      
       toast({
         title: "Success",
-        description: "KPI type updated successfully",
+        description: "KPI order updated successfully.",
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: "Error updating KPI order",
         description: error.message,
         variant: "destructive",
       });
@@ -73,29 +77,31 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold tracking-tight">KPI Management</h2>
-        <Button 
-          onClick={() => setIsCalculatorOpen(true)} 
-          size="lg"
-          className="gap-2 bg-blue-500 hover:bg-blue-600 text-white"
-        >
-          <Plus className="h-5 w-5" />
-          Add New KPI
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">KPI Management</h2>
+        <Button onClick={() => setShowCreateDialog(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add KPI
         </Button>
       </div>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid md:grid-cols-2 gap-6">
-          <FinancialKPIs gameId={gameId} calculatedValues={calculatedValues} />
-          <OperationalKPIs gameId={gameId} calculatedValues={calculatedValues} />
-        </div>
-      </DragDropContext>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FinancialKPIs
+          kpis={kpis?.filter(kpi => kpi.type === 'financial') || []}
+          calculatedValues={calculatedValues}
+          gameId={gameId}
+        />
+        <OperationalKPIs
+          kpis={kpis?.filter(kpi => kpi.type === 'operational') || []}
+          calculatedValues={calculatedValues}
+          gameId={gameId}
+        />
+      </div>
 
-      <KPICalculatorDialog 
+      <KPICreateDialog
         gameId={gameId}
-        open={isCalculatorOpen}
-        onOpenChange={setIsCalculatorOpen}
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
       />
     </div>
   );
