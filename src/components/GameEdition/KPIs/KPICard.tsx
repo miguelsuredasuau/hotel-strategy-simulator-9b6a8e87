@@ -3,7 +3,7 @@ import { Calculator, Pencil, Trash2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { KPI } from "@/types/kpi";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface KPICardProps {
   kpi: KPI;
@@ -48,14 +48,16 @@ const KPICard = ({
                 <div className="flex items-center gap-1">
                   <Calculator className="h-3.5 w-3.5 text-blue-500 shrink-0" />
                   {hasCircularDependency && (
-                    <Tooltip>
-                      <Tooltip.Trigger>
-                        <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      </Tooltip.Trigger>
-                      <Tooltip.Content>
-                        <p>Circular dependency detected in formula</p>
-                      </Tooltip.Content>
-                    </Tooltip>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Circular dependency detected in formula</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               )}
