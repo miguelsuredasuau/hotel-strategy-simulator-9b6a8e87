@@ -1,11 +1,7 @@
 import { useCallback } from 'react';
-import { useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 
 export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, executeImmediately: boolean = false) => {
-  const queryClient = useQueryClient();
-
   const evaluateFormula = (formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
     try {
       // Replace KPI UUID references with their values
@@ -24,8 +20,8 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
           return value.toString();
         }
         
-        // For non-calculated KPIs, use current_value if available, otherwise use default_value
-        const value = kpi.current_value ?? kpi.default_value ?? 0;
+        // For non-calculated KPIs, use default_value
+        const value = kpi.default_value ?? 0;
         kpiValues[kpiUuid] = value;
         return value.toString();
       });
@@ -39,17 +35,16 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
     }
   };
 
-  const updateCalculatedKPIs = useCallback(async () => {
-    if (!kpis?.length) return;
+  const calculateKPIValues = useCallback(() => {
+    if (!kpis?.length) return {};
 
     const kpiValues: Record<string, number> = {};
-    const updates: { uuid: string; current_value: number }[] = [];
     const processedKPIs = new Set<string>();
 
     // First pass: get all non-calculated KPI values
     kpis.forEach(kpi => {
       if (!kpi.formula) {
-        kpiValues[kpi.uuid] = kpi.current_value ?? kpi.default_value ?? 0;
+        kpiValues[kpi.uuid] = kpi.default_value ?? 0;
       }
     });
 
@@ -69,10 +64,6 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
 
       if (kpi.formula) {
         const calculatedValue = evaluateFormula(kpi.formula, kpiValues, new Set());
-        updates.push({
-          uuid: kpi.uuid,
-          current_value: calculatedValue
-        });
         kpiValues[kpi.uuid] = calculatedValue;
       }
     };
@@ -85,25 +76,8 @@ export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string, exec
       }
     });
 
-    // Update calculated KPIs in database
-    if (updates.length > 0) {
-      try {
-        for (const update of updates) {
-          const { error } = await supabase
-            .from('kpis')
-            .update({ current_value: update.current_value })
-            .eq('uuid', update.uuid);
+    return kpiValues;
+  }, [kpis]);
 
-          if (error) throw error;
-        }
-        
-        await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-      } catch (error: any) {
-        console.error('Error updating KPIs:', error);
-        throw error;
-      }
-    }
-  }, [kpis, gameId, queryClient]);
-
-  return { updateCalculatedKPIs };
+  return { calculateKPIValues };
 };

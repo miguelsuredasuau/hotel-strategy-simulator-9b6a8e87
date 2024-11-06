@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { useState } from "react";
 import KPICard from "./KPICard";
 import DeleteConfirmDialog from "../DeleteConfirmDialog";
 import { useToast } from "@/components/ui/use-toast";
+import { useKPICalculations } from "./hooks/useKPICalculations";
 
 interface FinancialKPIsProps {
   gameId: string;
@@ -17,7 +18,6 @@ interface FinancialKPIsProps {
 export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
   
   const { data: kpis, isLoading } = useQuery({
@@ -36,6 +36,9 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
     refetchInterval: 5000, // Refetch every 5 seconds to keep values updated
   });
 
+  const { calculateKPIValues } = useKPICalculations(kpis, gameId);
+  const calculatedValues = calculateKPIValues();
+
   const handleDeleteKPI = async () => {
     if (!kpiToDelete) return;
 
@@ -53,12 +56,11 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
       return;
     }
 
-    queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-    setKpiToDelete(null);
     toast({
       title: "Success",
       description: "KPI deleted successfully",
     });
+    setKpiToDelete(null);
   };
 
   if (isLoading) {
@@ -98,6 +100,7 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
                     >
                       <KPICard
                         kpi={kpi}
+                        calculatedValue={calculatedValues[kpi.uuid]}
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}
                         onDelete={() => setKpiToDelete(kpi)}

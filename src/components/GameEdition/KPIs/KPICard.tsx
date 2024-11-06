@@ -6,15 +6,15 @@ import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 interface KPICardProps {
   kpi: KPI;
+  calculatedValue?: number;
   dragHandleProps?: DraggableProvidedDragHandleProps;
   onClick: () => void;
   onDelete: () => void;
 }
 
-const KPICard = ({ kpi, dragHandleProps, onClick, onDelete }: KPICardProps) => {
+const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: KPICardProps) => {
   const isCalculated = Boolean(kpi.formula);
-  // If it's a calculated KPI, use current_value, otherwise use default_value
-  const displayValue = isCalculated ? (kpi.current_value ?? 0) : (kpi.default_value ?? 0);
+  const displayValue = isCalculated ? (calculatedValue ?? 0) : (kpi.default_value ?? 0);
   const formattedValue = kpi.is_percentage 
     ? `${displayValue}%`
     : displayValue.toLocaleString(undefined, {

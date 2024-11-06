@@ -75,7 +75,6 @@ export type Database = {
       kpis: {
         Row: {
           created_at: string | null
-          current_value: number | null
           default_value: number | null
           depends_on: string[] | null
           description: string | null
@@ -89,7 +88,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          current_value?: number | null
           default_value?: number | null
           depends_on?: string[] | null
           description?: string | null
@@ -103,7 +101,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          current_value?: number | null
           default_value?: number | null
           depends_on?: string[] | null
           description?: string | null
