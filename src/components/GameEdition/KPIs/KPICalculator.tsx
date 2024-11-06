@@ -20,7 +20,6 @@ interface KPICalculatorProps {
 export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [name, setName] = useState("");
   const [formula, setFormula] = useState("");
-  const [isCalculated, setIsCalculated] = useState(false);
   const [defaultValue, setDefaultValue] = useState<number>(0);
   const [unit, setUnit] = useState("");
   const [isCustomVariable, setIsCustomVariable] = useState(false);
@@ -56,9 +55,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
         if (error) throw error;
       } else {
-        const dependsOn = isCalculated 
-          ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
-          : null;
+        const dependsOn = formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || [];
 
         const { error } = await supabase
           .from('kpis')
@@ -66,9 +63,9 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             game_uuid: gameId,
             name,
             type: 'financial',
-            formula: isCalculated ? formula : null,
+            formula,
             depends_on: dependsOn,
-            default_value: isCalculated ? null : Number(defaultValue),
+            default_value: null,
             unit,
             is_custom_variable: false,
           });
@@ -86,7 +83,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
       setFormula("");
       setDefaultValue(0);
       setUnit("");
-      setIsCalculated(false);
       setIsCustomVariable(false);
       
       onSuccess?.();
@@ -117,27 +113,17 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             onChange={setIsCustomVariable}
           />
 
-          {!isCustomVariable && (
-            <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
-              <div className="space-y-0.5">
-                <Label>{isCalculated ? "Calculated KPI" : "Constant KPI"}</Label>
-                <p className="text-sm text-gray-500">
-                  {isCalculated 
-                    ? "This KPI will be calculated using a formula" 
-                    : "This KPI will have a constant value"}
-                </p>
-              </div>
-              <Button
-                variant={isCalculated ? "default" : "outline"}
-                onClick={() => setIsCalculated(!isCalculated)}
-                className="min-w-[120px]"
-              >
-                {isCalculated ? "Calculated" : "Constant"}
-              </Button>
+          {isCustomVariable ? (
+            <div className="space-y-2">
+              <Label>Default Value</Label>
+              <Input
+                type="text"
+                value={defaultValue}
+                onChange={(e) => setDefaultValue(Number(e.target.value))}
+                placeholder="Enter text or number"
+              />
             </div>
-          )}
-
-          {isCalculated && !isCustomVariable ? (
+          ) : (
             <div className="space-y-2">
               <Label>Formula</Label>
               <FormulaInput
@@ -145,16 +131,6 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
                 onChange={setFormula}
                 availableKPIs={kpis || []}
                 gameId={gameId}
-              />
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <Label>Default Value</Label>
-              <Input
-                type={isCustomVariable ? "text" : "number"}
-                value={defaultValue}
-                onChange={(e) => setDefaultValue(Number(e.target.value))}
-                placeholder={isCustomVariable ? "Enter text or number" : "Enter number"}
               />
             </div>
           )}
