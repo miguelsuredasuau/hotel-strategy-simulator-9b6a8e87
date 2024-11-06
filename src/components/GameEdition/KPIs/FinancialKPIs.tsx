@@ -9,13 +9,13 @@ import { useState } from "react";
 import KPICard from "./KPICard";
 import DeleteConfirmDialog from "../DeleteConfirmDialog";
 import { useToast } from "@/components/ui/use-toast";
-import { useKPICalculations } from "./hooks/useKPICalculations";
 
 interface FinancialKPIsProps {
   gameId: string;
+  calculatedValues: Record<string, number>;
 }
 
-export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
+export const FinancialKPIs = ({ gameId, calculatedValues }: FinancialKPIsProps) => {
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
   const { toast } = useToast();
@@ -34,9 +34,6 @@ export const FinancialKPIs = ({ gameId }: FinancialKPIsProps) => {
       return data as KPI[];
     },
   });
-
-  const { calculateKPIValues } = useKPICalculations(kpis, gameId);
-  const calculatedValues = calculateKPIValues();
 
   const handleDeleteKPI = async () => {
     if (!kpiToDelete) return;

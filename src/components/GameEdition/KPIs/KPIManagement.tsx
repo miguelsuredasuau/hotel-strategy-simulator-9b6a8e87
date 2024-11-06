@@ -34,7 +34,8 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     },
   });
 
-  const { calculateKPIValues } = useKPICalculations(kpis, gameId, false);
+  const { calculateKPIValues } = useKPICalculations(kpis, gameId);
+  const calculatedValues = calculateKPIValues();
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -106,8 +107,8 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid md:grid-cols-2 gap-6">
-          <FinancialKPIs gameId={gameId} />
-          <OperationalKPIs gameId={gameId} />
+          <FinancialKPIs gameId={gameId} calculatedValues={calculatedValues} />
+          <OperationalKPIs gameId={gameId} calculatedValues={calculatedValues} />
         </div>
       </DragDropContext>
 
