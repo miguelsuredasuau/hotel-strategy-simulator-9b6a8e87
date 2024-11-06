@@ -96,7 +96,7 @@ const TeamLogo = () => {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-white">
         <DropdownMenuLabel>{teamName || 'Team Menu'}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleEditProfile}>
