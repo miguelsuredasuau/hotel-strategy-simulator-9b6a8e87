@@ -9,22 +9,34 @@ interface Token {
 export const tokenizeFormula = (formula: string, kpis: KPI[]): Token[] => {
   if (!formula) return [];
 
+  // First, temporarily replace KPI references to protect them from splitting
+  const kpiPlaceholders: { [key: string]: string } = {};
+  let protectedFormula = formula.replace(/\${[^}]+}/g, (match) => {
+    const placeholder = `__KPI_${Object.keys(kpiPlaceholders).length}__`;
+    kpiPlaceholders[placeholder] = match;
+    return placeholder;
+  });
+
   // Add spaces around operators and parentheses if they're missing
-  const spacedFormula = formula
+  protectedFormula = protectedFormula
     .replace(/([+\-*/()=<>!&|?:])/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  const tokens = spacedFormula.split(' ');
+  // Split into tokens
+  const tokens = protectedFormula.split(' ').filter(Boolean);
+
+  // Process tokens and restore KPI references
   return tokens.map(token => {
-    // Check if token is a KPI reference (now using ${uuid} format)
-    if (token.match(/\${[a-zA-Z0-9-]+}/)) {
-      const kpiId = token.replace(/\${(.*)}/, '$1');
+    // Restore KPI reference if this is a placeholder
+    if (token.startsWith('__KPI_') && token.endsWith('__')) {
+      const originalKpiRef = kpiPlaceholders[token];
+      const kpiId = originalKpiRef.replace(/\${(.*)}/, '$1');
       const kpi = kpis.find(k => k.uuid === kpiId);
       return {
         type: 'kpi',
         value: kpi ? `[${kpi.name}]` : '[Unknown KPI]',
-        originalValue: token
+        originalValue: originalKpiRef
       };
     }
 
@@ -80,11 +92,26 @@ export const formatFormula = (formula: string): string => {
   // Convert old kpi:uuid format to new ${uuid} format if needed
   const updatedFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, '${$1}');
 
+  // Temporarily protect KPI references
+  const kpiPlaceholders: { [key: string]: string } = {};
+  let protectedFormula = updatedFormula.replace(/\${[^}]+}/g, (match) => {
+    const placeholder = `__KPI_${Object.keys(kpiPlaceholders).length}__`;
+    kpiPlaceholders[placeholder] = match;
+    return placeholder;
+  });
+
   // Add spaces around operators and parentheses
-  return updatedFormula
+  protectedFormula = protectedFormula
     .replace(/([+\-*/()=<>!&|?:])/g, ' $1 ')
     .replace(/\s+/g, ' ')
     .trim();
+
+  // Restore KPI references
+  Object.entries(kpiPlaceholders).forEach(([placeholder, original]) => {
+    protectedFormula = protectedFormula.replace(placeholder, original);
+  });
+
+  return protectedFormula;
 };
 
 // Helper function to convert between formats
