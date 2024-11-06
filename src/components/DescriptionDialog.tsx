@@ -1,6 +1,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -23,6 +24,9 @@ const DescriptionDialog = ({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            View the full description below
+          </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
           <p className="text-gray-600 whitespace-pre-wrap">{description}</p>

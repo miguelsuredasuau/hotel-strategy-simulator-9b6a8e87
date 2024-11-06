@@ -42,8 +42,11 @@ export const useKPICalculations = (gameId: string) => {
     }
 
     try {
-      // Replace KPI references with their values using the new ${uuid} format
-      const evaluableFormula = formula.replace(/\${([a-zA-Z0-9-]+)}/g, (match, kpiUuid) => {
+      // Convert old kpi:uuid format to new ${uuid} format if needed
+      const updatedFormula = formula.replace(/kpi:([a-zA-Z0-9-]+)/g, '${$1}');
+
+      // Replace KPI references with their values
+      const evaluableFormula = updatedFormula.replace(/\${([^}]+)}/g, (match, kpiUuid) => {
         if (processedKPIs.has(kpiUuid)) {
           console.warn('Circular dependency detected:', kpiUuid);
           return '0';
@@ -67,22 +70,11 @@ export const useKPICalculations = (gameId: string) => {
         return `(${value})`;
       });
 
-      // Clean up the formula and handle arithmetic operations
-      const cleanFormula = evaluableFormula
-        .replace(/\-/g, ' - ') 
-        .replace(/\+/g, ' + ') 
-        .replace(/\*/g, ' * ') 
-        .replace(/\//g, ' / ') 
-        .replace(/\s+/g, ' ')  
-        .trim();
-
-      if (!cleanFormula) return 0;
-
       // Log the formula for debugging
-      console.debug('Evaluating formula:', cleanFormula);
+      console.debug('Evaluating formula:', evaluableFormula);
 
       // Evaluate the formula in a safe context
-      const result = new Function(`return ${cleanFormula}`)();
+      const result = new Function(`return ${evaluableFormula}`)();
       return typeof result === 'number' && !isNaN(result) ? result : 0;
     } catch (error) {
       console.error('Error evaluating formula:', error, 'Formula:', formula);
