@@ -16,7 +16,6 @@ const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: K
   const isCalculated = Boolean(kpi.formula);
   const isCustomVariable = Boolean(kpi.is_custom_variable);
   
-  // Use calculatedValue if it exists, otherwise fall back to default_value
   const displayValue = isCalculated 
     ? (calculatedValue ?? 0) 
     : (kpi.default_value ?? 0);
@@ -31,9 +30,9 @@ const KPICard = ({ kpi, calculatedValue, dragHandleProps, onClick, onDelete }: K
         });
 
   return (
-    <Card className="bg-white hover:shadow-md transition-all duration-200">
+    <Card className="bg-white hover:shadow-md transition-all duration-200 transform-gpu">
       <div 
-        className="p-3 cursor-grab active:cursor-grabbing" 
+        className="p-3 cursor-grab active:cursor-grabbing touch-none"
         {...dragHandleProps}
       >
         <div className="flex items-center justify-between group">
