@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,11 +31,10 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 5000, // Auto-refresh every 5 seconds
   });
 
-  const { calculateKPIValues } = useKPICalculations(kpis, gameId);
-  const calculatedValues = !isLoading && kpis ? calculateKPIValues() : {};
+  const { calculateKPIValues } = useKPICalculations(gameId);
+  const calculatedValues = !isLoading && kpis ? calculateKPIValues(kpis) : {};
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
