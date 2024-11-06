@@ -6,10 +6,11 @@ export interface KPI {
   game_uuid?: string;
   name: string;
   type: KPIType;
-  default_value?: number;
+  default_value?: string | number;
   description?: string;
   unit?: string;
   is_percentage?: boolean;
   formula?: string;
   depends_on?: string[];
+  is_custom_variable?: boolean;
 }

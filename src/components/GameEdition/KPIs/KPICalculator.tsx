@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus } from "lucide-react";
+import { Plus, Variable } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { KPI } from "@/types/kpi";
 import { FormulaInput } from "./FormulaEditor/FormulaInput";
@@ -21,8 +21,9 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
   const [name, setName] = useState("");
   const [formula, setFormula] = useState("");
   const [isCalculated, setIsCalculated] = useState(false);
-  const [defaultValue, setDefaultValue] = useState<number>(0);
+  const [defaultValue, setDefaultValue] = useState<string | number>("");
   const [unit, setUnit] = useState("");
+  const [isCustomVariable, setIsCustomVariable] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,24 +42,41 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
   const handleCreateKPI = async () => {
     try {
-      // Extract UUIDs from formula instead of names
-      const dependsOn = isCalculated 
-        ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
-        : null;
+      if (isCustomVariable) {
+        // For custom variables, we don't use formulas
+        const { error } = await supabase
+          .from('kpis')
+          .insert({
+            game_uuid: gameId,
+            name,
+            type: 'operational',
+            is_custom_variable: true,
+            default_value: defaultValue,
+            unit,
+          });
 
-      const { error } = await supabase
-        .from('kpis')
-        .insert({
-          game_uuid: gameId,
-          name,
-          type: 'financial',
-          formula: isCalculated ? formula : null,
-          depends_on: dependsOn,
-          default_value: isCalculated ? null : defaultValue,
-          unit,
-        });
+        if (error) throw error;
+      } else {
+        // Extract UUIDs from formula instead of names
+        const dependsOn = isCalculated 
+          ? formula.match(/kpi:([a-zA-Z0-9-]+)/g)?.map(match => match.replace('kpi:', '')) || []
+          : null;
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from('kpis')
+          .insert({
+            game_uuid: gameId,
+            name,
+            type: 'financial',
+            formula: isCalculated ? formula : null,
+            depends_on: dependsOn,
+            default_value: isCalculated ? null : defaultValue,
+            unit,
+            is_custom_variable: false,
+          });
+
+        if (error) throw error;
+      }
 
       queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
       toast({
@@ -68,9 +86,10 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
       setName("");
       setFormula("");
-      setDefaultValue(0);
+      setDefaultValue("");
       setUnit("");
       setIsCalculated(false);
+      setIsCustomVariable(false);
       
       onSuccess?.();
     } catch (error: any) {
@@ -97,20 +116,40 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
 
           <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
             <div className="space-y-0.5">
-              <Label>{isCalculated ? "Calculated KPI" : "Constant KPI"}</Label>
+              <Label>Custom Variable</Label>
               <p className="text-sm text-gray-500">
-                {isCalculated 
-                  ? "This KPI will be calculated using a formula" 
-                  : "This KPI will have a constant value"}
+                Create a custom variable that can be used in formulas
               </p>
             </div>
             <Switch
-              checked={isCalculated}
-              onCheckedChange={setIsCalculated}
+              checked={isCustomVariable}
+              onCheckedChange={(checked) => {
+                setIsCustomVariable(checked);
+                if (checked) {
+                  setIsCalculated(false);
+                }
+              }}
             />
           </div>
 
-          {isCalculated ? (
+          {!isCustomVariable && (
+            <div className="flex items-center justify-between space-x-2 bg-white border rounded-lg p-4">
+              <div className="space-y-0.5">
+                <Label>{isCalculated ? "Calculated KPI" : "Constant KPI"}</Label>
+                <p className="text-sm text-gray-500">
+                  {isCalculated 
+                    ? "This KPI will be calculated using a formula" 
+                    : "This KPI will have a constant value"}
+                </p>
+              </div>
+              <Switch
+                checked={isCalculated}
+                onCheckedChange={setIsCalculated}
+              />
+            </div>
+          )}
+
+          {isCalculated && !isCustomVariable ? (
             <div className="space-y-2">
               <Label>Formula</Label>
               <FormulaInput
@@ -124,9 +163,10 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             <div className="space-y-2">
               <Label>Default Value</Label>
               <Input
-                type="number"
+                type={isCustomVariable ? "text" : "number"}
                 value={defaultValue}
-                onChange={(e) => setDefaultValue(parseFloat(e.target.value))}
+                onChange={(e) => setDefaultValue(e.target.value)}
+                placeholder={isCustomVariable ? "Enter text or number" : "Enter number"}
               />
             </div>
           )}
@@ -145,7 +185,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             className="w-full bg-blue-500 hover:bg-blue-600 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create KPI
+            Create {isCustomVariable ? "Variable" : "KPI"}
           </Button>
         </div>
       </CardContent>
