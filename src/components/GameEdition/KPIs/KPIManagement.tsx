@@ -35,7 +35,8 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   });
 
   const { calculateKPIValues } = useKPICalculations(kpis, gameId);
-  const calculatedValues = calculateKPIValues();
+  // Only calculate values when KPIs are loaded
+  const calculatedValues = !isLoading && kpis ? calculateKPIValues() : {};
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
@@ -65,6 +66,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
   const handleRecalculate = async () => {
     try {
+      if (!kpis) return;
       const newValues = calculateKPIValues();
       await queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
       toast({

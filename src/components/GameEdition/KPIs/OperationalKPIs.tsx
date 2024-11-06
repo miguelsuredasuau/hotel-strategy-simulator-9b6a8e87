@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,14 +12,14 @@ import { useToast } from "@/components/ui/use-toast";
 
 interface OperationalKPIsProps {
   gameId: string;
+  calculatedValues: Record<string, number>;
 }
 
-export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
+export const OperationalKPIs = ({ gameId, calculatedValues }: OperationalKPIsProps) => {
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
+  
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId, 'operational'],
     queryFn: async () => {
@@ -33,7 +33,6 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
       if (error) throw error;
       return data as KPI[];
     },
-    refetchInterval: 5000, // Refetch every 5 seconds to keep values updated
   });
 
   const handleDeleteKPI = async () => {
@@ -53,12 +52,11 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
       return;
     }
 
-    queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-    setKpiToDelete(null);
     toast({
       title: "Success",
       description: "KPI deleted successfully",
     });
+    setKpiToDelete(null);
   };
 
   if (isLoading) {
@@ -98,6 +96,7 @@ export const OperationalKPIs = ({ gameId }: OperationalKPIsProps) => {
                     >
                       <KPICard
                         kpi={kpi}
+                        calculatedValue={calculatedValues[kpi.uuid]}
                         dragHandleProps={provided.dragHandleProps}
                         onClick={() => setSelectedKPI(kpi)}
                         onDelete={() => setKpiToDelete(kpi)}
