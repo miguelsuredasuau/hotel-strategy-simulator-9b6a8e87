@@ -22,6 +22,10 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId],
     queryFn: async () => {
+      if (!gameId) {
+        throw new Error('Game ID is required');
+      }
+
       const { data, error } = await supabase
         .from('kpis')
         .select('*')
@@ -31,6 +35,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       if (error) throw error;
       return data as KPI[];
     },
+    enabled: !!gameId, // Only run the query if gameId exists
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
@@ -75,6 +80,10 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       });
     }
   };
+
+  if (!gameId) {
+    return null;
+  }
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

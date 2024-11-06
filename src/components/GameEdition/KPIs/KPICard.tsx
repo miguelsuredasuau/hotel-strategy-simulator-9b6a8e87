@@ -7,15 +7,27 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { KPIEditDialog } from "./KPIEditDialog";
+import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 interface KPICardProps {
   kpi: KPI;
   calculatedValue?: number;
   hasCircularDependency?: boolean;
   gameId: string;
+  dragHandleProps?: DraggableProvidedDragHandleProps;
+  onClick?: () => void;
+  onDelete?: () => void;
 }
 
-export const KPICard = ({ kpi, calculatedValue, hasCircularDependency, gameId }: KPICardProps) => {
+export const KPICard = ({ 
+  kpi, 
+  calculatedValue, 
+  hasCircularDependency, 
+  gameId,
+  dragHandleProps,
+  onClick,
+  onDelete 
+}: KPICardProps) => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -62,6 +74,10 @@ export const KPICard = ({ kpi, calculatedValue, hasCircularDependency, gameId }:
         title: "Success",
         description: "KPI deleted successfully",
       });
+      
+      if (onDelete) {
+        onDelete();
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -73,9 +89,9 @@ export const KPICard = ({ kpi, calculatedValue, hasCircularDependency, gameId }:
 
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="pt-6" {...dragHandleProps}>
         <div className="flex justify-between items-start gap-4">
-          <div className="space-y-1 flex-1">
+          <div className="space-y-1 flex-1" onClick={onClick}>
             <div className="flex items-center gap-2">
               <h3 className="font-medium">{kpi.name}</h3>
               {hasCircularDependency && (
