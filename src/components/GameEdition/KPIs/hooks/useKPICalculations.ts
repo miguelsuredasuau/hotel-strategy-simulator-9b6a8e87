@@ -1,35 +1,35 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { KPI } from "@/types/kpi";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export const useKPICalculations = (kpis: KPI[] | undefined, gameId: string) => {
   const queryClient = useQueryClient();
 
-  // Subscribe to KPI changes
-  useQuery({
-    queryKey: ['kpis', gameId],
-    queryFn: async () => {
-      const { data: changes } = await supabase
-        .channel('kpis-changes')
-        .on('postgres_changes', 
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'kpis',
-            filter: `game_uuid=eq.${gameId}`
-          }, 
-          (payload) => {
-            // Invalidate the query to trigger a refresh
-            queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
-          }
-        )
-        .subscribe();
+  // Set up real-time subscription
+  useEffect(() => {
+    if (!gameId) return;
 
-      return changes;
-    },
-    enabled: !!gameId,
-  });
+    const channel = supabase
+      .channel('kpis-changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'kpis',
+          filter: `game_uuid=eq.${gameId}`
+        }, 
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [gameId, queryClient]);
 
   const evaluateFormula = useCallback((formula: string, kpiValues: Record<string, number>, processedKPIs: Set<string>): number => {
     try {
