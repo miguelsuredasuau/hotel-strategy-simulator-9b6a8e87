@@ -63,7 +63,7 @@ export const KPIEditDialog = ({
         ...formData,
         formula: isCalculated ? formData.formula : null,
         depends_on: dependsOn,
-        default_value: isCalculated ? null : formData.default_value,
+        default_value: isCalculated ? null : Number(formData.default_value),
       };
 
       const { error } = await supabase

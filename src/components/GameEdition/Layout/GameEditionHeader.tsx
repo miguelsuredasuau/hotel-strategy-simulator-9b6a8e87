@@ -1,36 +1,36 @@
-import { Button } from "@/components/ui/button";
-import { useSessionContext } from "@supabase/auth-helpers-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { GameEditionHeaderProps } from "./types";
 
-interface GameEditionHeaderProps {
-  gameId?: string;
-  onLogout?: () => void;
-}
-
-const GameEditionHeader = ({ gameId, onLogout }: GameEditionHeaderProps) => {
-  const { session } = useSessionContext();
+const GameEditionHeader = ({ showBackButton = true }: GameEditionHeaderProps) => {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      if (onLogout) onLogout();
-    } catch (error: any) {
-      console.error('Error signing out:', error.message);
-    }
-  };
-
   return (
-    <div className="flex justify-between items-center mb-8">
-      <h1 className="text-2xl font-bold">Game Edition Dashboard</h1>
-      <div className="flex gap-4">
-        <Button variant="outline" onClick={handleLogout}>
-          Logout
-        </Button>
+    <header className="bg-white border-b sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            {showBackButton && (
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2"
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            )}
+          </div>
+          <div className="flex items-center">
+            <h1 className="text-xl font-semibold">Game Edition</h1>
+          </div>
+          <div className="flex items-center">
+            {/* Right side content if needed */}
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
   );
 };
 
