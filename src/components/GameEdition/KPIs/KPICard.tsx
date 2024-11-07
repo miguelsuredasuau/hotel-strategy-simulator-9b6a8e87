@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 interface KPICardProps {
   kpi: KPI;
+  gameId: string;
   calculatedValue?: number;
   dragHandleProps?: DraggableProvidedDragHandleProps;
   onClick: () => void;
@@ -16,6 +17,7 @@ interface KPICardProps {
 
 const KPICard = ({ 
   kpi, 
+  gameId,
   calculatedValue, 
   dragHandleProps, 
   onClick, 

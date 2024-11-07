@@ -70,6 +70,17 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
         return;
       }
 
+      // Get the current max order for the type
+      const { data: maxOrderKPI } = await supabase
+        .from('kpis')
+        .select('order')
+        .eq('game_uuid', gameId)
+        .eq('type', isCustomVariable ? 'operational' : 'financial')
+        .order('order', { ascending: false })
+        .limit(1);
+
+      const nextOrder = (maxOrderKPI?.[0]?.order ?? -1) + 1;
+
       if (isCustomVariable) {
         const { error } = await supabase
           .from('kpis')
@@ -79,6 +90,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             type: 'operational',
             default_value: Number(defaultValue),
             unit,
+            order: nextOrder,
           });
 
         if (error) throw error;
@@ -95,6 +107,7 @@ export const KPICalculator = ({ gameId, onSuccess }: KPICalculatorProps) => {
             depends_on: dependsOn,
             default_value: null,
             unit,
+            order: nextOrder,
           });
 
         if (error) throw error;

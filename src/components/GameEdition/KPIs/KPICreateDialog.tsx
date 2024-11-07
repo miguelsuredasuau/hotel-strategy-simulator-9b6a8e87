@@ -61,6 +61,17 @@ export const KPICreateDialog = ({ gameId, open, onOpenChange }: KPICreateDialogP
         return;
       }
 
+      // Get the current max order for the type
+      const { data: maxOrderKPI } = await supabase
+        .from('kpis')
+        .select('order')
+        .eq('game_uuid', gameId)
+        .eq('type', 'financial')
+        .order('order', { ascending: false })
+        .limit(1);
+
+      const nextOrder = (maxOrderKPI?.[0]?.order ?? -1) + 1;
+
       const dependsOn = isCalculated 
         ? formula.match(/kpi:(\w+)/g)?.map(match => match.replace('kpi:', '')) || []
         : null;
@@ -76,8 +87,8 @@ export const KPICreateDialog = ({ gameId, open, onOpenChange }: KPICreateDialogP
           is_percentage: isPercentage,
           formula: isCalculated ? formula : null,
           depends_on: dependsOn,
-          current_value: isCalculated ? null : currentValue,
           default_value: isCalculated ? null : defaultValue,
+          order: nextOrder,
         });
 
       if (error) throw error;
