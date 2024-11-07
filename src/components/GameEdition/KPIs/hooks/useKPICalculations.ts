@@ -37,6 +37,12 @@ export const useKPICalculations = (gameId: string) => {
     visited: Set<string> = new Set(),
     path: string[] = []
   ): string[] | null => {
+    // Skip check for KPIs without formulas (constants)
+    const kpi = kpis.find(k => k.uuid === kpiUuid);
+    if (!kpi?.formula) {
+      return null;
+    }
+
     if (visited.has(kpiUuid)) {
       const cycleStart = path.indexOf(kpiUuid);
       const cycle = path.slice(cycleStart);
@@ -47,15 +53,14 @@ export const useKPICalculations = (gameId: string) => {
     visited.add(kpiUuid);
     path.push(kpiUuid);
 
-    const kpi = kpis.find(k => k.uuid === kpiUuid);
-    if (!kpi?.formula) {
-      path.pop();
-      return null;
-    }
-
     const dependencies = kpi.formula.match(/\${([^}]+)}/g)?.map(match => match.replace(/\${(.+)}/, '$1')) || [];
 
     for (const depUuid of dependencies) {
+      const depKpi = kpis.find(k => k.uuid === depUuid);
+      // Skip dependency check if the KPI is a constant (no formula)
+      if (!depKpi?.formula) {
+        continue;
+      }
       const cycle = findCircularDependencies(depUuid, kpis, visited, path);
       if (cycle) {
         return cycle;
@@ -63,6 +68,7 @@ export const useKPICalculations = (gameId: string) => {
     }
 
     path.pop();
+    visited.delete(kpiUuid);
     return null;
   }, []);
 
