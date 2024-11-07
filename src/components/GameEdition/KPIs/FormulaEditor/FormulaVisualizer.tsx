@@ -1,10 +1,11 @@
 import { KPI } from "@/types/kpi";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, X } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { KPIToken } from "./components/KPIToken";
 import { OperatorToken } from "./components/OperatorToken";
 import { TextToken } from "./components/TextToken";
-import { tokenizeFormula } from "./utils/formulaUtils";
+import { tokenizeFormula, calculateDeletePosition } from "./utils/formulaUtils";
+import { Button } from "@/components/ui/button";
 
 interface FormulaVisualizerProps {
   formula: string;
@@ -31,6 +32,19 @@ export const FormulaVisualizer = ({ formula, kpis, onChange }: FormulaVisualizer
       .join(' ')
       .trim();
 
+    onChange(newFormula);
+  };
+
+  const handleDeleteToken = (index: number) => {
+    if (!onChange) return;
+
+    const tokens = tokenizeFormula(formula, kpis);
+    const { start, end } = calculateDeletePosition(tokens, index);
+    
+    // Create new formula by removing the token and its surrounding spaces
+    let newFormula = formula.slice(0, start).trimEnd() + ' ' + formula.slice(end).trimStart();
+    newFormula = newFormula.trim();
+    
     onChange(newFormula);
   };
 
@@ -67,6 +81,7 @@ export const FormulaVisualizer = ({ formula, kpis, onChange }: FormulaVisualizer
                       innerRef: provided.innerRef,
                       draggableProps: provided.draggableProps,
                       dragHandleProps: provided.dragHandleProps,
+                      onDelete: () => handleDeleteToken(index),
                     };
 
                     if (token.type === 'kpi') {
