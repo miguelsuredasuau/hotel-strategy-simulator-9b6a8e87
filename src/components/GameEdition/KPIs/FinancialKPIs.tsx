@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { KPI } from "@/types/kpi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
   const [selectedKPI, setSelectedKPI] = useState<KPI | null>(null);
   const [kpiToDelete, setKpiToDelete] = useState<KPI | null>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const { data: kpis, isLoading } = useQuery({
     queryKey: ['kpis', gameId, 'financial'],
@@ -40,25 +41,45 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
   const handleDeleteKPI = async () => {
     if (!kpiToDelete) return;
 
-    const { error } = await supabase
-      .from('kpis')
-      .delete()
-      .eq('uuid', kpiToDelete.uuid);
+    try {
+      // First, find all KPIs that depend on this one
+      const { data: dependentKPIs } = await supabase
+        .from('kpis')
+        .select('*')
+        .contains('depends_on', [kpiToDelete.uuid]);
 
-    if (error) {
+      // Delete the dependent KPIs first
+      if (dependentKPIs && dependentKPIs.length > 0) {
+        const { error: dependentsError } = await supabase
+          .from('kpis')
+          .delete()
+          .in('uuid', dependentKPIs.map(kpi => kpi.uuid));
+
+        if (dependentsError) throw dependentsError;
+      }
+
+      // Then delete the KPI itself
+      const { error } = await supabase
+        .from('kpis')
+        .delete()
+        .eq('uuid', kpiToDelete.uuid);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['kpis', gameId] });
+      toast({
+        title: "Success",
+        description: "KPI and its dependencies deleted successfully",
+      });
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to delete KPI",
+        description: error.message,
         variant: "destructive",
       });
-      return;
+    } finally {
+      setKpiToDelete(null);
     }
-
-    toast({
-      title: "Success",
-      description: "KPI deleted successfully",
-    });
-    setKpiToDelete(null);
   };
 
   if (isLoading) {
@@ -126,6 +147,8 @@ export const FinancialKPIs = ({ gameId, calculatedValues, circularDependencies =
         open={!!kpiToDelete}
         onOpenChange={(open) => !open && setKpiToDelete(null)}
         onConfirm={handleDeleteKPI}
+        title="Delete KPI?"
+        description="This action cannot be undone. This will permanently delete this KPI and all KPIs that depend on it in their formulas."
       />
     </Card>
   );

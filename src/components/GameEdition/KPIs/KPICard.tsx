@@ -37,6 +37,13 @@ const KPICard = ({
         maximumFractionDigits: 2
       });
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
     <Card className="bg-white hover:shadow-md transition-all duration-200 transform-gpu">
       <div 
@@ -93,10 +100,7 @@ const KPICard = ({
               variant="ghost"
               size="sm"
               className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
+              onClick={handleDelete}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
