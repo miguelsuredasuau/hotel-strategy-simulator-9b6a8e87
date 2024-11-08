@@ -9,7 +9,6 @@ import { Plus, RefreshCw } from "lucide-react";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { useDebounce } from './hooks/useDebounce';
 
 interface KPIManagementProps {
   gameId: string;
@@ -41,44 +40,38 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     circularDependencies: Record<string, boolean>;
   }>({ values: {}, error: null, circularDependencies: {} });
 
-  const recalculateValues = () => {
+  const performCalculation = () => {
     if (!isLoading && kpis) {
-      // Cancel any pending automatic recalculation
-      cancelDebounce();
-      
       const result = calculateKPIValues(kpis);
       setCalculationResult(result);
+      return result;
+    }
+    return null;
+  };
+
+  // Initial calculation and when KPIs change
+  useEffect(() => {
+    if (kpis) {
+      const result = performCalculation();
+      if (result?.error) {
+        toast({
+          title: "KPI Calculation Error",
+          description: result.error,
+          variant: "destructive",
+        });
+      }
+    }
+  }, [kpis, toast]);
+
+  const handleManualRecalculation = () => {
+    const result = performCalculation();
+    if (result) {
       toast({
         title: "KPIs Recalculated",
         description: "All KPI values have been updated.",
       });
     }
   };
-
-  const { debouncedCallback: debouncedCalculation, cancelDebounce } = useDebounce(() => {
-    if (!isLoading && kpis) {
-      const result = calculateKPIValues(kpis);
-      setCalculationResult(result);
-    }
-  }, 3500);
-
-  // Trigger recalculation when KPIs change
-  useEffect(() => {
-    if (kpis) {
-      debouncedCalculation();
-    }
-  }, [kpis, debouncedCalculation]);
-
-  // Show error toast if calculation has errors
-  useEffect(() => {
-    if (calculationResult.error) {
-      toast({
-        title: "KPI Calculation Error",
-        description: calculationResult.error,
-        variant: "destructive",
-      });
-    }
-  }, [calculationResult.error, toast]);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination || !kpis) return;
@@ -128,7 +121,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
           <div className="flex gap-2">
             <Button 
               variant="outline"
-              onClick={recalculateValues}
+              onClick={handleManualRecalculation}
               className="gap-2"
             >
               <RefreshCw className="h-4 w-4" />
