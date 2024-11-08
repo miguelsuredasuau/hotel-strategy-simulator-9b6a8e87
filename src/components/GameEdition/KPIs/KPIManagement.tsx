@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
 import { DragDropContext } from "@hello-pangea/dnd";
+import { useDebounce } from './hooks/useDebounce';
 
 interface KPIManagementProps {
   gameId: string;
@@ -35,7 +36,21 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
-  const { values: calculatedValues, error, circularDependencies } = !isLoading && kpis ? calculateKPIValues(kpis) : { values: {}, error: null, circularDependencies: {} };
+  const [debouncedKpis, setDebouncedKpis] = useState(kpis);
+
+  // Use custom debounce hook
+  const debouncedCalculation = useDebounce(() => {
+    if (!isLoading && kpis) {
+      setDebouncedKpis(kpis);
+    }
+  }, 3500); // 3.5 seconds delay
+
+  useEffect(() => {
+    debouncedCalculation();
+  }, [kpis, debouncedCalculation]);
+
+  const { values: calculatedValues, error, circularDependencies } = 
+    !isLoading && debouncedKpis ? calculateKPIValues(debouncedKpis) : { values: {}, error: null, circularDependencies: {} };
 
   useEffect(() => {
     if (error) {
