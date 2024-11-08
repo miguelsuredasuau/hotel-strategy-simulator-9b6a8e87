@@ -43,6 +43,9 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
 
   const recalculateValues = () => {
     if (!isLoading && kpis) {
+      // Cancel any pending automatic recalculation
+      cancelDebounce();
+      
       const result = calculateKPIValues(kpis);
       setCalculationResult(result);
       toast({
@@ -52,7 +55,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     }
   };
 
-  const debouncedCalculation = useDebounce(() => {
+  const { debouncedCallback: debouncedCalculation, cancelDebounce } = useDebounce(() => {
     if (!isLoading && kpis) {
       const result = calculateKPIValues(kpis);
       setCalculationResult(result);

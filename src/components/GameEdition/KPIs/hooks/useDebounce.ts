@@ -9,6 +9,7 @@ export const useDebounce = (callback: () => void, delay: number) => {
     callbackRef.current = callback;
   }, [callback]);
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -27,5 +28,11 @@ export const useDebounce = (callback: () => void, delay: number) => {
     }, delay);
   }, [delay]);
 
-  return debouncedCallback;
+  const cancelDebounce = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  return { debouncedCallback, cancelDebounce };
 };
