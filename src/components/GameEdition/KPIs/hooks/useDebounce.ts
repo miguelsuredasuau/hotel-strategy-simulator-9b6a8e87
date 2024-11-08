@@ -2,6 +2,12 @@ import { useCallback, useEffect, useRef } from 'react';
 
 export const useDebounce = (callback: () => void, delay: number) => {
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const callbackRef = useRef(callback);
+
+  // Update the callback ref when callback changes
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     return () => {
@@ -17,9 +23,9 @@ export const useDebounce = (callback: () => void, delay: number) => {
     }
 
     timeoutRef.current = setTimeout(() => {
-      callback();
+      callbackRef.current();
     }, delay);
-  }, [callback, delay]);
+  }, [delay]);
 
   return debouncedCallback;
 };

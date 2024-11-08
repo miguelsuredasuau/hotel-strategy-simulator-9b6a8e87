@@ -36,31 +36,32 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
   });
 
   const { calculateKPIValues } = useKPICalculations(gameId);
-  const [debouncedKpis, setDebouncedKpis] = useState(kpis);
+  const [calculationResult, setCalculationResult] = useState<{
+    values: Record<string, number>;
+    error: string | null;
+    circularDependencies: Record<string, boolean>;
+  }>({ values: {}, error: null, circularDependencies: {} });
 
-  // Use custom debounce hook
   const debouncedCalculation = useDebounce(() => {
     if (!isLoading && kpis) {
-      setDebouncedKpis(kpis);
+      const result = calculateKPIValues(kpis);
+      setCalculationResult(result);
     }
-  }, 3500); // 3.5 seconds delay
+  }, 3500);
 
   useEffect(() => {
     debouncedCalculation();
   }, [kpis, debouncedCalculation]);
 
-  const { values: calculatedValues, error, circularDependencies } = 
-    !isLoading && debouncedKpis ? calculateKPIValues(debouncedKpis) : { values: {}, error: null, circularDependencies: {} };
-
   useEffect(() => {
-    if (error) {
+    if (calculationResult.error) {
       toast({
         title: "KPI Calculation Error",
-        description: error,
+        description: calculationResult.error,
         variant: "destructive",
       });
     }
-  }, [error, toast]);
+  }, [calculationResult.error, toast]);
 
   const handleDragEnd = async (result: any) => {
     if (!result.destination || !kpis) return;
@@ -68,13 +69,12 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     const sourceType = result.source.droppableId;
     const destinationType = result.destination.droppableId;
 
-    if (sourceType !== destinationType) return; // Prevent dragging between different types
+    if (sourceType !== destinationType) return;
 
     const typeKpis = kpis.filter(kpi => kpi.type === sourceType);
     const [reorderedItem] = typeKpis.splice(result.source.index, 1);
     typeKpis.splice(result.destination.index, 0, reorderedItem);
 
-    // Update order for all KPIs of this type
     const updates = typeKpis.map((kpi, index) => ({
       uuid: kpi.uuid,
       order: index,
@@ -117,13 +117,13 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FinancialKPIs
             gameId={gameId}
-            calculatedValues={calculatedValues}
-            circularDependencies={circularDependencies}
+            calculatedValues={calculationResult.values}
+            circularDependencies={calculationResult.circularDependencies}
           />
           <OperationalKPIs
             gameId={gameId}
-            calculatedValues={calculatedValues}
-            circularDependencies={circularDependencies}
+            calculatedValues={calculationResult.values}
+            circularDependencies={calculationResult.circularDependencies}
           />
         </div>
 
