@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { KPI } from "@/types/kpi";
 import { useToast } from "@/components/ui/use-toast";
 import { useKPICalculations } from "./hooks/useKPICalculations";
 import { KPICreateDialog } from "./KPICreateDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import { FinancialKPIs } from "./FinancialKPIs";
 import { OperationalKPIs } from "./OperationalKPIs";
 import { DragDropContext } from "@hello-pangea/dnd";
@@ -30,7 +29,7 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
         .order('order');
 
       if (error) throw error;
-      return data as KPI[];
+      return data;
     },
     enabled: !!gameId,
   });
@@ -41,6 +40,17 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     error: string | null;
     circularDependencies: Record<string, boolean>;
   }>({ values: {}, error: null, circularDependencies: {} });
+
+  const recalculateValues = () => {
+    if (!isLoading && kpis) {
+      const result = calculateKPIValues(kpis);
+      setCalculationResult(result);
+      toast({
+        title: "KPIs Recalculated",
+        description: "All KPI values have been updated.",
+      });
+    }
+  };
 
   const debouncedCalculation = useDebounce(() => {
     if (!isLoading && kpis) {
@@ -108,10 +118,20 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">KPI Management</h2>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add KPI
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={recalculateValues}
+              className="gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Recalculate
+            </Button>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add KPI
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
