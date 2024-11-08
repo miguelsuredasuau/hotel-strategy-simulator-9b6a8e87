@@ -62,10 +62,14 @@ export const KPIManagement = ({ gameId }: KPIManagementProps) => {
     }
   }, 3500);
 
+  // Trigger recalculation when KPIs change
   useEffect(() => {
-    debouncedCalculation();
+    if (kpis) {
+      debouncedCalculation();
+    }
   }, [kpis, debouncedCalculation]);
 
+  // Show error toast if calculation has errors
   useEffect(() => {
     if (calculationResult.error) {
       toast({
